@@ -8,21 +8,21 @@ const cycleTimeData = {
     {
       label: 'Line 1',
       data: [60, 45, 30, 60, 40],  // Dữ liệu cycle time của Line 1
-      backgroundColor: 'rgba(75, 192, 192, 0.6)',
+      backgroundColor: 'rgba(75, 192, 192, 1)',
       borderColor: 'rgba(75, 192, 192, 1)',
       borderWidth: 1,
     },
     {
       label: 'Line 2',
       data: [55, 50, 32, 58, 42],  // Dữ liệu cycle time của Line 2
-      backgroundColor: 'rgba(54, 162, 235, 0.6)',
+      backgroundColor: 'rgba(54, 162, 235, 1)',
       borderColor: 'rgba(54, 162, 235, 1)',
       borderWidth: 1,
     },
     {
       label: 'Line 3',
       data: [62, 48, 29, 65, 39],  // Dữ liệu cycle time của Line 3
-      backgroundColor: 'rgba(255, 206, 86, 0.6)',
+      backgroundColor: 'rgba(255, 206, 86, 1)',
       borderColor: 'rgba(255, 206, 86, 1)',
       borderWidth: 1,
     },

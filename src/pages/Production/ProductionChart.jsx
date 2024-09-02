@@ -8,7 +8,7 @@ import { addDays, differenceInDays } from 'date-fns'; // Import các hàm từ d
 
 function ProductionChart() {
   const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(addDays(new Date(), 60)); // Thêm 60 ngày từ ngày hiện tại
+  const [endDate, setEndDate] = useState(addDays(new Date(), 10)); // Thêm 60 ngày từ ngày hiện tại
   const [chartData, setChartData] = useState({ labels: [], datasets: [] });
   const chartRef = useRef(null);
 

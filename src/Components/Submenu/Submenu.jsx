@@ -1,37 +1,48 @@
 import React, { useState } from 'react';
-import { FiChevronDown } from 'react-icons/fi';
+import { Link, useNavigate } from 'react-router-dom';
+import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
 
-const Submenu = ({ title, items, setCurrentView }) => {
-    const [isOpen, setIsOpen] = useState(false);
+const Submenu = ({ title, items, isCollapsed, mainLink, onSubmenuClick }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
-    const toggleSubmenu = () => {
-        setIsOpen(!isOpen);
-    };
+  const toggleSubmenu = () => {
+    setIsOpen(!isOpen);
+  };
 
-    return (
-        <div>
-            <div 
-                className="flex items-center text-gray-700 hover:text-black cursor-pointer"
-                onClick={toggleSubmenu}
+  const handleMainLinkClick = () => {
+    navigate(mainLink);
+    onSubmenuClick(toggleSubmenu);
+  };
+
+  return (
+    <div className="flex flex-col">
+      <div 
+        className="flex items-center justify-between text-gray-700 hover:text-black cursor-pointer"
+        onClick={handleMainLinkClick}
+      >
+        <span className="flex items-center">
+          {title}
+        </span>
+        <span>
+          {isOpen ? <FiChevronDown /> : <FiChevronRight />}
+        </span>
+      </div>
+      <div className={`${isOpen && !isCollapsed ? 'block' : 'hidden'} pl-4 mt-2`}>
+        {items.map((item, index) => (
+          item.name && (
+            <Link
+              key={index}
+              to={item.link}
+              className="block py-1 px-6 text-gray-600 hover:text-black"
             >
-                {title}
-                <FiChevronDown className={`ml-auto transform ${isOpen ? 'rotate-180' : ''}`} />
-            </div>
-            {isOpen && (
-                <div className="ml-6 mt-2 flex flex-col space-y-2">
-                    {items.map((item, index) => (
-                        <button
-                            key={index}
-                            onClick={() => setCurrentView(item.link)}  // Change view based on submenu item
-                            className="text-gray-600 hover:text-black"
-                        >
-                            {item.name}
-                        </button>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-}
+              {item.name}
+            </Link>
+          )
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export default Submenu;

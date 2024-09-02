@@ -1,8 +1,9 @@
 
 export const productionItems = [
-    { name: 'Overview', link: '/production/overview' },
-    { name: 'Reports', link: '/production/reports' },
-    { name: 'Schedule', link: '/production/schedule' },
+    
+    { name: 'Tổng quan', link: '/production/overview' },
+    { name: 'Báo cáo', link: '/production/reports' },
+    { name: 'Kế hoạch', link: '/production/schedule' },
 ];
 
 export const qualityItems = [
@@ -15,6 +16,12 @@ export const equipmentItems = [
     { name: 'Machines', link: '/equipment/machines' },
     { name: 'Maintenance', link: '/equipment/maintenance' },
     { name: 'Inventory', link: '/equipment/inventory' },
+];
+
+export const inventorytItems = [
+    { name: 'Overview', link: '/inventory/machines' },
+    { name: '', link: '/inventory/maintenance' },
+    { name: 'Inventory', link: '/inventory/inventory' },
 ];
 
 export const supportItems = [
