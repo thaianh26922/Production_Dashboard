@@ -8,7 +8,7 @@ function MainLayout({ children }) {
   return (
     <div className="flex h-screen w-screen">
       {/* Sidebar luôn cố định ở bên trái */}
-      <aside className={`${isSidebarCollapsed ? 'w-20' : 'w-60'} bg-gray-200 flex-shrink-0 transition-all duration-300`}>
+      <aside className={`${isSidebarCollapsed ? 'w-20' : 'w-48'} bg-gray-200 flex-shrink-0 transition-all duration-300`}>
         <Sidebar isCollapsed={isSidebarCollapsed} setIsCollapsed={setIsSidebarCollapsed} setCurrentView={() => {}} />
       </aside>
 

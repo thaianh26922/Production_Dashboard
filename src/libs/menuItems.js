@@ -7,35 +7,38 @@ export const productionItems = [
 ];
 
 export const qualityItems = [
-    { name: 'Inspection', link: '/quality/inspection' },
-    { name: 'Reports', link: '/quality/reports' },
-    { name: 'Issues', link: '/quality/issues' },
+    { name: 'Tổng quan', link: '/quality/inspection' },
+    { name: 'Báo cáo', link: '/quality/reports' },
+    { name: 'Phân tích', link: '/quality/issues' },
 ];
 
 export const equipmentItems = [
-    { name: 'Machines', link: '/equipment/machines' },
-    { name: 'Maintenance', link: '/equipment/maintenance' },
-    { name: 'Inventory', link: '/equipment/inventory' },
+    { name: 'Tổng quan', link: '/equipment/machines' },
+    { name: 'Phân tích ', link: '/equipment/report' },
+    { name: 'Bảo dưỡng', link: '/equipment/maintance' },
 ];
 
 export const inventorytItems = [
-    { name: 'Overview', link: '/inventory/machines' },
-    { name: '', link: '/inventory/maintenance' },
-    { name: 'Inventory', link: '/inventory/inventory' },
+    { name: 'Danh mục', link: '/inventory/material' },
+    { name: 'Nhập kho', link: '/inventory/Import' },
+    { name: 'Xuất kho', link: '/inventory/export' },
 ];
 
 export const supportItems = [
     { name: 'FAQ', link: '/support/faq' },
-    { name: 'Contact Us', link: '/support/contact' },
-    { name: 'Documentation', link: '/support/documentation' },
+    { name: 'Tài liệu', link: '/support/documentation' },
 ];
 
 export const settingItems = [
     { name: 'Profile', link: '/settings/profile' },
-    { name: 'Security', link: '/settings/security' },
-    { name: 'Notifications', link: '/settings/notifications' },
+    { name: ' Bảo mật', link: '/settings/security' },
+    { name: ' Thông báo', link: '/settings/notifications' },
 ];
 
+export const adminItems = [
+    { name: 'Tài khoản', link: '/admin/userlist' },
+   
+];
 export const logoutItems = [
     { name: 'Logout', link: '/logout' }
 ];

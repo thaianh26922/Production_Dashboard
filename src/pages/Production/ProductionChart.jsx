@@ -1,63 +1,43 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { FaFilter } from 'react-icons/fa';
+import { addDays } from 'date-fns';
+import FilterModal from '../../Components/Modal/FilterModal';
+import { generateFakeData } from '../../data/generateFakeData'; // Hàm để tạo dữ liệu giả
 import { Bar } from 'react-chartjs-2';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { FaFilter } from 'react-icons/fa'; // Import icon filter từ react-icons
-import 'chart.js/auto';
-import { addDays, differenceInDays } from 'date-fns'; // Import các hàm từ date-fns
+import 'chartjs-plugin-trendline'; // Import plugin trendline
 
 function ProductionChart() {
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(addDays(new Date(), 10)); // Thêm 60 ngày từ ngày hiện tại
+  const [endDate, setEndDate] = useState(addDays(new Date(), 10));
   const [chartData, setChartData] = useState({ labels: [], datasets: [] });
   const chartRef = useRef(null);
 
-  // Hàm tạo dữ liệu giả
-  const generateFakeData = (start, end) => {
-    const daysDifference = differenceInDays(end, start) + 1; // Số ngày giữa start và end
-    const labels = [];
-    const totalProduction = [];
-    const defectProducts = [];
+  const formFields = [
+    { name: 'startDate', label: 'Ngày bắt đầu', type: 'date' },
+    { name: 'endDate', label: 'Ngày kết thúc', type: 'date' },
+   
+  ];
 
-    for (let i = 0; i < daysDifference; i++) {
-      const currentDate = addDays(start, i);
-      labels.push(currentDate.toLocaleDateString('en-GB')); // Định dạng ngày
-      totalProduction.push(Math.floor(Math.random() * 300 + 100)); // Số sản phẩm ngẫu nhiên từ 100 đến 400
-      defectProducts.push(Math.floor(Math.random() * 20 + 5)); // Số sản phẩm lỗi ngẫu nhiên từ 5 đến 25
-    }
-
-    return {
-      labels,
-      datasets: [
-        {
-          label: 'Tổng sản lượng',
-          data: totalProduction,
-          borderColor: '#4A90E2',
-          backgroundColor: '#0ea5e9',
-          borderWidth: 1,
-          barThickness: 'flex',
-        },
-        {
-          label: 'Sản phẩm lỗi',
-          data: defectProducts,
-          borderColor: '#E94A4A',
-          backgroundColor: '#ea580c',
-          borderWidth: 1,
-          barThickness: 'flex',
-        },
-      ],
+  const applyFilter = (data) => {
+    setStartDate(data.startDate);
+    setEndDate(data.endDate);
+    
+    const filterParams = {
+      startDate: data.startDate,
+      endDate: data.endDate,
+      productType: data.productType || null,
+      productionLine: data.productionLine || null,
     };
-  };
 
-  const filterDataByDate = () => {
-    const newChartData = generateFakeData(startDate, endDate);
+    const newChartData = generateFakeData(filterParams.startDate, filterParams.endDate);
     setChartData(newChartData);
-    console.log('Lọc dữ liệu từ:', startDate, 'đến', endDate);
   };
 
   useEffect(() => {
-    filterDataByDate();
-  }, []);
+    const initialChartData = generateFakeData(startDate, endDate);
+    setChartData(initialChartData);
+  }, [startDate, endDate]);
 
   const chartOptions = {
     plugins: {
@@ -77,6 +57,12 @@ function ProductionChart() {
         titleColor: '#fff',
         bodyColor: '#fff',
       },
+      trendlineLinear: { // Cấu hình cho trendline
+        style: "rgba(255,105,180, .8)",
+        lineStyle: "solid",
+        width: 2,
+        projection: true
+      }
     },
     scales: {
       x: {
@@ -112,39 +98,25 @@ function ProductionChart() {
   };
 
   return (
-    <div className="mb-6" style={{ width: '100%', height: '100%' }}>
+    <div className="bg-white p-4 rounded-lg shadow-md" style={{ width: '100%', height: '100%' }}>
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">Phân tích sản lượng</h3>
-        <div className="flex items-center gap-2">
-          <DatePicker
-            selected={startDate}
-            onChange={(date) => setStartDate(date)}
-            selectsStart
-            startDate={startDate}
-            endDate={endDate}
-            className="py-1 px-2 border rounded text-sm"
-            dateFormat="dd/MM/yyyy"
-            placeholderText="Chọn ngày bắt đầu"
-          />
-          <DatePicker
-            selected={endDate}
-            onChange={(date) => setEndDate(date)}
-            selectsEnd
-            startDate={startDate}
-            endDate={endDate}
-            minDate={startDate}
-            className="p-1 border rounded text-sm"
-            dateFormat="dd/MM/yyyy"
-            placeholderText="Chọn ngày kết thúc"
-          />
-          <button onClick={filterDataByDate} className="p-1 bg-green-500 text-white rounded">
-            <FaFilter /> {/* Sử dụng icon filter */}
-          </button>
-        </div>
+        <h3 className="text-lg font-semibold">Tổng sản lượng</h3>
+        <button
+          onClick={() => setIsFilterModalOpen(true)}
+          className="p-1 bg-green-500 text-white rounded"
+        >
+          <FaFilter /> {/* Sử dụng icon filter */}
+        </button>
       </div>
       <div style={{ width: '100%', height: '100%', minHeight: '300px', maxHeight: '500px' }}>
         <Bar ref={chartRef} data={chartData} options={chartOptions} />
       </div>
+      <FilterModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        onApplyFilter={applyFilter}
+        formFields={formFields}
+      />
     </div>
   );
 }

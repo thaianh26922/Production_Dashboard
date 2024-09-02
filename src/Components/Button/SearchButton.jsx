@@ -7,7 +7,7 @@ function SearchButton({ placeholder = "Search...", onSearch }) {
       <input 
         type="text" 
         placeholder={placeholder} 
-        className="border rounded-full pl-3 pr-10 py-1 w-64 focus:outline-none focus:ring-2 focus:ring-gray-300"
+        className="border  rounded-full pl-3 pr-10 py-1 w-64 focus:outline-none focus:ring-2 focus:ring-gray-300"
         onKeyPress={(e) => {
           if (e.key === 'Enter') {
             onSearch(e.target.value);

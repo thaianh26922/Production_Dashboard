@@ -1,75 +1,78 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
-import 'chart.js/auto';
+import { addDays } from 'date-fns';
 
-const cycleTimeData = {
-  labels: ['Chuẩn bị nguyên liệu', 'Trộn và nhồi bột', 'Định hình bánh', 'Nướng bánh', 'Làm mát và đóng gói'],
-  datasets: [
-    {
-      label: 'Line 1',
-      data: [60, 45, 30, 60, 40],  // Dữ liệu cycle time của Line 1
-      backgroundColor: 'rgba(75, 192, 192, 1)',
-      borderColor: 'rgba(75, 192, 192, 1)',
-      borderWidth: 1,
-    },
-    {
-      label: 'Line 2',
-      data: [55, 50, 32, 58, 42],  // Dữ liệu cycle time của Line 2
-      backgroundColor: 'rgba(54, 162, 235, 1)',
-      borderColor: 'rgba(54, 162, 235, 1)',
-      borderWidth: 1,
-    },
-    {
-      label: 'Line 3',
-      data: [62, 48, 29, 65, 39],  // Dữ liệu cycle time của Line 3
-      backgroundColor: 'rgba(255, 206, 86, 1)',
-      borderColor: 'rgba(255, 206, 86, 1)',
-      borderWidth: 1,
-    },
-  ],
+const generateCycleTimeData = (startDate, endDate) => {
+  const daysDifference = Math.abs(endDate - startDate) / (1000 * 60 * 60 * 24);
+  const labels = Array.from({ length: daysDifference + 1 }).map((_, i) => addDays(startDate, i).toLocaleDateString('en-GB'));
+
+  const stages = ['Chuẩn bị nguyên liệu', 'Trộn và nhồi bột', 'Định hình bánh', 'Nướng bánh', 'Làm mát và đóng gói'];
+  const datasets = stages.map((stage, index) => ({
+    label: stage,
+    data: labels.map(() => Math.floor(Math.random() * 50 + 30)), // Dữ liệu cycle time từ 30 đến 80 phút
+    backgroundColor: `rgba(${index * 60}, 162, 235, 0.6)`,
+    borderColor: `rgba(${index * 60}, 162, 235, 1)`,
+    borderWidth: 1,
+  }));
+
+  return {
+    labels,
+    datasets,
+  };
 };
 
-const chartOptions = {
-  responsive: true,  // Biểu đồ sẽ tự động điều chỉnh kích thước
-  maintainAspectRatio: false,  // Không giữ tỉ lệ mặc định để phù hợp với kích thước vùng chứa
-  scales: {
-    y: {
-      beginAtZero: true,
-      title: {
-        display: true,
-        text: 'Thời gian (phút)',
+const CycleTimeBarChart = () => {
+  const [startDate] = useState(new Date());
+  const [endDate] = useState(addDays(new Date(), 10));
+  const [chartData, setChartData] = useState(generateCycleTimeData(startDate, endDate));
+
+  useEffect(() => {
+    setChartData(generateCycleTimeData(startDate, endDate));
+  }, [startDate, endDate]);
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Ngày sản xuất',
+        },
       },
-    },
-    x: {
-      title: {
-        display: false,
-        text: 'Công đoạn sản xuất',
-      },
-    },
-  },
-  plugins: {
-    legend: {
-      position: 'top',
-    },
-    tooltip: {
-      callbacks: {
-        label: function (tooltipItem) {
-          return `${tooltipItem.dataset.label}: ${tooltipItem.raw} phút`;
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Thời gian (phút)',
         },
       },
     },
-  },
-};
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top',
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            return `${context.dataset.label}: ${context.raw} phút`;
+          },
+        },
+      },
+    },
+  };
 
-const CycleTimeChart = () => {
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md" style={{ height: '100%' }}>
-      <h3 className="text-lg font-semibold mb-4">Cycle Time theo Line sản xuất</h3>
-      <div style={{ height: '100%', minHeight: '300px' }}>
-        <Bar data={cycleTimeData} options={chartOptions} />
+    <div className="bg-white p-4 rounded-lg shadow-md" style={{ width: '100%', height: '100%' }}>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">Cycle Time theo Công đoạn sản xuất</h3>
+      </div>
+      <div style={{ width: '100%', height: '100%', minHeight: '300px', maxHeight: '500px' }}>
+        <Bar data={chartData} options={chartOptions} />
       </div>
     </div>
   );
-}
+};
 
-export default CycleTimeChart;
+export default CycleTimeBarChart;

@@ -2,19 +2,19 @@ import React from 'react';
 
 function InventoryTable({ limit }) {
   const inventoryData = [
-    { category: 'Nguyên vật liệu chính', material: 'Đường', quantity: '500 kg', warehouse: 'Kho 1' },
-    { category: 'Nguyên vật liệu chính', material: 'Bột mì', quantity: '300 kg', warehouse: 'Kho 2' },
-    { category: 'Nguyên vật liệu chính', material: 'Bơ', quantity: '200 kg', warehouse: 'Kho 1' },
-    { category: 'Nguyên vật liệu chính', material: 'Sữa', quantity: '100 lít', warehouse: 'Kho 3' },
-    { category: 'Nguyên vật liệu chính', material: 'Socola', quantity: '50 kg', warehouse: 'Kho 2' },
+    { category: 'Nguyên vật liệu ', material: 'Đường', quantity: '500 kg', warehouse: 'Kho 1' },
+    { category: 'Nguyên vật liệu ', material: 'Bột mì', quantity: '300 kg', warehouse: 'Kho 2' },
+    { category: 'Nguyên vật liệu ', material: 'Bơ', quantity: '200 kg', warehouse: 'Kho 1' },
+    { category: 'Nguyên vật liệu ', material: 'Sữa', quantity: '100 lít', warehouse: 'Kho 3' },
+    { category: 'Nguyên vật liệu ', material: 'Socola', quantity: '50 kg', warehouse: 'Kho 2' },
     { category: 'Phụ liệu', material: 'Phẩm màu', quantity: '10 kg', warehouse: 'Kho 2' },
     { category: 'Phụ liệu', material: 'Hương liệu', quantity: '15 lít', warehouse: 'Kho 3' },
     { category: 'Phụ liệu', material: 'Chất bảo quản', quantity: '5 kg', warehouse: 'Kho 1' },
-    { category: 'Nguyên vật liệu chính', material: 'Socola', quantity: '50 kg', warehouse: 'Kho 2' },
+    { category: 'Nguyên vật liệu ', material: 'Socola', quantity: '50 kg', warehouse: 'Kho 2' },
     { category: 'Phụ liệu', material: 'Phẩm màu', quantity: '10 kg', warehouse: 'Kho 2' },
     { category: 'Phụ liệu', material: 'Hương liệu', quantity: '15 lít', warehouse: 'Kho 3' },
     { category: 'Phụ liệu', material: 'Chất bảo quản', quantity: '5 kg', warehouse: 'Kho 1' },
-    { category: 'Nguyên vật liệu chính', material: 'Socola', quantity: '50 kg', warehouse: 'Kho 2' },
+    { category: 'Nguyên vật liệu ', material: 'Socola', quantity: '50 kg', warehouse: 'Kho 2' },
     { category: 'Phụ liệu', material: 'Phẩm màu', quantity: '10 kg', warehouse: 'Kho 2' },
     { category: 'Phụ liệu', material: 'Hương liệu', quantity: '15 lít', warehouse: 'Kho 3' },
     { category: 'Phụ liệu', material: 'Chất bảo quản', quantity: '5 kg', warehouse: 'Kho 1' },
@@ -30,7 +30,7 @@ function InventoryTable({ limit }) {
         <thead>
           <tr>
             <th className="py-2 px-4 border-b">Loại</th>
-            <th className="py-2 px-4 border-b">Nguyên vật liệu / Phụ liệu</th>
+            <th className="py-2 px-4 border-b">Tên sản phẩm</th>
             <th className="py-2 px-4 border-b">Số lượng</th>
             <th className="py-2 px-4 border-b">Kho</th>
           </tr>

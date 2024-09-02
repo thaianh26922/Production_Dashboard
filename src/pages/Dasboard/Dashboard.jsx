@@ -1,13 +1,13 @@
 import React from 'react';
 import ProductionDashboard from '../Production/ProductionDashboard';
 import QualityDashboard from '../Quality/QualityDashboard';
-import EquimentDashboard from '../Equiment.jsx/EquimentDashboard';
 import InventoryTable from '../Inventory/InventoryTable';
 import DashboardStatsGrid from './DashboardStatsGrid';
+import EquipmentPerformance from '../Equiment.jsx/EquipmentPerformance';
 
 function Dashboard() {
   return (
-    <div className="grid gap-4 bg-gray-100 p-1 h-screen">
+    <div className="grid gap-4 bg-gray-100  h-screen">
       {/* Dashboard Stats Grid */}
       <div className=" p-2 rounded-lg shadow-md">
         <DashboardStatsGrid />
@@ -26,11 +26,11 @@ function Dashboard() {
       {/* Lower Content Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
         <div className="bg-white p-4 rounded-lg shadow-md h-full">
-          <EquimentDashboard />
+          <EquipmentPerformance/>
         </div>
         <div className="bg-white p-4 rounded-lg shadow-md h-full">
           {/* Chỉ hiển thị 6 mục đầu tiên trong danh sách tồn kho */}
-          <InventoryTable limit={6} />
+          <InventoryTable limit={12} />
         </div>
       </div>
     </div>
