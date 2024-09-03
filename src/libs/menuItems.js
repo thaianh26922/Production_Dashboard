@@ -7,14 +7,14 @@ export const productionItems = [
 ];
 
 export const qualityItems = [
-    { name: 'Tổng quan', link: '/quality/inspection' },
+    { name: 'Tổng quan', link: '/quality/overview' },
     { name: 'Báo cáo', link: '/quality/reports' },
-    { name: 'Phân tích', link: '/quality/issues' },
+    
 ];
 
 export const equipmentItems = [
     { name: 'Tổng quan', link: '/equipment/machines' },
-    { name: 'Phân tích ', link: '/equipment/report' },
+    { name: 'Báo cáo ', link: '/equipment/reports' },
     { name: 'Bảo dưỡng', link: '/equipment/maintance' },
 ];
 

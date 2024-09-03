@@ -3,7 +3,7 @@ import ProductionDashboard from '../Production/ProductionDashboard';
 import QualityDashboard from '../Quality/QualityDashboard';
 import InventoryTable from '../Inventory/InventoryTable';
 import DashboardStatsGrid from './DashboardStatsGrid';
-import EquipmentPerformance from '../Equiment.jsx/EquipmentPerformance';
+import EquipmentPerformance from '../../Components/Equiment/EquipmentPerformance';
 
 function Dashboard() {
   return (
@@ -26,7 +26,7 @@ function Dashboard() {
       {/* Lower Content Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
         <div className="bg-white p-4 rounded-lg shadow-md h-full">
-          <EquipmentPerformance/>
+          <EquipmentPerformance />
         </div>
         <div className="bg-white p-4 rounded-lg shadow-md h-full">
           {/* Chỉ hiển thị 6 mục đầu tiên trong danh sách tồn kho */}

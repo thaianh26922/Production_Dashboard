@@ -3,6 +3,8 @@ import mayTronImage from '../../assets/image/May_tron.png';
 import mayDinhHinhImage from '../../assets/image/May_Dinh_Hình.png';
 import mayNuongImage from '../../assets/image/May_nuong_banh.webp';
 import mayDongGoiImage from '../../assets/image/May-dong-goi.png';
+import MachineStatusHistory from './MachineStatusHistory';
+import ErrorHistoryChart from './ErrorHistoryChart';
 
 const machineImages = {
   'Máy Trộn': mayTronImage,
@@ -13,8 +15,8 @@ const machineImages = {
 
 const MachineDetails = ({ machineName }) => {
   // Thông tin trạng thái và chế độ máy
-  const machineStatus = 'MAINTANCE'; // 'RUN', 'STOP', 'MAINTENANCE'
-  const machineMode = 'HANDLE'; // 'Remote', 'Handle'
+  const machineStatus = 'RUN'; // 'RUN', 'STOP', 'MAINTENANCE'
+  const machineMode = 'AUTO'; // 'Remote', 'Handle'
 
   const statusColor = machineStatus === 'RUN' ? 'bg-green-500' : machineStatus === 'STOP' ? 'bg-red-500' : 'bg-yellow-500';
 
@@ -51,22 +53,23 @@ const MachineDetails = ({ machineName }) => {
       <div className="grid grid-cols-3 gap-4">
         {/* Lịch sử Trạng Thái Máy */}
         <div className="bg-white p-2 rounded-lg shadow col-span-2 h-full">
-          <h3 className="font-semibold mb-2">Lịch sử Trạng Thái Máy</h3>
-          {/* Chèn biểu đồ lịch sử trạng thái ở đây */}
+          <h3 className="font-semibold mb-2">Lịch sử trạng thái máy </h3>
+           <MachineStatusHistory />
         </div>
 
-        {/* Lịch sử Lỗi */}
+        {/* Cycle Times */}  
         <div className="bg-white p-2 rounded-lg shadow h-full">
           <h3 className="font-semibold mb-2">CycleTimes</h3>
-          {/* Chèn biểu đồ lịch sử lỗi ở đây */}
+          <div className="text-center text-[2xl/3] text-blue-600">36 phút 47 giây</div>
         </div>
       </div>
 
-  {/* Cycle Times */}
-  <div className="bg-white p-2 rounded-lg shadow h-full row-span-1">
-    <h3 className="font-semibold mb-2">Lịch sử lỗi</h3>
-    {/* Chèn biểu đồ cycle times ở đây */}
-  </div>
+      {/* Lịch sử Lỗi */}
+      <div className="bg-white p-2 rounded-lg shadow h-full row-span-1">
+        <h3 className="font-semibold mb-2">Lịch sử lỗi</h3>
+        <ErrorHistoryChart />
+        
+      </div>
 </div>
 
     </div>

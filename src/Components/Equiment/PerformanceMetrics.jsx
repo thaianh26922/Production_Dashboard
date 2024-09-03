@@ -25,12 +25,12 @@ const PerformanceMetrics = () => {
           return context.chart.data.datasets[0].data[0] + '%';
         },
         font: {
-          size: 14, // Giảm kích thước font cho tỷ lệ phần trăm
+          size: 14, 
           weight: 'bold',
         },
       },
     },
-    maintainAspectRatio: false, // Giữ cho biểu đồ tỷ lệ với container
+    maintainAspectRatio: false, 
   };
 
   return (
@@ -39,14 +39,14 @@ const PerformanceMetrics = () => {
       <div className="col-span-8 grid grid-cols-4 gap-2">
         <div className="bg-white rounded-lg shadow-lg p-4 flex flex-col items-center">
           <h3 className="font-semibold text-center text-xs mb-2">Tính Sẵn Sàng A (%)</h3>
-          <div className="relative w-32 h-40"> {/* Điều chỉnh kích thước biểu đồ */}
+          <div className="relative w-32 h-40"> 
             <Doughnut data={doughnutData(89.79)} options={doughnutOptions} />
             <div className="absolute inset-0 flex items-center justify-center text-sm font-bold">{89.79}%</div>
           </div>
         </div>
         <div className="bg-white rounded-lg shadow-lg p-4 flex flex-col items-center">
           <h3 className="font-semibold text-center text-xs mb-2">Hiệu Suất P (%)</h3>
-          <div className="relative w-32 h-40"> {/* Điều chỉnh kích thước biểu đồ */}
+          <div className="relative w-32 h-40"> 
             <Doughnut data={doughnutData(89.79)} options={doughnutOptions} />
             <div className="absolute inset-0 flex items-center justify-center text-sm font-bold">{89.79}%</div>
           </div>
@@ -66,7 +66,7 @@ const PerformanceMetrics = () => {
           </div>
         </div>
       </div>
-       {/* Các khối nhỏ hiển thị thời gian chiếm 1/3 chiều rộng */}
+       
        <div className="col-span-4 grid grid-cols-2 gap-2">
         <div className="bg-white rounded-lg shadow-lg p-2">
           <h3 className="font-semibold text-xs text-left mb-4">Tổng Sản Lượng Hôm Nay</h3>

@@ -1,35 +1,20 @@
+// ProductionPlanCatalog.js
 import React, { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Import CSS cho react-toastify
+import 'react-toastify/dist/ReactToastify.css';
 import DynamicFormModal from '../../Components/Modal/DynamicFormModal';
 import SearchButton from '../../Components/Button/SearchButton';
 import AddButton from '../../Components/Button/AddButton';
 import ExportExcelButton from '../../Components/Button/ExportExcelButton';
 import * as yup from 'yup';
 import { format } from 'date-fns';
+import { addPlan, updatePlan, deletePlan } from '../../redux/appSlice';
 
 const ProductionPlanCatalog = () => {
-  const [plans, setPlans] = useState([
-    {
-      id: 1,
-      productionOrder: 'PO12345',
-      productionOrderName: 'Sản xuất bánh trung thu',
-      startDate: new Date('2024-08-01'),
-      endDate: new Date('2024-09-30'),
-      quantity: 10000,
-      status: 'Mới tạo'
-    },
-    {
-      id: 2,
-      productionOrder: 'PO67890',
-      productionOrderName: 'Sản xuất kẹo dẻo',
-      startDate: new Date('2024-07-01'),
-      endDate: new Date('2024-07-31'),
-      quantity: 5000,
-      status: 'Hoàn thành'
-    }
-  ]);
+  const plans = useSelector(state => state.productionPlan);
+  const dispatch = useDispatch();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,22 +23,11 @@ const ProductionPlanCatalog = () => {
   const [exportEndDate, setExportEndDate] = useState(new Date());
 
   const handleSave = (data) => {
-    data.startDate = new Date(data.startDate);
-    data.endDate = new Date(data.endDate);
-
     if (selectedPlan) {
-      setPlans((prevPlans) =>
-        prevPlans.map((plan) =>
-          plan.id === selectedPlan.id ? { ...plan, ...data } : plan
-        )
-      );
+      dispatch(updatePlan({ id: selectedPlan.id, ...data }));
       toast.success('Cập nhật thành công!');
     } else {
-      const newPlan = {
-        id: plans.length + 1,
-        ...data,
-      };
-      setPlans([...plans, newPlan]);
+      dispatch(addPlan(data));
       toast.success('Đã lưu thành công!');
     }
     setIsModalOpen(false);
@@ -61,7 +35,7 @@ const ProductionPlanCatalog = () => {
   };
 
   const handleDelete = (id) => {
-    setPlans(plans.filter((plan) => plan.id !== id));
+    dispatch(deletePlan(id));
     toast.success('Xóa thành công!');
   };
 
@@ -98,10 +72,8 @@ const ProductionPlanCatalog = () => {
         <SearchButton placeholder="Tìm kiếm lệnh sản xuất..." onSearch={handleSearch} />
         <AddButton onClick={() => setIsModalOpen(true)} />
 
-        {/* Khoảng trống giữa các nút bên trái và phần lựa chọn ngày */}
         <div className="flex-grow"></div>
 
-        {/* Lựa chọn ngày và nút xuất Excel */}
         <div className="flex items-center gap-2 ml-auto">
           <input
             type="date"
@@ -139,10 +111,10 @@ const ProductionPlanCatalog = () => {
               <td className="border px-4 py-2 text-sm text-center ">{plan.productionOrder}</td>
               <td className="border px-4 py-2 text-sm text-center  ">{plan.productionOrderName}</td>
               <td className="border px-4 py-2 text-sm text-center ">
-                {format(plan.startDate, 'dd/MM/yyyy')} {/* Định dạng ngày */}
+                {format(new Date(plan.startDate), 'dd/MM/yyyy')}
               </td>
               <td className="border px-4 py-2 text-sm text-center">
-                {format(plan.endDate, 'dd/MM/yyyy')} {/* Định dạng ngày */}
+                {format(new Date(plan.endDate), 'dd/MM/yyyy')}
               </td>
               <td className="border px-4 py-2 text-sm text-center">{plan.quantity}</td>
               <td className={`border px-4 py-2 text-sm text-center font-bold ${getStatusColor(plan.status)}`}>
