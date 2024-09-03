@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { FaUserAlt, FaLock, FaEye, FaEyeSlash, FaUsers, FaBook } from 'react-icons/fa'; 
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import {jwtDecode} from 'jwt-decode';  // Import thư viện jwt-decode
 
 function Login() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -22,7 +24,18 @@ function Login() {
 
       // Nếu đăng nhập thành công, lưu token vào localStorage và điều hướng
       if (response.status === 200) {
-        localStorage.setItem('token', response.data.token);  // Lưu token thực tế vào localStorage
+        const { token } = response.data;
+        localStorage.setItem('token', token);  // Lưu token thực tế vào localStorage
+
+        // Giải mã token để lấy thông tin role
+        const decodedToken = jwtDecode(token);
+        console.log('Decoded Token:', decodedToken); 
+        const role = decodedToken.user.role;  // Trích xuất role từ token đã giải mã
+
+        // Kiểm tra xem role có được lấy thành công không
+        console.log('Role:', role);  // In ra vai trò của người dùng để kiểm tra
+        localStorage.setItem('role', role);  // Lưu role vào localStorage
+
         toast.success('Đăng nhập thành công!');
         navigate('/dashboard');  // Điều hướng tới Dashboard
       }

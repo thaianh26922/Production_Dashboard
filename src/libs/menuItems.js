@@ -18,7 +18,7 @@ export const equipmentItems = [
     { name: 'Bảo dưỡng', link: '/equipment/maintance' },
 ];
 
-export const inventorytItems = [
+export const inventoryItems = [
     { name: 'Danh mục', link: '/inventory/material' },
     { name: 'Nhập kho', link: '/inventory/Import' },
     { name: 'Xuất kho', link: '/inventory/export' },

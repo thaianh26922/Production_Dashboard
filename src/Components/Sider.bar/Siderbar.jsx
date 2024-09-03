@@ -1,11 +1,15 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import { Link } from 'react-router-dom';
 import { FiHome, FiBarChart2, FiGrid, FiClipboard, FiDatabase, FiHeadphones, FiSettings, FiLogOut, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import Submenu from '../Submenu/Submenu';
-import { productionItems, qualityItems, equipmentItems, supportItems, settingItems, inventorytItems, adminItems } from '../../libs/menuItems';
+import { AuthContext } from '../../context/AuthContext'
+import { productionItems, qualityItems, equipmentItems, supportItems, settingItems, inventoryItems, adminItems } from '../../libs/menuItems';
 
-const Sidebar = ({ isCollapsed, setIsCollapsed, userRole }) => {
+const Sidebar = ({ isCollapsed, setIsCollapsed}) => {
   // Hàm chuyển đổi trạng thái ẩn/hiện của sidebar
+  const {userRole} = useContext(AuthContext);
+  console.log('Current role:', userRole);
+
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
   };
@@ -79,22 +83,22 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, userRole }) => {
           {/* Submenu Tồn kho */}
           <Submenu 
             title={<><FiDatabase className="mr-4 text-lg" />{!isCollapsed && <span>Tồn kho</span>}</>} 
-            items={inventorytItems} 
+            items={inventoryItems} 
             mainLink="/inventory/material" 
             isCollapsed={isCollapsed}
             onSubmenuClick={handleSubmenuClick} 
           />
 
-          {/* Mục menu của admin chỉ hiển thị nếu userRole là "admin" */}
-          {userRole === 'admin' && (
-            <Submenu 
+          {/* Mục menu của admin chỉ hiển thị nếu userRole là "Admin" */}
+          
+            { (userRole === 'Admin' && <Submenu 
               title={<><FiSettings className="mr-4 text-lg" />{!isCollapsed && <span>Hệ thống</span>}</>} 
               items={adminItems} 
               mainLink="/admin/userlist" 
               isCollapsed={isCollapsed}
-              onSubmenuClick={handleSubmenuClick} 
-            />
-          )}
+             onSubmenuClick={handleSubmenuClick} 
+            />)}
+          
         </nav>
       </div>
 

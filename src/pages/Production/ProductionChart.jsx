@@ -2,9 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FaFilter } from 'react-icons/fa';
 import { addDays } from 'date-fns';
 import FilterModal from '../../Components/Modal/FilterModal';
-import { generateFakeData } from '../../data/generateFakeData'; // Hàm để tạo dữ liệu giả
+import { generateFakeData } from '../../data/generateFakeData'; 
 import { Bar } from 'react-chartjs-2';
-import 'chartjs-plugin-trendline'; // Import plugin trendline
+import 'chartjs-plugin-trendline'; 
 
 function ProductionChart() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);

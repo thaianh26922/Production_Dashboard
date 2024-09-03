@@ -1,18 +1,23 @@
-import React, { useState } from 'react';
-import Sidebar from '../Components/Sider.bar/Siderbar';
+import React, { useContext } from 'react';
+import Sidebar from '../Components/Sider.bar/Siderbar';  
 import Header from '../Components/Header/Header';
+import { AuthContext } from '../context/AuthContext'; 
 
 function MainLayout({ children }) {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
+  const { role } = useContext(AuthContext); 
 
   return (
     <div className="flex h-screen w-screen">
       
-      <aside className={`${isSidebarCollapsed ? 'w-20' : 'w-48'} bg-gray-200 flex-shrink-0 transition-all duration-300`}>
-        <Sidebar isCollapsed={isSidebarCollapsed} setIsCollapsed={setIsSidebarCollapsed} setCurrentView={() => {}} />
+      <aside className={`bg-gray-200 flex-shrink-0 transition-all duration-300 ${isSidebarCollapsed ? 'w-20' : 'w-48'}`}>
+        <Sidebar 
+          isCollapsed={isSidebarCollapsed} 
+          setIsCollapsed={setIsSidebarCollapsed} 
+          role={role} 
+        />
       </aside>
 
-      
       <div className="flex flex-col flex-grow">
         
         <header className="flex-shrink-0 ml-2">
