@@ -36,7 +36,7 @@ const AppRouter = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const role = localStorage.getItem('role'); 
+    const role = localStorage.getItem('role'); // Assuming role is stored in localStorage
     if (token) {
       setIsAuthenticated(true);
       setUserRole(role); 
