@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Import icons for password visibility toggle
 
 Modal.setAppElement('#root');
 
@@ -20,6 +21,9 @@ const DynamicFormModal = ({ isOpen, onClose, onSave, formFields, contentLabel, i
     resolver: yupResolver(validationSchema)
   });
 
+  // State to toggle password visibility
+  const [showPassword, setShowPassword] = useState({});
+
   // Reset form with initial data when modal opens
   useEffect(() => {
     if (initialData) {
@@ -31,6 +35,14 @@ const DynamicFormModal = ({ isOpen, onClose, onSave, formFields, contentLabel, i
   const onSubmit = (data) => {
     onSave(data);
     onClose();
+  };
+
+  // Toggle password visibility
+  const togglePasswordVisibility = (fieldName) => {
+    setShowPassword((prevState) => ({
+      ...prevState,
+      [fieldName]: !prevState[fieldName],
+    }));
   };
 
   return (
@@ -46,15 +58,40 @@ const DynamicFormModal = ({ isOpen, onClose, onSave, formFields, contentLabel, i
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Render form fields dynamically */}
         {formFields.map((field, index) => (
-          <div key={index}>
+          <div key={index} className="relative">
             <label htmlFor={field.name} className="block text-gray-600 text-sm mb-2">{field.label}</label>
-            <input
-              type={field.type || 'text'}
-              id={field.name}
-              {...register(field.name)}
-              className={`border w-full p-2 rounded-md focus:outline-none focus:ring-2 ${errors[field.name] ? 'border-red-500' : 'focus:ring-blue-400'}`}
-              placeholder={field.placeholder || ''}
-            />
+            {field.type === 'select' ? (
+              <select
+                id={field.name}
+                {...register(field.name)}
+                className={`border w-full p-2 rounded-md focus:outline-none focus:ring-2 ${errors[field.name] ? 'border-red-500' : 'focus:ring-blue-400'}`}
+              >
+                <option value="" disabled>{field.placeholder || 'Chọn một tùy chọn'}</option>
+                {field.options.map((option, idx) => (
+                  <option key={idx} value={option}>{option}</option>
+                ))}
+              </select>
+            ) : (
+              <>
+                <input
+                  type={field.type === 'password' && showPassword[field.name] ? 'text' : field.type || 'text'}
+                  id={field.name}
+                  {...register(field.name)}
+                  className={`border w-full p-2 rounded-md focus:outline-none focus:ring-2 ${errors[field.name] ? 'border-red-500' : 'focus:ring-blue-400'}`}
+                  placeholder={field.placeholder || ''}
+                  disabled={field.disabled}
+                />
+                {field.type === 'password' && (
+                  <button
+                    type="button"
+                    className="absolute right-3 top-10 transform -translate-y-1/2 text-gray-600"
+                    onClick={() => togglePasswordVisibility(field.name)}
+                  >
+                    {showPassword[field.name] ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                )}
+              </>
+            )}
             {errors[field.name] && <p className="text-red-500 text-sm mt-1">{errors[field.name].message}</p>}
           </div>
         ))}

@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
-import DatePicker from 'react-datepicker';
+
 import 'react-datepicker/dist/react-datepicker.css';
 import ErrorFreeChart from './ErrorFreeChart';
 import DetailedErrorChart from './DetailedErrorChart';
 
 const ErrorRateCharts = () => {
   const [selectedMachine, setSelectedMachine] = useState('Máy trộn');
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
-
+  
   const machineData = {
     'Máy trộn': {
       errorFree: 80,
@@ -63,7 +61,7 @@ const ErrorRateCharts = () => {
   const selectedData = machineData[selectedMachine];
 
   const errorFreeData = {
-    labels: ['Dừng có lỗi', 'Dừng không lỗi'],
+    labels: ['Dừng có lỗi máy', 'Dừng không lỗi'],
     datasets: [
       {
         data: [selectedData.error, selectedData.errorFree],
@@ -82,55 +80,26 @@ const ErrorRateCharts = () => {
     ],
   };
 
-  const handleMachineChange = (e) => {
-    setSelectedMachine(e.target.value);
-  };
+
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md">
-        <div className="flex items-center mb-4 space-x-2">
-            <select
-                value={selectedMachine}
-                onChange={handleMachineChange}
-                className="p-2 border rounded text-sm"
-            >
-                <option value="Máy trộn">Máy trộn</option>
-                <option value="Máy định hình">Máy định hình</option>
-                <option value="Máy nướng">Máy nướng</option>
-                <option value="Máy đóng gói">Máy đóng gói</option>
-            </select>
-            <DatePicker
-                selected={startDate}
-                onChange={(date) => setStartDate(date)}
-                selectsStart
-                startDate={startDate}
-                endDate={endDate}
-                className="p-2 border rounded text-sm"
-            />
-            <DatePicker
-                selected={endDate}
-                onChange={(date) => setEndDate(date)}
-                selectsEnd
-                startDate={startDate}
-                endDate={endDate}
-                className="p-2 border rounded text-sm"
-            />
-            <button className="p-2 bg-green-500 text-white rounded">Phân tích</button>
-    </div>
-
-
-    <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white p-4 rounded shadow col-span-1">
-            <h3 className="text-lg font-semibold mb-4">Biểu đồ tỷ lệ dừng lỗi và không lỗi</h3>
-            <ErrorFreeChart errorFreeData={errorFreeData} /> 
+    <div className="bg-white p-2 rounded-lg shadow-md">
+       
+        <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white p-4 rounded shadow col-span-1" style={{ height: '400px' }}>
+                <h3 className="text-lg font-semibold mb-2">Biểu đồ tỷ lệ dừng lỗi và không lỗi</h3>
+                <div style={{ height: '100%' }}>
+                  <ErrorFreeChart errorFreeData={errorFreeData} />
+                </div>
+            </div>
+            
+            <div className="bg-white p-4 rounded shadow col-span-1" style={{ height: '400px' }}>
+                <h3 className="text-lg font-semibold mb-2">Biểu đồ tỷ lệ lỗi máy sản xuất</h3>
+                <div style={{ height: '70%' }}>
+                  <DetailedErrorChart detailedErrorData={detailedErrorData} />
+                </div>
+            </div>
         </div>
-        
-        <div className="bg-white p-4 rounded shadow col-span-1">
-            <h3 className="text-lg font-semibold mb-4">Biểu đồ tỷ lệ dừng lỗi và không lỗi</h3>
-            <DetailedErrorChart detailedErrorData={detailedErrorData} />
-        </div>
-    </div>
-
     </div>
   );
 };

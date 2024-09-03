@@ -72,27 +72,27 @@ function MaterialInspectionChart() {
         <ul className="flex flex-wrap justify-between">
           <li className="flex items-center text-sm w-1/2 md:w-auto">
             <span
-              className="block w-3 h-3 rounded-full mr-2"
+              className="block w-3 h-3 rounded-full mr-1"
               style={{ backgroundColor: '#4A90E2' }}
             ></span>
             <span className="font-medium">Đạt</span>
-            <span className="ml-auto font-semibold">{selectedData.achieved}</span>
+            <span className="ml-2 font-semibold">{selectedData.achieved}</span>
           </li>
           <li className="flex items-center text-sm w-1/2 md:w-auto">
             <span
-              className="block w-3 h-3 rounded-full mr-2"
+              className="block w-3 h-3 rounded-full mr-1"
               style={{ backgroundColor: '#FFC107' }}
             ></span>
             <span className="font-medium">Chưa đạt</span>
-            <span className="ml-auto font-semibold">{selectedData.warning}</span>
+            <span className="ml-2 font-semibold">{selectedData.warning}</span>
           </li>
           <li className="flex items-center text-sm w-1/2 md:w-auto">
             <span
-              className="block w-3 h-3 rounded-full mr-2"
+              className="block w-3 h-3 rounded-full mr-1"
               style={{ backgroundColor: '#FF5252' }}
             ></span>
             <span className="font-medium">Không đạt</span>
-            <span className="ml-auto font-semibold">{selectedData.failed}</span>
+            <span className="ml-2 font-semibold">{selectedData.failed}</span>
           </li>
         </ul>
       </div>

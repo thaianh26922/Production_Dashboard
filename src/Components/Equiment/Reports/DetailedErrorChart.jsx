@@ -17,7 +17,12 @@ const DetailedErrorChart = ({ detailedErrorData }) => {
     responsive: true,
   };
 
-  return <Pie data={detailedErrorData} options={options} />;
+  return (
+     <div  className=" h-60 flex justify-center items-center"> 
+      <Pie data={detailedErrorData} options={options} />
+      </div>
+  )
+  
 };
 
 export default DetailedErrorChart;

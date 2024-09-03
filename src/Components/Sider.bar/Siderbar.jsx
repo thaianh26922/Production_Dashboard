@@ -4,17 +4,19 @@ import { FiHome, FiBarChart2, FiGrid, FiClipboard, FiDatabase, FiHeadphones, FiS
 import Submenu from '../Submenu/Submenu';
 import { productionItems, qualityItems, equipmentItems, supportItems, settingItems, inventorytItems, adminItems } from '../../libs/menuItems';
 
-const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
+const Sidebar = ({ isCollapsed, setIsCollapsed, userRole }) => {
+  // Hàm chuyển đổi trạng thái ẩn/hiện của sidebar
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
   };
 
+  // Hàm xử lý khi click vào submenu
   const handleSubmenuClick = (toggleSubmenu) => {
     if (isCollapsed) {
-      setIsCollapsed(false); // Mở rộng sidebar
-      toggleSubmenu(); // Mở submenu tương ứng
+      setIsCollapsed(false); 
+      toggleSubmenu(); 
     } else {
-      toggleSubmenu(); // Chỉ mở submenu nếu sidebar đã mở rộng
+      toggleSubmenu(); 
     }
   };
 
@@ -38,7 +40,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
 
       <div className="flex flex-col space-y-4 p-4">
         <nav className="flex flex-col space-y-4">
-          {/* Dashboard Menu */}
+          {/* Mục menu chung: Dashboard */}
           <Link
             to="/dashboard"
             className="flex items-center text-gray-700 hover:text-black"
@@ -47,75 +49,78 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
             {!isCollapsed && <span>Trang chủ</span>}
           </Link>
 
-          {/* Production Submenu */}
+          {/* Submenu Sản xuất */}
           <Submenu 
             title={<><FiBarChart2 className="mr-4 text-lg" />{!isCollapsed && <span>Sản xuất</span>}</>} 
             items={productionItems} 
-            mainLink="/production/overview" // Link chính khi click vào "Sản xuất"
+            mainLink="/production/overview" 
             isCollapsed={isCollapsed}
-            onSubmenuClick={handleSubmenuClick} // Truyền hàm xử lý click vào submenu
+            onSubmenuClick={handleSubmenuClick} 
           />
 
-          {/* Equipment Submenu */}
+          {/* Submenu Thiết bị */}
           <Submenu 
             title={<><FiGrid className="mr-4 text-lg" />{!isCollapsed && <span>Thiết bị</span>}</>} 
             items={equipmentItems} 
-            mainLink="/equipment/machines" // Link chính khi click vào "Thiết bị"
+            mainLink="/equipment/machines" 
             isCollapsed={isCollapsed}
-            onSubmenuClick={handleSubmenuClick} // Truyền hàm xử lý click vào submenu
+            onSubmenuClick={handleSubmenuClick} 
           />
 
-          {/* Quality Submenu */}
+          {/* Submenu Chất lượng */}
           <Submenu 
             title={<><FiClipboard className="mr-4 text-lg" />{!isCollapsed && <span>Chất lượng</span>}</>} 
             items={qualityItems} 
-            mainLink="/quality/inspection" // Link chính khi click vào "Chất lượng"
+            mainLink="/quality/overview" 
             isCollapsed={isCollapsed}
-            onSubmenuClick={handleSubmenuClick} // Truyền hàm xử lý click vào submenu
+            onSubmenuClick={handleSubmenuClick} 
           />
 
-          {/* Inventory Menu */}
+          {/* Submenu Tồn kho */}
           <Submenu 
-            title={<><FiBarChart2 className="mr-4 text-lg" />{!isCollapsed && <span>Tồn kho</span>}</>} 
+            title={<><FiDatabase className="mr-4 text-lg" />{!isCollapsed && <span>Tồn kho</span>}</>} 
             items={inventorytItems} 
-            mainLink="/inventory/material" // Link chính khi click vào "Sản xuất"
+            mainLink="/inventory/material" 
             isCollapsed={isCollapsed}
-            onSubmenuClick={handleSubmenuClick} // Truyền hàm xử lý click vào submenu
+            onSubmenuClick={handleSubmenuClick} 
           />
-          {/* Production Submenu */}
-          <Submenu 
-            title={<><FiBarChart2 className="mr-4 text-lg" />{!isCollapsed && <span>Hệ thống</span>}</>} 
-            items={adminItems} 
-            mainLink="/admin/userlist" // Link chính khi click vào "Sản xuất"
-            isCollapsed={isCollapsed}
-            onSubmenuClick={handleSubmenuClick} // Truyền hàm xử lý click vào submenu
-          />
+
+          {/* Mục menu của admin chỉ hiển thị nếu userRole là "admin" */}
+          {userRole === 'admin' && (
+            <Submenu 
+              title={<><FiSettings className="mr-4 text-lg" />{!isCollapsed && <span>Hệ thống</span>}</>} 
+              items={adminItems} 
+              mainLink="/admin/userlist" 
+              isCollapsed={isCollapsed}
+              onSubmenuClick={handleSubmenuClick} 
+            />
+          )}
         </nav>
       </div>
 
       <div className="p-4 mt-2">
         <nav className="flex flex-col space-y-4">
-          {/* Support Submenu */}
+          {/* Submenu Hỗ trợ */}
           <Submenu 
             title={<><FiHeadphones className="mr-4 text-lg" />{!isCollapsed && <span>Hỗ trợ</span>}</>} 
             items={supportItems} 
-            mainLink="/support/faq" // Link chính khi click vào "Hỗ trợ"
+            mainLink="/support/faq" 
             isCollapsed={isCollapsed}
-            onSubmenuClick={handleSubmenuClick} // Truyền hàm xử lý click vào submenu
+            onSubmenuClick={handleSubmenuClick} 
           />
 
-          {/* Setting Submenu */}
+          {/* Submenu Cài đặt */}
           <Submenu 
             title={<><FiSettings className="mr-4 text-lg" />{!isCollapsed && <span>Cài Đặt</span>}</>} 
             items={settingItems} 
-            mainLink="/settings/profile" // Link chính khi click vào "Cài Đặt"
+            mainLink="/settings/profile" 
             isCollapsed={isCollapsed}
-            onSubmenuClick={handleSubmenuClick} // Truyền hàm xử lý click vào submenu
+            onSubmenuClick={handleSubmenuClick} 
           />
 
-          {/* Logout Menu */}
+          {/* Mục Đăng xuất */}
           <Link
-            to="/logout"
+            to="/login"
             className="flex items-center text-gray-700 hover:text-black"
           >
             <FiLogOut className="mr-4 text-lg" />

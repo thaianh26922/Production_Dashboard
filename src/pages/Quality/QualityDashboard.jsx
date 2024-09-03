@@ -13,10 +13,7 @@ function QualityDashboard() {
     <div className="bg-white p-4 rounded-lg shadow-md mt-2">
       {/* Biểu đồ chất lượng */}
       <MaterialInspectionChart/>
-      
     </div>
-    
-    
     </>
     
 
