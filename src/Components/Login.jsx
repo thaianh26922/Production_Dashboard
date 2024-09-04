@@ -10,7 +10,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const apiUrl = import.meta.env.VITE_API_URL;
+  
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -22,7 +22,7 @@ function Login() {
         password,
       });
 
-      // Nếu đăng nhập thành công, lưu token vào localStorage và điều hướng
+      // Nếu đăng nhập thành công, lưu token vào localStorage 
       if (response.status === 200) {
         const { token } = response.data;
         localStorage.setItem('token', token);  // Lưu token thực tế vào localStorage
@@ -33,8 +33,8 @@ function Login() {
         const role = decodedToken.user.role;  // Trích xuất role từ token đã giải mã
 
         // Kiểm tra xem role có được lấy thành công không
-        console.log('Role:', role);  // In ra vai trò của người dùng để kiểm tra
-        localStorage.setItem('role', role);  // Lưu role vào localStorage
+        console.log('Role:', role);  
+        localStorage.setItem('role', role);  
 
         toast.success('Đăng nhập thành công!');
         navigate('/dashboard');  // Điều hướng tới Dashboard
@@ -56,7 +56,7 @@ function Login() {
   return (
     <div className="flex items-center justify-center h-screen bg-gradient-to-br from-cyan-500 to-blue-700">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-xl">
-        <h2 className="text-3xl font-bold text-center text-gray-800">Sign In to Your Account</h2>
+        <h2 className="text-3xl font-bold text-center text-gray-800">Sign In To Your Account</h2>
         
         <form className="space-y-4" onSubmit={handleLogin}>
           <div className="relative">
