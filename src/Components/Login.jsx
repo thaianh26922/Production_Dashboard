@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaUserAlt, FaLock, FaEye, FaEyeSlash, FaUsers, FaBook } from 'react-icons/fa'; 
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import {jwtDecode} from 'jwt-decode';  // Import thư viện jwt-decode
+import {jwtDecode} from 'jwt-decode';
 
 function Login() {
   const navigate = useNavigate();
