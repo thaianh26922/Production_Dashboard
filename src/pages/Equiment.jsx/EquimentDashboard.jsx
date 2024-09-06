@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import MachineSelection from '../../Components/Equiment/MachineSelection';
 import MachineDetails from '../../Components/Equiment/MachineDetails';
 import PerformanceMetrics from '../../Components/Equiment/PerformanceMetrics';
 import RealTimeEnergyChart from '../../Components/Equiment/RealTimeEnergyChart';
@@ -9,35 +8,31 @@ const EquipmentDashboard = () => {
   const [currentMachine, setCurrentMachine] = useState('Máy Trộn');
 
   return (
-    < >
-    <div className="w-vh h-vh">
-        <div className="p-2 h-1/3 bg-white rounded-lg grid grid-cols-8 gap-4 ">
-          
-            <div className="col-span-1 ">
-              <MachineSelection currentMachine={currentMachine} setCurrentMachine={setCurrentMachine} />
-            </div>
-
+    <>
+      <div className="w-full h-full p-1 space-y-4 ">
         
-            <div className="col-span-7 ">
-              <MachineDetails machineName={currentMachine} />
-            </div>
+        {/* Hàng 1: MachineDetails (đã tích hợp MachineSelection) */}
+        <div className="bg-white rounded-lg p-4 shadow-lg   ">
+          <MachineDetails machineName={currentMachine} setCurrentMachine={setCurrentMachine} />
         </div>
-      
+        
+        {/* Hàng 2: PerformanceMetrics */}
+        <div className="bg-white rounded-lg p-4 shadow-lg">
+          <PerformanceMetrics />
+        </div>
+        
+        {/* Hàng 3: RealTimeEnergyChart và HourlyProductionChart (cùng một hàng) */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-white rounded-lg shadow-lg p-4">
+            <RealTimeEnergyChart />
+          </div>
+          <div className="bg-white rounded-lg shadow-lg p-4">
+            <HourlyProductionChart />
+          </div>
+        </div>
 
-    </div>
-    <PerformanceMetrics />
-    <div className="grid grid-cols-2 gap-4 mt-2">  
-      <div className="bg-white rounded-lg shadow-lg p-4">
-        <RealTimeEnergyChart />
       </div>
-      <div className="bg-white rounded-lg shadow-lg p-4">
-        <HourlyProductionChart />
-      </div>
-    </div>
-
-      
     </>
-    
   );
 };
 

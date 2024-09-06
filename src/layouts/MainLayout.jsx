@@ -5,7 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 
 function MainLayout({ children }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
-  const { role } = useContext(AuthContext); 
+  const { userRole } = useContext(AuthContext); 
 
   return (
     <div className="flex h-screen w-screen">
@@ -14,7 +14,7 @@ function MainLayout({ children }) {
         <Sidebar 
           isCollapsed={isSidebarCollapsed} 
           setIsCollapsed={setIsSidebarCollapsed} 
-          role={role} 
+          role={userRole} 
         />
       </aside>
 

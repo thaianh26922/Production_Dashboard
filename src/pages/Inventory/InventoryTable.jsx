@@ -29,6 +29,7 @@ function InventoryTable({ limit }) {
       <table className="min-w-full bg-white border-collapse">
         <thead>
           <tr>
+         
             <th className="py-2 px-4 border-b">Loại</th>
             <th className="py-2 px-4 border-b">Tên sản phẩm</th>
             <th className="py-2 px-4 border-b">Số lượng</th>

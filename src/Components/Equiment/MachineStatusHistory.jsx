@@ -1,78 +1,63 @@
 import React from 'react';
-import { Scatter } from 'react-chartjs-2';
-import 'chart.js/auto';
+import { BarChart, Bar, XAxis, Tooltip, CartesianGrid, YAxis, Legend } from 'recharts';
 
+// Dữ liệu trạng thái máy từ 8:00 đến 17:00
+const data = [
+  { time: '08:00', Run: 1, ChangeLine: 0, Wait: 0, Error: 0 },
+  { time: '08:30', Run: 0, ChangeLine: 1, Wait: 0, Error: 0 },
+  { time: '09:00', Run: 1, ChangeLine: 0, Wait: 0, Error: 0 },
+  { time: '09:30', Run: 0, ChangeLine: 0, Wait: 1, Error: 0 },
+  { time: '10:00', Run: 0, ChangeLine: 0, Wait: 0, Error: 1 },
+  { time: '10:30', Run: 1, ChangeLine: 0, Wait: 0, Error: 0 },
+  { time: '11:00', Run: 0, ChangeLine: 1, Wait: 0, Error: 0 },
+  { time: '11:30', Run: 0, ChangeLine: 0, Wait: 1, Error: 0 },
+  { time: '12:00', Run: 1, ChangeLine: 0, Wait: 0, Error: 0 },
+  { time: '12:30', Run: 0, ChangeLine: 0, Wait: 0, Error: 1 },
+  { time: '13:00', Run: 1, ChangeLine: 0, Wait: 0, Error: 0 },
+  { time: '13:30', Run: 0, ChangeLine: 1, Wait: 0, Error: 0 },
+  { time: '14:00', Run: 1, ChangeLine: 0, Wait: 0, Error: 0 },
+  { time: '14:30', Run: 0, ChangeLine: 0, Wait: 1, Error: 0 },
+  { time: '15:00', Run: 0, ChangeLine: 0, Wait: 0, Error: 1 },
+  { time: '15:30', Run: 1, ChangeLine: 0, Wait: 0, Error: 0 },
+  { time: '16:00', Run: 0, ChangeLine: 1, Wait: 0, Error: 0 },
+  { time: '16:30', Run: 0, ChangeLine: 0, Wait: 1, Error: 0 },
+  { time: '17:00', Run: 1, ChangeLine: 0, Wait: 0, Error: 0 },
+];
+
+// Tạo biểu đồ thanh trạng thái duy nhất với chiều cao bằng nhau và liên tục từ 8:00 đến 17:00
 const MachineStatusHistory = () => {
-  
-  const data = {
-    labels: ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'],
-    datasets: [
-      {
-        label: 'Đang chạy',
-        data: [
-          { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 }, 
-          { x: 3.5, y: 1 },{ x: 4, y: 1 }, { x: 5, y: 1 } ,{ x: 6, y: 1 }
-          
-        ],
-        backgroundColor: 'green',
-        pointRadius: 5,
-      },
-      {
-        label: 'Sửa chữa',
-        data: [
-          { x: 3, y: 1 }, { x: 3.5, y: 1 },
-         
-        ],
-        backgroundColor: 'yellow',
-        pointRadius: 5,
-      },
-      {
-        label: 'Dừng',
-        data: [
-          { x: 7, y: 1 }, { x: 8, y: 1 },
-         
-        ],
-        backgroundColor: 'red',
-        pointRadius: 5,
-      },
-    ],
-  };
-
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false, 
-    scales: {
-      x: {
-        type: 'linear',
-        position: 'bottom',
-        ticks: {
-          callback: (value) => `${value}:00`,
-        },
-        title: {
-          display: false,
-          text: 'Giờ trong ngày',
-        },
-      },
-      y: {
-        display: false,
-      },
-    },
-    plugins: {
-      legend: {
-        position: 'bottom',
-      },
-      tooltip: {
-        callbacks: {
-          label: (tooltipItem) => `Giờ: ${tooltipItem.xLabel}:00`,
-        },
-      },
-    },
-  };
-
   return (
-    <div className="w-full h-16"> {/* Chỉnh kích thước chiều cao tại đây */}
-      <Scatter data={data} options={options} />
-    </div>
+    <BarChart
+      width={1000}
+      height={150}  // Điều chỉnh chiều cao tổng thể để tập trung vào thanh duy nhất
+      data={data}
+      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}  // Đặt khoảng cách cho Legend
+      barGap={0}  // Không có khoảng cách giữa các thanh
+      barCategoryGap="0%"  // Thanh sát nhau
+    >
+      <CartesianGrid strokeDasharray="3 3" />
+      
+      {/* Trục Ox với các mốc thời gian */}
+      <XAxis 
+        dataKey="time"
+        interval={0}  // Hiển thị toàn bộ mốc thời gian
+        tick={{ angle: 0, textAnchor: 'end' }}  // Không xoay mốc thời gian
+      />
+      
+      {/* Trục Oy ẩn đi vì các thanh có chiều cao bằng nhau */}
+      <YAxis hide />
+      
+      <Tooltip />
+      
+      {/* Legend để giải thích các màu của trạng thái */}
+      <Legend layout="horizontal" verticalAlign="bottom" align="center" />
+      
+      {/* Thanh trạng thái duy nhất với các màu khác nhau */}
+      <Bar dataKey="Run" stackId="a" fill="#00FF00" name="Run" />
+      <Bar dataKey="ChangeLine" stackId="a" fill="#0000FF" name="Change Line" />
+      <Bar dataKey="Wait" stackId="a" fill="#FFFF00" name="Wait" />
+      <Bar dataKey="Error" stackId="a" fill="#FF0000" name="Error" />
+    </BarChart>
   );
 };
 

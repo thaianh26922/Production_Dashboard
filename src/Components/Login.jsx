@@ -10,14 +10,14 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const apiUrl = import.meta.env.VITE_API_URL;
+  
 
   const handleLogin = async (event) => {
     event.preventDefault();
 
     try {
       // Gọi API đến server backend để xác thực
-      const response = await axios.post('http://localhost:5000/api/login', {
+      const response = await axios.post('https://back-end-production.onrender.com/api/login', {
         username,
         password,
       });
