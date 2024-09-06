@@ -8,10 +8,10 @@ import MachineStatusHistory from './MachineStatusHistory'; // Component lịch s
 
 // Định nghĩa hình ảnh cho các loại máy
 const machineImages = {
-  'Máy Trộn': 'mayTronImage',
-  'Máy Định Hình': 'mayDinhHinhImage',
-  'Máy Nướng': 'mayNuongImage',
-  'Máy Đóng Gói': 'mayDongGoiImage',
+  'Máy Trộn': '../../src/assets/image/May_tron.png',
+  'Máy Định Hình': '../../src/assets/image/May_Dinh_Hinh.png',
+  'Máy Nướng': '../../src/assets/image/May_nuong_banh.webp',
+  'Máy Đóng Gói': '../../src/assets/image/May-dong-goi.png',
 };
 
 const MachineDetails = () => {

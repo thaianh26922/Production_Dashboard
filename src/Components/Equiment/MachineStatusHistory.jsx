@@ -48,7 +48,7 @@ const MachineStatusHistory = () => {
       <YAxis hide />
       
       <Tooltip />
-      aaaaaaa
+    
       
       {/* Legend để giải thích các màu của trạng thái */}
       <Legend layout="horizontal" verticalAlign="bottom" align="center" />
