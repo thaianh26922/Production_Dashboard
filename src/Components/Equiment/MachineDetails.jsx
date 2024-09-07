@@ -13,6 +13,7 @@ const machineImages = {
   'Máy Định Hình': '../../src/assets/image/May_Dinh_Hinh.png',
   'Máy Nướng': '../../src/assets/image/May_nuong_banh.webp',
   'Máy Đóng Gói': '../../src/assets/image/May-dong-goi.png',
+
 };
 
 // Hàm chuyển đổi thời gian (giờ:phút) sang phút tính từ đầu ngày
