@@ -1,40 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-// Dữ liệu với các trạng thái mới: Chạy, Chờ, Lỗi Máy, Dừng, Thiếu đơn
-const data = [
-  { time: '09:00', status: 'Chạy', duration: 1 },      // Chạy từ 9:00 đến 9:01 (1 phút)
-  { time: '09:01', status: 'Lỗi Máy', duration: 19 },  // Lỗi Máy từ 9:01 đến 9:20 (19 phút)
-  { time: '09:20', status: 'Chờ', duration: 5 },       // Chờ từ 9:20 đến 9:25 (5 phút)
-  { time: '09:25', status: 'Chạy', duration: 2 },      // Chạy từ 9:25 đến 9:27 (2 phút)
-  { time: '09:27', status: 'Lỗi Máy', duration: 1 },   // Lỗi Máy từ 9:27 đến 9:28 (1 phút)
-  { time: '09:28', status: 'Chờ', duration: 2 },       // Chờ từ 9:28 đến 9:30 (2 phút)
-  { time: '09:30', status: 'Chạy', duration: 5 },      // Chạy từ 9:30 đến 9:35 (5 phút)
-  { time: '09:35', status: 'Dừng', duration: 5 },      // Dừng từ 9:35 đến 9:40 (5 phút)
-  { time: '09:40', status: 'Chạy', duration: 2 },      // Chạy từ 9:40 đến 9:42 (2 phút)
-  { time: '09:42', status: 'Lỗi Máy', duration: 1 },   // Lỗi Máy từ 9:42 đến 9:43 (1 phút)
-  { time: '09:43', status: 'Chờ', duration: 2 },       // Chờ từ 9:43 đến 9:45 (2 phút)
-  { time: '09:45', status: 'Chạy', duration: 15 },     // Chạy từ 9:45 đến 10:00 (15 phút)
-  { time: '10:00', status: 'Thiếu đơn', duration: 10 },// Thiếu đơn từ 10:00 đến 10:10 (10 phút)
-  { time: '10:10', status: 'Chạy', duration: 50 },     // Chạy từ 10:10 đến 11:00 (50 phút)
-  { time: '11:00', status: 'Dừng', duration: 10 },     // Dừng từ 11:00 đến 11:10 (10 phút)
-  { time: '11:10', status: 'Chờ', duration: 30 },      // Chờ từ 11:10 đến 11:40 (30 phút)
-  { time: '11:40', status: 'Lỗi Máy', duration: 5 },   // Lỗi Máy từ 11:40 đến 11:45 (5 phút)
-  { time: '11:45', status: 'Chạy', duration: 2 },      // Chạy từ 11:45 đến 11:47 (2 phút)
-  { time: '11:47', status: 'Dừng', duration: 1 },      // Dừng từ 11:47 đến 11:48 (1 phút)
-  { time: '11:48', status: 'Chờ', duration: 2 },       // Chờ từ 11:48 đến 11:50 (2 phút)
-  { time: '11:50', status: 'Chạy', duration: 10 },     // Chạy từ 11:50 đến 12:00 (10 phút)
-  { time: '12:00', status: 'Dừng', duration: 15 },     // Dừng từ 12:00 đến 12:15 (15 phút)
-  { time: '12:15', status: 'Chờ', duration: 25 },      // Chờ từ 12:15 đến 12:40 (25 phút)
-  { time: '12:40', status: 'Lỗi Máy', duration: 10 },  // Lỗi Máy từ 12:40 đến 12:50 (10 phút)
-  { time: '12:50', status: 'Chạy', duration: 20 },     // Chạy từ 12:50 đến 13:10 (20 phút)
-  { time: '13:10', status: 'Dừng', duration: 5 },      // Dừng từ 13:10 đến 13:15 (5 phút)
-  { time: '13:15', status: 'Chờ', duration: 15 },      // Chờ từ 13:15 đến 13:30 (15 phút)
-  { time: '13:30', status: 'Lỗi Máy', duration: 10 },  // Lỗi Máy từ 13:30 đến 13:40 (10 phút)
-  { time: '13:40', status: 'Chạy', duration: 20 },     // Chạy từ 13:40 đến 14:00 (20 phút)
-];
-
-// Màu sắc tương ứng cho các trạng thái mới
+// Định nghĩa màu sắc cho các trạng thái
 const colors = {
   'Chạy': '#00FF00',
   'Chờ': '#FFFF00',
@@ -43,15 +10,17 @@ const colors = {
   'Thiếu đơn': '#FF6600',
 };
 
-const MachineStatusHistory = () => {
+const MachineStatusHistory = ({ historyData }) => {
   const svgRef = useRef();
   const legendRef = useRef();
 
   useEffect(() => {
+    if (!historyData || historyData.length === 0) return;
+
     // Set kích thước của biểu đồ
-    const width = 1200;
+    const width = 1000;
     const height = 100;  // Chiều cao của biểu đồ chính
-    const margin = { top: 20, right: 30, bottom: 40, left: 0 };
+    const margin = { top: 20, right: 30, bottom: 40, left: 20 };
 
     // Tạo SVG cho biểu đồ chính
     const svg = d3.select(svgRef.current)
@@ -59,76 +28,86 @@ const MachineStatusHistory = () => {
       .attr('height', height)
       .style('background-color', '#0000');
 
-    // Tạo thang đo x cho trục thời gian
+    // Tạo thang đo x cho trục thời gian từ 6:00 đến 06:00 hôm sau
+    const totalMinutesInDay = 24 * 60; // Tổng số phút trong 24 giờ
+    const startTime = 6 * 60; // 6:00 sáng, tính bằng phút
+    const endTime = startTime + totalMinutesInDay; // 6:00 sáng hôm sau
+
     const xScale = d3.scaleLinear()
-      .domain([9 * 60, 14 * 60]) // Chuyển đổi giờ sang phút, giới hạn từ 9:00 đến 14:00
+      .domain([startTime, endTime]) // Từ 06:00 (360 phút) đến 06:00 sáng hôm sau
       .range([margin.left, width - margin.right]);
 
-    // Tính toán tổng thời gian
-    const totalMinutes = d3.sum(data, d => d.duration);
+    // Xóa các phần tử cũ
+    svg.selectAll("*").remove();
+
+    // Đặt lại tổng thời gian tích lũy
+    let totalElapsedMinutes = startTime;  // Bắt đầu từ 6:00 sáng
 
     // Tạo nhóm thanh bars
     svg.selectAll('rect')
-      .data(data)
+      .data(historyData)
       .join('rect')
-      .attr('x', (d, i) => xScale((9 * 60) + d3.sum(data.slice(0, i), d => d.duration))) // Tính toán vị trí x dựa trên phút
+      .attr('x', d => {
+        // Giới hạn vị trí thời gian để đảm bảo không bị vượt qua 06:00 sáng hôm sau
+        const xPos = xScale(totalElapsedMinutes);  
+        totalElapsedMinutes += d.duration;  // Tích lũy thời gian
+        return xPos;
+      })
       .attr('y', margin.top)
-      .attr('width', d => xScale(d.duration) - xScale(0)) // Tính toán chiều rộng dựa trên thời lượng
-      .attr('height', height - margin.top - margin.bottom )  // Để chừa không gian cho phần legend
+      .attr('width', d => {
+        // Đảm bảo không vượt quá giới hạn 06:00 sáng hôm sau
+        const barWidth = xScale(totalElapsedMinutes) - xScale(totalElapsedMinutes - d.duration);
+        return barWidth > 0 ? barWidth : 0;  // Đảm bảo chiều rộng không âm
+      })
+      .attr('height', height - margin.top - margin.bottom)
       .attr('fill', d => colors[d.status]);
 
-    // Thêm trục x với các mốc thời gian lớn (9:00, 10:00, 11:00, ...)
+    // Thêm trục x với các mốc thời gian chính từ 06:00 đến 06:00 hôm sau
     const xAxis = d3.axisBottom(xScale)
-      .ticks(6) // Chỉ hiển thị các mốc giờ chính
-      .tickFormat(d => `${Math.floor(d / 60)}:00`); // Hiển thị dạng giờ (9:00, 10:00,...)
+      .tickValues(d3.range(startTime, endTime + 60, 60))  // Mốc thời gian mỗi giờ
+      .tickFormat(d => {
+        let hour = Math.floor((d % totalMinutesInDay) / 60); // Đảm bảo không vượt qua 24 giờ
+        return hour.toString().padStart(2, '0') + ":00";  // Hiển thị giờ dưới dạng HH:00
+      });
 
     svg.append('g')
       .attr('transform', `translate(0,${height - margin.bottom})`)
       .call(xAxis);
 
-    // Thêm đường lưới (grid lines)
-    svg.append('g')
-      .attr('class', 'grid')
-      .attr('transform', `translate(0,${height - margin.bottom})`)
-      .call(d3.axisBottom(xScale)
-        .ticks(6) // Tạo các đường lưới theo các ticks quan trọng
-        .tickSize(-(height - margin.top - margin.bottom))
-        .tickFormat('')
-      )
-      .selectAll('line')
-      .attr('stroke', '#ccc')
-      .attr('stroke-dasharray', '4');
+    // Cập nhật phần legend dựa trên dữ liệu đã lọc
+    const totalDuration = d3.sum(historyData, d => d.duration); // Tính tổng thời gian từ dữ liệu hiện tại
 
-    // Tạo phần legend trong một SVG riêng biệt
     const legend = d3.select(legendRef.current)
       .attr('width', width)
-      .attr('height', 50); // Chiều cao của phần legend
+      .attr('height', 50);
+
+    // Xóa legend cũ trước khi thêm legend mới
+    legend.selectAll('*').remove();
 
     const legendGroup = legend.selectAll('.legend')
       .data(Object.keys(colors))
       .join('g')
       .attr('class', 'legend')
-      .attr('transform', (d, i) => `translate(${i * 150}, 10)`);  // Điều chỉnh vị trí của legend
+      .attr('transform', (d, i) => `translate(${i * 150}, 10)`);
 
-    // Vẽ ô vuông màu cho mỗi trạng thái
     legendGroup.append('rect')
       .attr('x', 0)
-      .attr('width', 18)
-      .attr('height', 18)
+      .attr('width', 12)
+      .attr('height', 12)
       .attr('fill', d => colors[d]);
 
-    // Thêm tên trạng thái và tỷ lệ phần trăm
     legendGroup.append('text')
       .attr('x', 24)
       .attr('y', 9)
-      .attr('dy', '0.35em')
+      .attr('dy', '0.3em')
+      .style('font-size', '12px')
       .text(d => {
-        const durationSum = d3.sum(data.filter(item => item.status === d), item => item.duration);
-        const percentage = ((durationSum / totalMinutes) * 100).toFixed(2);
+        const statusDuration = d3.sum(historyData.filter(item => item.status === d), item => item.duration);
+        const percentage = totalDuration > 0 ? ((statusDuration / totalDuration) * 100).toFixed(2) : 0;
         return `${d} (${percentage}%)`;
       });
 
-  }, [data]);
+  }, [historyData]); // Đảm bảo cập nhật khi historyData thay đổi
 
   return (
     <div>

@@ -12,7 +12,7 @@ const EquipmentDashboard = () => {
       <div className="w-full h-full p-1 space-y-4 ">
         
         {/* Hàng 1: MachineDetails (đã tích hợp MachineSelection) */}
-        <div className="bg-white rounded-lg p-2 shadow-lg   ">
+        <div className="bg-white rounded-lg p-1 shadow-lg   ">
           <MachineDetails machineName={currentMachine} setCurrentMachine={setCurrentMachine} />
         </div>
         

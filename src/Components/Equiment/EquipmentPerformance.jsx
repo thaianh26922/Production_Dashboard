@@ -34,7 +34,7 @@ const EquipmentPerformance = () => {
   };
 
   return (
-    <div className="grid grid-cols-12 gap-4 mt-4">
+    <div className="grid grid-cols-12 gap-1 mt-4">
       {/* Các biểu đồ doughnut */}
       <div className="col-span-12 grid grid-cols-2 gap-4">
         <div className="bg-white rounded-lg shadow-lg p-4 flex flex-col items-center">
