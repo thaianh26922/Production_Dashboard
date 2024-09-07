@@ -6,14 +6,16 @@ import MachineStatusHistory from './MachineStatusHistory';
 import ErrorHistoryChart from './ErrorHistoryChart';
 import { FaFilter } from 'react-icons/fa';
 import { addDays } from 'date-fns';
+import MayTron from '../../assets/image/May_tron.png';
+import MayDinhHinh from '../../assets/image/May_Dinh_Hinh.png';
+import MayNuong from '../../assets/image/May_nuong_banh.webp';
+import MayDongGoi from '../../assets/image/May-dong-goi.png';
 
-// Định nghĩa hình ảnh cho các loại máy
 const machineImages = {
-  'Máy Trộn': '../../src/assets/image/May_tron.png',
-  'Máy Định Hình': '../../src/assets/image/May_Dinh_Hinh.png',
-  'Máy Nướng': '../../src/assets/image/May_nuong_banh.webp',
-  'Máy Đóng Gói': '../../src/assets/image/May-dong-goi.png',
-
+  'Máy Trộn': MayTron,
+  'Máy Định Hình': MayDinhHinh,
+  'Máy Nướng': MayNuong,
+  'Máy Đóng Gói': MayDongGoi,
 };
 
 // Hàm chuyển đổi thời gian (giờ:phút) sang phút tính từ đầu ngày
