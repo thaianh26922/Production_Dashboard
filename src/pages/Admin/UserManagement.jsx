@@ -39,11 +39,9 @@ const UserManagement = () => {
   const handleSave = async (data) => {
     try {
       if (selectedUser) {
-<<<<<<< HEAD
-        await axios.put(`https://localhost:5000/api/users/${selectedUser._id}`, data, {
-=======
+
         await axios.put(`https://back-end-production.onrender.com/api/users/${selectedUser._id}`, data, {
->>>>>>> 388af01da19b9a3abc070d6a8f4ed6f5f592344a
+
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
@@ -51,11 +49,7 @@ const UserManagement = () => {
         setUsers(users.map(user => (user._id === selectedUser._id ? { ...user, ...data } : user)));
         toast.success('User updated successfully');
       } else {
-<<<<<<< HEAD
-        const response = await axios.post('https://localhost:5000/api/users', data, {
-=======
         const response = await axios.post('https://back-end-production.onrender.com/api/users', data, {
->>>>>>> 388af01da19b9a3abc070d6a8f4ed6f5f592344a
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
@@ -74,11 +68,7 @@ const UserManagement = () => {
   // Delete user
   const handleDeleteUser = async (id) => {
     try {
-<<<<<<< HEAD
-      await axios.delete(`https://localhost:5000/api/users/${id}`, {
-=======
       await axios.delete(`https://back-end-production.onrender.com/api/users/${id}`, {
->>>>>>> 388af01da19b9a3abc070d6a8f4ed6f5f592344a
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
@@ -93,11 +83,7 @@ const UserManagement = () => {
   // Toggle user lock status
   const handleToggleLockUser = async (id) => {
     try {
-<<<<<<< HEAD
-      const response = await axios.put(`https://localhost:5000/api/users/${id}/lock`, {}, {
-=======
       const response = await axios.put(`https://back-end-production.onrender.com/api/users/${id}/lock`, {}, {
->>>>>>> 388af01da19b9a3abc070d6a8f4ed6f5f592344a
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },

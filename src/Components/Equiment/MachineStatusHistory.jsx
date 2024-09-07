@@ -1,64 +1,140 @@
-import React from 'react';
-import { BarChart, Bar, XAxis, Tooltip, CartesianGrid, YAxis, Legend } from 'recharts';
+import React, { useEffect, useRef } from 'react';
+import * as d3 from 'd3';
 
-// Dữ liệu trạng thái máy từ 8:00 đến 17:00
+// Dữ liệu với các trạng thái mới: Chạy, Chờ, Lỗi Máy, Dừng, Thiếu đơn
 const data = [
-  { time: '08:00', Run: 1, ChangeLine: 0, Wait: 0, Error: 0 },
-  { time: '08:30', Run: 0, ChangeLine: 1, Wait: 0, Error: 0 },
-  { time: '09:00', Run: 1, ChangeLine: 0, Wait: 0, Error: 0 },
-  { time: '09:30', Run: 0, ChangeLine: 0, Wait: 1, Error: 0 },
-  { time: '10:00', Run: 0, ChangeLine: 0, Wait: 0, Error: 1 },
-  { time: '10:30', Run: 1, ChangeLine: 0, Wait: 0, Error: 0 },
-  { time: '11:00', Run: 0, ChangeLine: 1, Wait: 0, Error: 0 },
-  { time: '11:30', Run: 0, ChangeLine: 0, Wait: 1, Error: 0 },
-  { time: '12:00', Run: 1, ChangeLine: 0, Wait: 0, Error: 0 },
-  { time: '12:30', Run: 0, ChangeLine: 0, Wait: 0, Error: 1 },
-  { time: '13:00', Run: 1, ChangeLine: 0, Wait: 0, Error: 0 },
-  { time: '13:30', Run: 0, ChangeLine: 1, Wait: 0, Error: 0 },
-  { time: '14:00', Run: 1, ChangeLine: 0, Wait: 0, Error: 0 },
-  { time: '14:30', Run: 0, ChangeLine: 0, Wait: 1, Error: 0 },
-  { time: '15:00', Run: 0, ChangeLine: 0, Wait: 0, Error: 1 },
-  { time: '15:30', Run: 1, ChangeLine: 0, Wait: 0, Error: 0 },
-  { time: '16:00', Run: 0, ChangeLine: 1, Wait: 0, Error: 0 },
-  { time: '16:30', Run: 0, ChangeLine: 0, Wait: 1, Error: 0 },
-  { time: '17:00', Run: 1, ChangeLine: 0, Wait: 0, Error: 0 },
+  { time: '09:00', status: 'Chạy', duration: 1 },      // Chạy từ 9:00 đến 9:01 (1 phút)
+  { time: '09:01', status: 'Lỗi Máy', duration: 19 },  // Lỗi Máy từ 9:01 đến 9:20 (19 phút)
+  { time: '09:20', status: 'Chờ', duration: 5 },       // Chờ từ 9:20 đến 9:25 (5 phút)
+  { time: '09:25', status: 'Chạy', duration: 2 },      // Chạy từ 9:25 đến 9:27 (2 phút)
+  { time: '09:27', status: 'Lỗi Máy', duration: 1 },   // Lỗi Máy từ 9:27 đến 9:28 (1 phút)
+  { time: '09:28', status: 'Chờ', duration: 2 },       // Chờ từ 9:28 đến 9:30 (2 phút)
+  { time: '09:30', status: 'Chạy', duration: 5 },      // Chạy từ 9:30 đến 9:35 (5 phút)
+  { time: '09:35', status: 'Dừng', duration: 5 },      // Dừng từ 9:35 đến 9:40 (5 phút)
+  { time: '09:40', status: 'Chạy', duration: 2 },      // Chạy từ 9:40 đến 9:42 (2 phút)
+  { time: '09:42', status: 'Lỗi Máy', duration: 1 },   // Lỗi Máy từ 9:42 đến 9:43 (1 phút)
+  { time: '09:43', status: 'Chờ', duration: 2 },       // Chờ từ 9:43 đến 9:45 (2 phút)
+  { time: '09:45', status: 'Chạy', duration: 15 },     // Chạy từ 9:45 đến 10:00 (15 phút)
+  { time: '10:00', status: 'Thiếu đơn', duration: 10 },// Thiếu đơn từ 10:00 đến 10:10 (10 phút)
+  { time: '10:10', status: 'Chạy', duration: 50 },     // Chạy từ 10:10 đến 11:00 (50 phút)
+  { time: '11:00', status: 'Dừng', duration: 10 },     // Dừng từ 11:00 đến 11:10 (10 phút)
+  { time: '11:10', status: 'Chờ', duration: 30 },      // Chờ từ 11:10 đến 11:40 (30 phút)
+  { time: '11:40', status: 'Lỗi Máy', duration: 5 },   // Lỗi Máy từ 11:40 đến 11:45 (5 phút)
+  { time: '11:45', status: 'Chạy', duration: 2 },      // Chạy từ 11:45 đến 11:47 (2 phút)
+  { time: '11:47', status: 'Dừng', duration: 1 },      // Dừng từ 11:47 đến 11:48 (1 phút)
+  { time: '11:48', status: 'Chờ', duration: 2 },       // Chờ từ 11:48 đến 11:50 (2 phút)
+  { time: '11:50', status: 'Chạy', duration: 10 },     // Chạy từ 11:50 đến 12:00 (10 phút)
+  { time: '12:00', status: 'Dừng', duration: 15 },     // Dừng từ 12:00 đến 12:15 (15 phút)
+  { time: '12:15', status: 'Chờ', duration: 25 },      // Chờ từ 12:15 đến 12:40 (25 phút)
+  { time: '12:40', status: 'Lỗi Máy', duration: 10 },  // Lỗi Máy từ 12:40 đến 12:50 (10 phút)
+  { time: '12:50', status: 'Chạy', duration: 20 },     // Chạy từ 12:50 đến 13:10 (20 phút)
+  { time: '13:10', status: 'Dừng', duration: 5 },      // Dừng từ 13:10 đến 13:15 (5 phút)
+  { time: '13:15', status: 'Chờ', duration: 15 },      // Chờ từ 13:15 đến 13:30 (15 phút)
+  { time: '13:30', status: 'Lỗi Máy', duration: 10 },  // Lỗi Máy từ 13:30 đến 13:40 (10 phút)
+  { time: '13:40', status: 'Chạy', duration: 20 },     // Chạy từ 13:40 đến 14:00 (20 phút)
 ];
 
-// Tạo biểu đồ thanh trạng thái duy nhất với chiều cao bằng nhau và liên tục từ 8:00 đến 17:00
+// Màu sắc tương ứng cho các trạng thái mới
+const colors = {
+  'Chạy': '#00FF00',
+  'Chờ': '#FFFF00',
+  'Lỗi Máy': '#FF0000',
+  'Dừng': '#0000FF',
+  'Thiếu đơn': '#FF6600',
+};
+
 const MachineStatusHistory = () => {
+  const svgRef = useRef();
+  const legendRef = useRef();
+
+  useEffect(() => {
+    // Set kích thước của biểu đồ
+    const width = 1200;
+    const height = 100;  // Chiều cao của biểu đồ chính
+    const margin = { top: 20, right: 30, bottom: 40, left: 0 };
+
+    // Tạo SVG cho biểu đồ chính
+    const svg = d3.select(svgRef.current)
+      .attr('width', width)
+      .attr('height', height)
+      .style('background-color', '#0000');
+
+    // Tạo thang đo x cho trục thời gian
+    const xScale = d3.scaleLinear()
+      .domain([9 * 60, 14 * 60]) // Chuyển đổi giờ sang phút, giới hạn từ 9:00 đến 14:00
+      .range([margin.left, width - margin.right]);
+
+    // Tính toán tổng thời gian
+    const totalMinutes = d3.sum(data, d => d.duration);
+
+    // Tạo nhóm thanh bars
+    svg.selectAll('rect')
+      .data(data)
+      .join('rect')
+      .attr('x', (d, i) => xScale((9 * 60) + d3.sum(data.slice(0, i), d => d.duration))) // Tính toán vị trí x dựa trên phút
+      .attr('y', margin.top)
+      .attr('width', d => xScale(d.duration) - xScale(0)) // Tính toán chiều rộng dựa trên thời lượng
+      .attr('height', height - margin.top - margin.bottom )  // Để chừa không gian cho phần legend
+      .attr('fill', d => colors[d.status]);
+
+    // Thêm trục x với các mốc thời gian lớn (9:00, 10:00, 11:00, ...)
+    const xAxis = d3.axisBottom(xScale)
+      .ticks(6) // Chỉ hiển thị các mốc giờ chính
+      .tickFormat(d => `${Math.floor(d / 60)}:00`); // Hiển thị dạng giờ (9:00, 10:00,...)
+
+    svg.append('g')
+      .attr('transform', `translate(0,${height - margin.bottom})`)
+      .call(xAxis);
+
+    // Thêm đường lưới (grid lines)
+    svg.append('g')
+      .attr('class', 'grid')
+      .attr('transform', `translate(0,${height - margin.bottom})`)
+      .call(d3.axisBottom(xScale)
+        .ticks(6) // Tạo các đường lưới theo các ticks quan trọng
+        .tickSize(-(height - margin.top - margin.bottom))
+        .tickFormat('')
+      )
+      .selectAll('line')
+      .attr('stroke', '#ccc')
+      .attr('stroke-dasharray', '4');
+
+    // Tạo phần legend trong một SVG riêng biệt
+    const legend = d3.select(legendRef.current)
+      .attr('width', width)
+      .attr('height', 50); // Chiều cao của phần legend
+
+    const legendGroup = legend.selectAll('.legend')
+      .data(Object.keys(colors))
+      .join('g')
+      .attr('class', 'legend')
+      .attr('transform', (d, i) => `translate(${i * 150}, 10)`);  // Điều chỉnh vị trí của legend
+
+    // Vẽ ô vuông màu cho mỗi trạng thái
+    legendGroup.append('rect')
+      .attr('x', 0)
+      .attr('width', 18)
+      .attr('height', 18)
+      .attr('fill', d => colors[d]);
+
+    // Thêm tên trạng thái và tỷ lệ phần trăm
+    legendGroup.append('text')
+      .attr('x', 24)
+      .attr('y', 9)
+      .attr('dy', '0.35em')
+      .text(d => {
+        const durationSum = d3.sum(data.filter(item => item.status === d), item => item.duration);
+        const percentage = ((durationSum / totalMinutes) * 100).toFixed(2);
+        return `${d} (${percentage}%)`;
+      });
+
+  }, [data]);
+
   return (
-    <BarChart
-      width={1000}
-      height={150}  // Điều chỉnh chiều cao tổng thể để tập trung vào thanh duy nhất
-      data={data}
-      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}  // Đặt khoảng cách cho Legend
-      barGap={0}  // Không có khoảng cách giữa các thanh
-      barCategoryGap="0%"  // Thanh sát nhau
-    >
-      <CartesianGrid strokeDasharray="3 3" />
-      
-      {/* Trục Ox với các mốc thời gian */}
-      <XAxis 
-        dataKey="time"
-        interval={0}  // Hiển thị toàn bộ mốc thời gian
-        tick={{ angle: 0, textAnchor: 'end' }}  // Không xoay mốc thời gian
-      />
-      
-      {/* Trục Oy ẩn đi vì các thanh có chiều cao bằng nhau */}
-      <YAxis hide />
-      
-      <Tooltip />
-    
-      
-      {/* Legend để giải thích các màu của trạng thái */}
-      <Legend layout="horizontal" verticalAlign="bottom" align="center" />
-      
-      {/* Thanh trạng thái duy nhất với các màu khác nhau */}
-      <Bar dataKey="Run" stackId="a" fill="#00FF00" name="Run" />
-      <Bar dataKey="ChangeLine" stackId="a" fill="#0000FF" name="Change Line" />
-      <Bar dataKey="Wait" stackId="a" fill="#FFFF00" name="Wait" />
-      <Bar dataKey="Error" stackId="a" fill="#FF0000" name="Error" />
-    </BarChart>
+    <div>
+      <svg ref={svgRef}></svg>
+      <svg ref={legendRef}></svg>
+    </div>
   );
 };
 
