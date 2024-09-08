@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MachineSelection from './MachineSelection';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -62,7 +62,6 @@ const mergeIntervals = (data, startTime = 6 * 60, endTime = 30 * 60) => {
 };
 
 // Hàm sinh dữ liệu giả cho trạng thái máy từ ngày bắt đầu đến ngày kết thúc
-// Hàm sinh dữ liệu giả cho trạng thái máy từ ngày bắt đầu đến ngày kết thúc
 const generateFakeData = (startDate, endDate) => {
   const historyData = [];
   const oneDay = 24 * 60 * 60 * 1000; // Một ngày tính bằng mili giây
@@ -118,13 +117,24 @@ const generateFakeData = (startDate, endDate) => {
   return historyData;
 };
 
-
 // Component chính để hiển thị chi tiết máy
 const MachineDetails = () => {
   const [currentMachine, setCurrentMachine] = useState('Máy Trộn'); // Lưu trạng thái máy hiện tại
   const [startDate, setStartDate] = useState(new Date()); // Ngày bắt đầu
   const [endDate, setEndDate] = useState(addDays(new Date(), 7)); // Ngày kết thúc
-  const [historyData, setHistoryData] = useState(generateFakeData(new Date(), addDays(new Date(), 7))); // Dữ liệu trạng thái máy
+  const [historyData, setHistoryData] = useState([]);
+
+  // Hàm áp dụng bộ lọc ngày và cập nhật dữ liệu
+  const applyDateFilter = () => {
+    const newHistoryData = generateFakeData(startDate, endDate); // Sinh dữ liệu mới cho khoảng thời gian
+    setHistoryData(newHistoryData); // Cập nhật dữ liệu mới sau khi lọc
+  };
+
+  // Khởi tạo dữ liệu khi component mount
+  useEffect(() => {
+    const initialHistoryData = generateFakeData(new Date(), addDays(new Date(), 7));
+    setHistoryData(initialHistoryData); // Chỉ khởi tạo lần đầu
+  }, []); 
 
   // Trạng thái của máy
   const machineStatus = 'RUN';
@@ -132,12 +142,6 @@ const MachineDetails = () => {
 
   // Định màu cho trạng thái của máy
   const statusColor = machineStatus === 'RUN' ? 'bg-green-500' : machineStatus === 'STOP' ? 'bg-red-500' : 'bg-yellow-500';
-
-  // Hàm áp dụng bộ lọc ngày và cập nhật dữ liệu
-  const applyDateFilter = () => {
-    const newHistoryData = generateFakeData(startDate, endDate);
-    setHistoryData(newHistoryData); // Cập nhật dữ liệu sau khi lọc ngày
-  };
 
   return (
     <div className="bg-gray-100 p-4 rounded-lg shadow-md grid gap-2 w-full grid-rows-auto">
@@ -172,65 +176,62 @@ const MachineDetails = () => {
         </div>
 
         <div className="col-span-1 bg-white p-2 rounded-lg shadow grid grid-cols-1 gap-2">
-  {/* Phần Cycles Times */}
-  <div>
-    <h3 className="font-semibold mb-2">Cycles Times</h3>
-    <div className="text-center text-[2xl/3] text-blue-600">8 giờ 24 phút 47 giây</div>
-  </div>
-    <hr />
-  {/* Phần Thông Số Máy */}
-  <div className="bg-white rounded-lg">
-    <h3 className="font-semibold mb-2">Thông Số Máy</h3>
-    <div className="grid grid-cols-2 gap-2">
-      <div className="flex justify-between">
-        <span className="font-semibold">Tốc độ:</span>
-        <span className="text-blue-600">50 RPM</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="font-semibold">Áp suất:</span>
-        <span className="text-blue-600">120 PSI</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="font-semibold">Nhiệt độ:</span>
-        <span className="text-blue-600">200°C</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="font-semibold">Công suất:</span>
-        <span className="text-blue-600">15 kW</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="font-semibold">Trạng thái:</span>
-        <span className="text-blue-600">Hoạt động</span>
-      </div>
-    </div>
-  </div>
-</div>
-
+          <div>
+            <h3 className="font-semibold mb-2">Cycles Times</h3>
+            <div className="text-center text-[2xl/3] text-blue-600">8 giờ 24 phút 47 giây</div>
+          </div>
+          <hr />
+          <div className="bg-white rounded-lg">
+            <h3 className="font-semibold mb-2">Thông Số Máy</h3>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="flex justify-between">
+                <span className="font-semibold">Tốc độ:</span>
+                <span className="text-blue-600">50 RPM</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold">Áp suất:</span>
+                <span className="text-blue-600">120 PSI</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold">Nhiệt độ:</span>
+                <span className="text-blue-600">200°C</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold">Công suất:</span>
+                <span className="text-blue-600">15 kW</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold">Trạng thái:</span>
+                <span className="text-blue-600">Hoạt động</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Phần dưới hiển thị lịch sử trạng thái máy và biểu đồ */}
       <div className="bg-white p-2 rounded-lg shadow w-full max-h-96 overflow-y-auto">
         <div className="mb-4 flex items-center justify-between gap-1">
           <div className="flex items-center gap-1">
-            <h3 className="font-semibold mr-2">Lịch sử trạng thái            máy</h3>
+            <h3 className="font-semibold mr-2">Lịch sử trạng thái máy</h3>
             <DatePicker
               selected={startDate}
               onChange={(date) => setStartDate(date)}
               selectsStart
               startDate={startDate}
               endDate={endDate}
-              dateFormat="dd/MM/yyyy" // Định dạng ngày
-              className="p-1 border rounded-md w-[60%]" // Kiểu dáng của DatePicker
-              placeholderText="Từ ngày" // Văn bản gợi ý trong DatePicker
+              dateFormat="dd/MM/yyyy"
+              className="p-1 border rounded-md w-[60%]"
+              placeholderText="Từ ngày"
             />
             <span className="-translate-x-[72px]">-</span>
             <DatePicker
               selected={endDate}
-              onChange={(date) => setEndDate(date)} // Hàm cập nhật ngày kết thúc
+              onChange={(date) => setEndDate(date)}
               selectsEnd
               startDate={startDate}
               endDate={endDate}
-              minDate={startDate} // Không cho phép chọn ngày trước ngày bắt đầu
+              minDate={startDate}
               dateFormat="dd/MM/yyyy"
               className="p-1 border rounded-md w-[60%] -translate-x-16"
               placeholderText="Đến ngày"
@@ -255,4 +256,3 @@ const MachineDetails = () => {
 };
 
 export default MachineDetails;
-

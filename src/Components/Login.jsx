@@ -41,7 +41,7 @@ function Login() {
       }
     } catch (error) {
       // Xử lý lỗi khi đăng nhập thất bại
-      if (error.response && error.response.status === 401) {
+      if (error.response && error.response.status === 400) {
         toast.error('Sai tên đăng nhập hoặc mật khẩu!');
       } else {
         toast.error('Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.');
