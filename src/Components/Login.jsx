@@ -3,14 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { FaUserAlt, FaLock, FaEye, FaEyeSlash, FaUsers, FaBook } from 'react-icons/fa'; 
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import {jwtDecode} from 'jwt-decode';
+import {jwtDecode } from 'jwt-decode';
 
 function Login() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -29,23 +28,24 @@ function Login() {
 
         // Giải mã token để lấy thông tin role
         const decodedToken = jwtDecode(token);
-        console.log('Decoded Token:', decodedToken); 
         const role = decodedToken.user.role;  // Trích xuất role từ token đã giải mã
-
-        // Kiểm tra xem role có được lấy thành công không
-        console.log('Role:', role);  
         localStorage.setItem('role', role);  
 
         toast.success('Đăng nhập thành công!');
         navigate('/dashboard');  // Điều hướng tới Dashboard
       }
     } catch (error) {
-      // Xử lý lỗi khi đăng nhập thất bại
-      if (error.response && error.response.status === 400) {
-        toast.error('Sai tên đăng nhập hoặc mật khẩu!');
-      } else {
-        toast.error('Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.');
-      }
+      
+      console.error('Login Error:', error); 
+      toast.error('Sai tên đăng nhập hoặc mật khẩu!', {
+        position: "top-right", // Bạn có thể tùy chỉnh vị trí của thông báo
+        autoClose: 1000,       // Đóng thông báo sau 3 giây
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     }
   };
 

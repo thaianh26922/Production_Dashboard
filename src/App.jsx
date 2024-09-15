@@ -13,7 +13,7 @@ function App() {
         <AppRouter />
         <ToastContainer 
           position="top-right"
-          autoClose={1000} // Thời gian mặc định 3 giây
+          autoClose={1000} 
           hideProgressBar={false}
           newestOnTop={false}
           closeOnClick

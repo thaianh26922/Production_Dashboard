@@ -55,7 +55,7 @@ function MaterialInspectionChart() {
 
   return (
     <div className="bg-white p-4 ">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between  items-center mb-4">
         <h3 className="text-sm font-semibold">Chất lượng nguyên liệu</h3>
         <select value={selectedMaterial} onChange={handleMaterialChange} className="p-1 border rounded text-sm">
           {Object.keys(materialInspectionData).map((material) => (
