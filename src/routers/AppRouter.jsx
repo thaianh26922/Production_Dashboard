@@ -34,13 +34,19 @@ const AppRouter = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
 
+  // Hàm cập nhật trạng thái sau khi đăng nhập thành công
+  const handleLogin = (role) => {
+    setIsAuthenticated(true);
+    setUserRole(role);
+  };
+
+  // Kiểm tra trạng thái xác thực từ localStorage khi ứng dụng được tải
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const role = localStorage.getItem('role'); // Assuming role is stored in localStorage
-    if (token) {
+    const role = localStorage.getItem('role'); // Lấy role từ localStorage
+    if (token && role) {
       setIsAuthenticated(true);
       setUserRole(role); 
-      
     } else {
       console.log('User is not authenticated.');
     }
@@ -49,10 +55,10 @@ const AppRouter = () => {
   return (
     <Router>
       <Routes>
-        {/* Route for Login */}
-        <Route path="/login" element={<Login />} />
+        {/* Route cho Login */}
+        <Route path="/login" element={<Login onLogin={handleLogin} />} />
 
-        {/* Protected routes for authenticated users */}
+        {/* Protected routes cho người dùng đã xác thực */}
         <Route
           path="/"
           element={
@@ -172,7 +178,7 @@ const AppRouter = () => {
           }
         />
 
-        {/* Redirect all other paths */}
+        {/* Redirect tất cả các đường dẫn khác */}
         <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
       </Routes>
     </Router>

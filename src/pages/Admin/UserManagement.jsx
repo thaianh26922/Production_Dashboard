@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaEdit, FaTrash, FaEye, FaEyeSlash, FaLock, FaUnlock, FaPlus } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaLock, FaEye, FaUnlock, FaPlus } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DynamicFormModal from '../../Components/Modal/DynamicFormModal';
@@ -11,6 +11,7 @@ const UserManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const currentRole = localStorage.getItem('role'); // Lấy role hiện tại từ localStorage
 
   // Fetch users from API
   useEffect(() => {
@@ -39,9 +40,7 @@ const UserManagement = () => {
   const handleSave = async (data) => {
     try {
       if (selectedUser) {
-
         await axios.put(`https://back-end-production.onrender.com/api/users/${selectedUser._id}`, data, {
-
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },

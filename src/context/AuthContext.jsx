@@ -1,42 +1,31 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
+// Tạo AuthContext
 export const AuthContext = createContext();
 
+// Tạo AuthProvider để bọc ứng dụng
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState(null);
+  const [userRole, setUserRole] = useState(localStorage.getItem('role') || null);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const role = localStorage.getItem('role');
-    if (token && role) {
-      setIsAuthenticated(true);
-      setUserRole(role);
-    }
-  }, []);
-
+  // Hàm để cập nhật role khi người dùng đăng nhập
   const login = (role) => {
-    localStorage.setItem('token', 'example-token');
-    localStorage.setItem('role', role);
-    setIsAuthenticated(true);
     setUserRole(role);
-    // Trigger a state change to ensure re-render
-    setTimeout(() => {
-      const newRole = localStorage.getItem('role');
-      setUserRole(newRole);
-    }, 0);
+    localStorage.setItem('role', role); // Lưu role vào localStorage
   };
 
+  // Hàm để logout người dùng
   const logout = () => {
+    setUserRole(null);
     localStorage.removeItem('token');
     localStorage.removeItem('role');
-    setIsAuthenticated(false);
-    setUserRole(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, userRole, login, logout }}>
+    <AuthContext.Provider value={{ userRole, setUserRole: login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
+
+// Custom hook để sử dụng AuthContext
+export const useAuth = () => useContext(AuthContext);
