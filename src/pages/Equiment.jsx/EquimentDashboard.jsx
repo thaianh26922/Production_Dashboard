@@ -9,20 +9,20 @@ const EquipmentDashboard = () => {
 
   return (
     <>
-      <div className="w-full h-full p-1 space-y-4 ">
+      <div className="w-full h-full  ">
         
         {/* Hàng 1: MachineDetails (đã tích hợp MachineSelection) */}
-        <div className="bg-white rounded-lg p-1 shadow-lg   ">
+        <div className="bg-white rounded-lg  shadow-lg   ">
           <MachineDetails machineName={currentMachine} setCurrentMachine={setCurrentMachine} />
         </div>
         
         {/* Hàng 2: PerformanceMetrics */}
-        <div className="bg-white rounded-lg p-4 shadow-lg">
+        <div className="bg-white rounded-lg p-4 shadow-lg mt-2">
           <PerformanceMetrics />
         </div>
         
         {/* Hàng 3: RealTimeEnergyChart và HourlyProductionChart (cùng một hàng) */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 mt-2">
           <div className="bg-white rounded-lg shadow-lg p-4">
             <RealTimeEnergyChart />
           </div>

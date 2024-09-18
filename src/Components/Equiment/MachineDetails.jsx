@@ -144,7 +144,7 @@ const MachineDetails = () => {
   const statusColor = machineStatus === 'RUN' ? 'bg-green-500' : machineStatus === 'STOP' ? 'bg-red-500' : 'bg-yellow-500';
 
   return (
-    <div className="bg-gray-100 p-4 rounded-lg shadow-md grid gap-2 w-full grid-rows-auto">
+    <div className="bg-gray-100 p-1 rounded-lg shadow-md grid gap-2 w-full grid-rows-auto">
       {/* Phần trên hiển thị trạng thái máy và lựa chọn máy */}
       <div className="grid grid-cols-4 gap-2">
         <div className="col-span-1 bg-white p-2 rounded-lg shadow">

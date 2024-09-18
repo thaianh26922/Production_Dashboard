@@ -14,6 +14,7 @@ export const qualityItems = [
 
 export const equipmentItems = [
     { name: 'Tổng quan', link: '/equipment/machines' },
+    { name: 'Phân Tích', link: '/equipment/analysis' },
     { name: 'Báo cáo ', link: '/equipment/reports' },
     { name: 'Bảo dưỡng', link: '/equipment/maintenance' },
 ];

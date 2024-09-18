@@ -2,7 +2,7 @@ import React from 'react';
 
 const MachineSelection = ({ currentMachine, setCurrentMachine }) => {
   return (
-    <div className="lg:col-span-1 flex flex-col items-stretch">
+    <div className="lg:col-span-1 flex flex-col items-stretch bg-">
       <button 
         className={`p-2 my-2 rounded transition duration-300 text-center ${currentMachine === 'Máy Trộn' ? 'bg-green-500 text-white' : 'bg-green-200 text-black'}`} 
         onClick={() => setCurrentMachine('Máy Trộn')}

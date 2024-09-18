@@ -112,6 +112,14 @@ const AppRouter = () => {
           }
         />
         <Route
+          path="/equipment/analysis"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <MainLayout><EquimentReports /></MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/equipment/reports"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
