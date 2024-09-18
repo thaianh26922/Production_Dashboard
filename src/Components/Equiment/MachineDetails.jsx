@@ -6,6 +6,8 @@ import MachineStatusHistory from './MachineStatusHistory';
 import ErrorHistoryChart from './ErrorHistoryChart';
 import { FaFilter } from 'react-icons/fa';
 import { addDays } from 'date-fns';
+import axios from 'axios';
+
 import MayTron from '../../assets/image/May_tron.png';
 import MayDinhHinh from '../../assets/image/May_Dinh_Hinh.png';
 import MayNuong from '../../assets/image/May_nuong_banh.webp';
@@ -18,103 +20,20 @@ const machineImages = {
   'Máy Đóng Gói': MayDongGoi,
 };
 
-// Hàm chuyển đổi thời gian (giờ:phút) sang phút tính từ đầu ngày
-const convertTimeToMinutes = (time) => {
-  const [hours, minutes] = time.split(':').map(Number);
-  return hours * 60 + minutes;
-};
-
-// Hàm hợp nhất các khoảng thời gian trùng lặp giữa các ngày
-const mergeIntervals = (data, startTime = 6 * 60, endTime = 30 * 60) => {
-  const merged = [];
-  data.sort((a, b) => convertTimeToMinutes(a.time) - convertTimeToMinutes(b.time)); // Sắp xếp theo thời gian bắt đầu
-
-  let prev = data[0];
-  let prevEnd = convertTimeToMinutes(prev.time) + prev.duration;
-
-  for (let i = 1; i < data.length; i++) {
-    const currentStart = convertTimeToMinutes(data[i].time);
-    const currentEnd = currentStart + data[i].duration;
-
-    // Kiểm tra xem có trùng lặp không
-    if (currentStart < prevEnd) {
-      // Hợp nhất khoảng thời gian trùng lặp
-      prev.duration = Math.max(prevEnd, currentEnd) - convertTimeToMinutes(prev.time);
-    } else {
-      // Nếu không trùng lặp, đẩy đoạn trước vào mảng và cập nhật khoảng mới
-      merged.push(prev);
-      prev = data[i];
-    }
-    prevEnd = Math.max(prevEnd, currentEnd);
+// Hàm lấy dữ liệu từ API
+const fetchMachineData = async (startDate, endDate) => {
+  try {
+    // Thay thế API_URL và JWT_TOKEN bằng giá trị thật của bạn
+    const response = await axios.get('API_URL', {
+      headers: {
+        Authorization: `Bearer YOUR_JWT_TOKEN`, // Sử dụng token hợp lệ
+      },
+    });
+    return response.data; // Trả về dữ liệu đã lấy
+  } catch (error) {
+    console.error('Error fetching machine data:', error);
+    return []; // Trả về mảng rỗng nếu có lỗi
   }
-  merged.push(prev);
-
-  // Đảm bảo rằng tổng thời gian nằm trong khoảng từ 6:00 đến 6:00 hôm sau
-  return merged.map((interval) => {
-    const intervalStart = Math.max(startTime, convertTimeToMinutes(interval.time));
-    const intervalEnd = Math.min(endTime, intervalStart + interval.duration);
-    return {
-      ...interval,
-      time: `${String(Math.floor(intervalStart / 60)).padStart(2, '0')}:${String(intervalStart % 60).padStart(2, '0')}`,
-      duration: intervalEnd - intervalStart,
-    };
-  });
-};
-
-// Hàm sinh dữ liệu giả cho trạng thái máy từ ngày bắt đầu đến ngày kết thúc
-const generateFakeData = (startDate, endDate) => {
-  const historyData = [];
-  const oneDay = 24 * 60 * 60 * 1000; // Một ngày tính bằng mili giây
-
-  const statuses = [
-    { status: 'Chạy', weight: 0.7 },
-    { status: 'Chờ', weight: 0.10 },
-    { status: 'Dừng', weight: 0.05 },
-    { status: 'Lỗi Máy', weight: 0.1 },
-    { status: 'Thiếu đơn', weight: 0.05 },
-  ];
-
-  // Hàm chọn trạng thái dựa trên trọng số
-  const chooseStatus = () => {
-    const random = Math.random();
-    let sum = 0;
-    for (const item of statuses) {
-      sum += item.weight;
-      if (random < sum) return item.status;
-    }
-    return statuses[0].status;
-  };
-
-  // Sinh dữ liệu cho mỗi ngày từ ngày bắt đầu đến ngày kết thúc
-  for (let d = new Date(startDate); d <= endDate; d = new Date(d.getTime() + oneDay)) {
-    const formattedDate = d.toISOString().split('T')[0]; // Chuyển đổi ngày sang định dạng YYYY-MM-DD
-    let currentTime = 6 * 60; // Bắt đầu từ 6:00 sáng (tính bằng phút)
-    const dailyData = [];
-
-    while (currentTime < (24 + 6) * 60) { // Dữ liệu từ 6:00 đến 6:00 hôm sau
-      // Sinh ra các khoảng thời gian 2, 5 hoặc 10 phút ngẫu nhiên
-      const duration = Math.floor(Math.random() * 11 + 5) * 5; // Thời lượng ngẫu nhiên từ 2 đến 10 phút
-      if (currentTime + duration > (24 + 6) * 60) {
-        break;
-      }
-
-      dailyData.push({
-        time: `${String(Math.floor(currentTime / 60)).padStart(2, '0')}:${String(currentTime % 60).padStart(2, '0')}`,
-        status: chooseStatus(),
-        duration,
-      });
-      currentTime += duration;
-    }
-
-    // Hợp nhất các khoảng thời gian trùng lặp và đảm bảo chúng nằm trong 1440 phút
-    const mergedData = mergeIntervals(dailyData, 6 * 60, 30 * 60);  
-    historyData.push(...mergedData.map((entry) => ({
-      ...entry,
-      date: formattedDate,
-    })));
-  }
-
-  return historyData;
 };
 
 // Component chính để hiển thị chi tiết máy
@@ -122,21 +41,25 @@ const MachineDetails = () => {
   const [currentMachine, setCurrentMachine] = useState('Máy Trộn'); // Lưu trạng thái máy hiện tại
   const [startDate, setStartDate] = useState(new Date()); // Ngày bắt đầu
   const [endDate, setEndDate] = useState(addDays(new Date(), 7)); // Ngày kết thúc
-  const [historyData, setHistoryData] = useState([]);
+  const [historyData, setHistoryData] = useState([]); // Dữ liệu trạng thái máy từ API
 
   // Hàm áp dụng bộ lọc ngày và cập nhật dữ liệu
-  const applyDateFilter = () => {
-    const newHistoryData = generateFakeData(startDate, endDate); // Sinh dữ liệu mới cho khoảng thời gian
+  const applyDateFilter = async () => {
+    const newHistoryData = await fetchMachineData(startDate, endDate); // Lấy dữ liệu từ API
     setHistoryData(newHistoryData); // Cập nhật dữ liệu mới sau khi lọc
   };
 
   // Khởi tạo dữ liệu khi component mount
   useEffect(() => {
-    const initialHistoryData = generateFakeData(new Date(), addDays(new Date(), 7));
-    setHistoryData(initialHistoryData); // Chỉ khởi tạo lần đầu
-  }, []); 
+    const loadData = async () => {
+      const initialHistoryData = await fetchMachineData(new Date(), addDays(new Date(), 7)); // Lấy dữ liệu mặc định
+      setHistoryData(initialHistoryData); // Lưu dữ liệu vào state
+    };
 
-  // Trạng thái của máy
+    loadData(); // Gọi hàm lấy dữ liệu khi component được mount
+  }, []);
+
+  // Trạng thái của máy (có thể lấy từ API nếu cần)
   const machineStatus = 'RUN';
   const machineMode = 'AUTO';
 
