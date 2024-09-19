@@ -1,181 +1,165 @@
-import React, { useState, useEffect } from 'react';
-import MachineSelection from './MachineSelection';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import MachineStatusHistory from './MachineStatusHistory';
-import ErrorHistoryChart from './ErrorHistoryChart';
-import { FaFilter } from 'react-icons/fa';
-import { addDays } from 'date-fns';
+import React, { useEffect, useRef, useState } from 'react';
+import * as d3 from 'd3';
 import axios from 'axios';
 
-import MayTron from '../../assets/image/May_tron.png';
-import MayDinhHinh from '../../assets/image/May_Dinh_Hinh.png';
-import MayNuong from '../../assets/image/May_nuong_banh.webp';
-import MayDongGoi from '../../assets/image/May-dong-goi.png';
-
-const machineImages = {
-  'Máy Trộn': MayTron,
-  'Máy Định Hình': MayDinhHinh,
-  'Máy Nướng': MayNuong,
-  'Máy Đóng Gói': MayDongGoi,
+// Định nghĩa màu sắc cho các trạng thái
+const colors = {
+  "1": "#28a745",  // Chạy (Xanh lá)
+  "2": "#ffc107",  // Chờ (Vàng)
+  "3": "#dc3545",  // Lỗi (Đỏ)
 };
 
-// Hàm lấy dữ liệu từ API
-const fetchMachineData = async (startDate, endDate) => {
-  try {
-    // Thay thế API_URL và JWT_TOKEN bằng giá trị thật của bạn
-    const response = await axios.get('API_URL', {
-      headers: {
-        Authorization: `Bearer YOUR_JWT_TOKEN`, // Sử dụng token hợp lệ
-      },
-    });
-    return response.data; // Trả về dữ liệu đã lấy
-  } catch (error) {
-    console.error('Error fetching machine data:', error);
-    return []; // Trả về mảng rỗng nếu có lỗi
-  }
-};
+const MachineStatusHistory = () => {
+  const [historyData, setHistoryData] = useState([]); // Lưu trữ dữ liệu lịch sử máy
+  const svgRef = useRef();
+  const legendRef = useRef();
 
-// Component chính để hiển thị chi tiết máy
-const MachineDetails = () => {
-  const [currentMachine, setCurrentMachine] = useState('Máy Trộn'); // Lưu trạng thái máy hiện tại
-  const [startDate, setStartDate] = useState(new Date()); // Ngày bắt đầu
-  const [endDate, setEndDate] = useState(addDays(new Date(), 7)); // Ngày kết thúc
-  const [historyData, setHistoryData] = useState([]); // Dữ liệu trạng thái máy từ API
-
-  // Hàm áp dụng bộ lọc ngày và cập nhật dữ liệu
-  const applyDateFilter = async () => {
-    const newHistoryData = await fetchMachineData(startDate, endDate); // Lấy dữ liệu từ API
-    setHistoryData(newHistoryData); // Cập nhật dữ liệu mới sau khi lọc
-  };
-
-  // Khởi tạo dữ liệu khi component mount
+  // Lấy dữ liệu từ API
   useEffect(() => {
-    const loadData = async () => {
-      const initialHistoryData = await fetchMachineData(new Date(), addDays(new Date(), 7)); // Lấy dữ liệu mặc định
-      setHistoryData(initialHistoryData); // Lưu dữ liệu vào state
+    const fetchHistoryData = async () => {
+      try {
+        const response = await axios.get(
+          'http://103.77.215.18:3030/api/plugins/telemetry/DEVICE/9032a0e0-45bc-11ef-b8c3-a13625245eca/values/timeseries?keys=PLC:STATUS',
+          {
+            headers: {
+              Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtZXNzeXN0ZW1AZ21haWwuY29tIiwidXNlcklkIjoiZDQwNWQ2MDAtNDUwNS0xMWVmLWI4YzMtYTEzNjI1MjQ1ZWNhIiwic2NvcGVzIjpbIlRFTkFOVF9BRE1JTiJdLCJzZXNzaW9uSWQiOiJiNDkzMjI1YS1jOWI5LTRjNTQtODg5Yy05YTUwMzYyNmZhMjkiLCJleHAiOjE3MjY3MjY2ODAsImlzcyI6InRoaW5nc2JvYXJkLmlvIiwiaWF0IjoxNzI2NzE3NjgwLCJmaXJzdE5hbWUiOiJNRVMiLCJsYXN0TmFtZSI6Ik9SUyIsImVuYWJsZWQiOnRydWUsImlzUHVibGljIjpmYWxzZSwidGVuYW50SWQiOiI4MDc0MTkyMC00NTA1LTExZWYtYTkxMC05ZjYzZTY1ZjJhNzciLCJjdXN0b21lcklkIjoiMTM4MTQwMDAtMWRkMi0xMWIyLTgwODAtODA4MDgwODA4MDgwIn0.UQmvIN4nPWK8tiESHcEZJqXGJx1Oj8-rzy_5rY0dSAAJdA4DhIBobtEHeQgmQkCrLOD9mXSxsEWgnlkDhFEsjg`, // Thay thế bằng JWT Token của bạn
+            },
+          }
+        );
+
+        const rawData = response.data;
+        const formattedData = formatHistoryData(rawData); // Xử lý dữ liệu API
+        setHistoryData(formattedData); // Lưu dữ liệu vào state
+      } catch (error) {
+        console.error('Error fetching history data:', error);
+      }
     };
 
-    loadData(); // Gọi hàm lấy dữ liệu khi component được mount
+    fetchHistoryData(); // Gọi API khi component mount
   }, []);
 
-  // Trạng thái của máy (có thể lấy từ API nếu cần)
-  const machineStatus = 'RUN';
-  const machineMode = 'AUTO';
+  // Hàm xử lý dữ liệu thô từ API thành dữ liệu lịch sử máy
+  const formatHistoryData = (rawData) => {
+    const formattedData = []; // Kết quả xử lý
+    const keys = Object.keys(rawData); // Các key từ API
 
-  // Định màu cho trạng thái của máy
-  const statusColor = machineStatus === 'RUN' ? 'bg-green-500' : machineStatus === 'STOP' ? 'bg-red-500' : 'bg-yellow-500';
+    keys.forEach((key) => {
+      const telemetryData = rawData[key]; // Dữ liệu telemetry theo key
+      telemetryData.forEach((entry, index) => {
+        const startTime = new Date(entry.ts);  // Thời gian bắt đầu của trạng thái
+        const nextEntry = telemetryData[index + 1];  // Trạng thái tiếp theo
+        const endTime = nextEntry ? new Date(nextEntry.ts) : new Date();  // Nếu không có trạng thái tiếp theo, dùng thời gian hiện tại làm thời gian kết thúc
+
+        const duration = (endTime - startTime) / 60000;  // Thời gian kéo dài (tính bằng phút)
+        formattedData.push({
+          time: startTime.getHours() * 60 + startTime.getMinutes(),  // Tính thời gian bắt đầu trong ngày (phút)
+          key: entry.value,  // Giá trị của trạng thái (1, 2, hoặc 3)
+          duration,
+        });
+      });
+    });
+
+    return formattedData;
+  };
+
+  useEffect(() => {
+    if (!historyData || historyData.length === 0) return;
+
+    // Set kích thước của biểu đồ
+    const width = 1000;
+    const height = 100;  // Chiều cao của biểu đồ chính
+    const margin = { top: 20, right: 30, bottom: 40, left: 20 };
+
+    // Tạo SVG cho biểu đồ chính
+    const svg = d3.select(svgRef.current)
+      .attr('width', width)
+      .attr('height', height)
+      .style('background-color', '#f0f0f0');
+
+    // Tạo thang đo x cho trục thời gian từ 6:00 đến 06:00 hôm sau
+    const totalMinutesInDay = 24 * 60; // Tổng số phút trong 24 giờ
+    const startTime = 6 * 60; // 6:00 sáng, tính bằng phút
+    const endTime = startTime + totalMinutesInDay; // 6:00 sáng hôm sau
+
+    const xScale = d3.scaleLinear()
+      .domain([startTime, endTime]) // Từ 06:00 (360 phút) đến 06:00 sáng hôm sau
+      .range([margin.left, width - margin.right]);
+
+    // Xóa các phần tử cũ
+    svg.selectAll("*").remove();
+
+    // Đặt lại tổng thời gian tích lũy
+    let totalElapsedMinutes = startTime;  // Bắt đầu từ 6:00 sáng
+
+    // Tạo nhóm thanh bars
+    svg.selectAll('rect')
+      .data(historyData)
+      .join('rect')
+      .attr('x', d => {
+        const xPos = xScale(d.time);  
+        return xPos;
+      })
+      .attr('y', margin.top)
+      .attr('width', d => {
+        const barWidth = xScale(d.time + d.duration) - xScale(d.time);
+        return barWidth > 0 ? barWidth : 0;
+      })
+      .attr('height', height - margin.top - margin.bottom)
+      .attr('fill', d => colors[d.key] || '#000');  // Màu tương ứng với trạng thái chạy (1), chờ (2), lỗi (3)
+
+    // Thêm trục x với các mốc thời gian chính từ 06:00 đến 06:00 hôm sau
+    const xAxis = d3.axisBottom(xScale)
+      .tickValues(d3.range(startTime, endTime + 60, 60))  // Mốc thời gian mỗi giờ
+      .tickFormat(d => {
+        let hour = Math.floor((d % totalMinutesInDay) / 60); // Đảm bảo không vượt qua 24 giờ
+        return hour.toString().padStart(2, '0') + ":00";  // Hiển thị giờ dưới dạng HH:00
+      });
+
+    svg.append('g')
+      .attr('transform', `translate(0,${height - margin.bottom})`)
+      .call(xAxis);
+
+    // Cập nhật phần legend dựa trên dữ liệu đã lọc
+    const totalDuration = d3.sum(historyData, d => d.duration); // Tính tổng thời gian từ dữ liệu hiện tại
+
+    const legend = d3.select(legendRef.current)
+      .attr('width', width)
+      .attr('height', 100); // Tăng chiều cao legend để hiển thị 2 hàng
+
+    // Xóa legend cũ trước khi thêm legend mới
+    legend.selectAll('*').remove();
+
+    const legendGroup = legend.selectAll('.legend')
+      .data(Object.keys(colors))
+      .join('g')
+      .attr('class', 'legend')
+      .attr('transform', (d, i) => `translate(${(i % 9) * 150}, ${Math.floor(i / 9) * 30})`);  // Điều chỉnh vị trí thành 2 hàng
+
+    legendGroup.append('rect')
+      .attr('x', 0)
+      .attr('width', 12)
+      .attr('height', 12)
+      .attr('fill', d => colors[d]);
+
+    legendGroup.append('text')
+      .attr('x', 24)
+      .attr('y', 9)
+      .attr('dy', '0.3em')
+      .style('font-size', '12px')
+      .text(d => {
+        const statusDuration = d3.sum(historyData.filter(item => item.key === d), item => item.duration);
+        const percentage = totalDuration > 0 ? ((statusDuration / totalDuration) * 100).toFixed(2) : 0;
+        return `${d} (${percentage}%)`;
+      });
+
+  }, [historyData]); // Đảm bảo cập nhật khi historyData thay đổi
 
   return (
-    <div className="bg-gray-100 p-1 rounded-lg shadow-md grid gap-2 w-full grid-rows-auto">
-      {/* Phần trên hiển thị trạng thái máy và lựa chọn máy */}
-      <div className="grid grid-cols-4 gap-2">
-        <div className="col-span-1 bg-white p-2 rounded-lg shadow">
-          <MachineSelection currentMachine={currentMachine} setCurrentMachine={setCurrentMachine} />
-        </div>
-
-        <div className="col-span-1 flex flex-col items-center bg-white p-2 rounded-lg shadow">
-          <img
-            src={machineImages[currentMachine]}
-            alt={`${currentMachine} image`}
-            className="w-40 h-48 object-contain object-center rounded"
-          />
-          <h2 className="text-center text-xl font-bold mt-1">{currentMachine}</h2>
-        </div>
-
-        <div className="col-span-1 bg-white p-2 rounded-lg shadow">
-          <div className="mb-2">
-            <h3 className="font-semibold text-sm mb-1 text-left">Trạng Thái Máy</h3>
-            <div className={`py-8 px-3 rounded shadow text-white text-center text-xl font-bold ${statusColor}`}>
-              {machineStatus}
-            </div>
-          </div>
-          <div>
-            <h3 className="font-semibold text-sm mb-1 text-left">Chế Độ Máy</h3>
-            <div className="py-8 px-3 rounded shadow text-center text-xl font-semibold text-black">
-              {machineMode}
-            </div>
-          </div>
-        </div>
-
-        <div className="col-span-1 bg-white p-2 rounded-lg shadow grid grid-cols-1 gap-2">
-          <div>
-            <h3 className="font-semibold mb-2">Cycles Times</h3>
-            <div className="text-center text-[2xl/3] text-blue-600">8 giờ 24 phút 47 giây</div>
-          </div>
-          <hr />
-          <div className="bg-white rounded-lg">
-            <h3 className="font-semibold mb-2">Thông Số Máy</h3>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="flex justify-between">
-                <span className="font-semibold">Tốc độ:</span>
-                <span className="text-blue-600">50 RPM</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-semibold">Áp suất:</span>
-                <span className="text-blue-600">120 PSI</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-semibold">Nhiệt độ:</span>
-                <span className="text-blue-600">200°C</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-semibold">Công suất:</span>
-                <span className="text-blue-600">15 kW</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-semibold">Trạng thái:</span>
-                <span className="text-blue-600">Hoạt động</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Phần dưới hiển thị lịch sử trạng thái máy và biểu đồ */}
-      <div className="bg-white p-2 rounded-lg shadow w-full max-h-96 overflow-y-auto">
-        <div className="mb-4 flex items-center justify-between gap-1">
-          <div className="flex items-center gap-1">
-            <h3 className="font-semibold mr-2">Lịch sử trạng thái máy</h3>
-            <DatePicker
-              selected={startDate}
-              onChange={(date) => setStartDate(date)}
-              selectsStart
-              startDate={startDate}
-              endDate={endDate}
-              dateFormat="dd/MM/yyyy"
-              className="p-1 border rounded-md w-[60%]"
-              placeholderText="Từ ngày"
-            />
-            <span className="-translate-x-[72px]">-</span>
-            <DatePicker
-              selected={endDate}
-              onChange={(date) => setEndDate(date)}
-              selectsEnd
-              startDate={startDate}
-              endDate={endDate}
-              minDate={startDate}
-              dateFormat="dd/MM/yyyy"
-              className="p-1 border rounded-md w-[60%] -translate-x-16"
-              placeholderText="Đến ngày"
-            />
-            <button onClick={applyDateFilter} className="p-1 -translate-x-32 bg-green-500 text-white rounded">
-              <FaFilter /> {/* Icon lọc */}
-            </button>
-          </div>
-        </div>
-
-        {/* Hiển thị lịch sử trạng thái máy */}
-        <MachineStatusHistory historyData={historyData} />
-
-        {/* Hiển thị biểu đồ lỗi (giả lập) */}
-        <div>
-          <h3 className="font-semibold mb-2">Lịch sử lỗi</h3>
-          <ErrorHistoryChart />
-        </div>
-      </div>
+    <div>
+      <svg ref={svgRef}></svg>
+      <svg ref={legendRef}></svg>
     </div>
   );
 };
 
-export default MachineDetails;
+export default MachineStatusHistory;

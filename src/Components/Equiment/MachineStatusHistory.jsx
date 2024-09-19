@@ -4,14 +4,8 @@ import axios from 'axios';
 
 // Định nghĩa màu sắc cho các keys
 const colors = {
-  "Run_Time": "#DAF7A6",
-  "Lock_Number": "#FFC300",
-  "CUR_Motor": "#581845",
-  "RE_Botda": "#DAF7A6",
-  "RE_DAU": "#FFC300",
-  "RE_Lieu": "#FF5733",
-  "Chot_VT": "#FF5738",
-  
+  "PLC:STATUS": "#DAF7A6",
+    
   
 };
 
@@ -25,10 +19,10 @@ const MachineStatusHistory = () => {
     const fetchHistoryData = async () => {
       try {
         const response = await axios.get(
-          'http://172.104.177.67:3030/api/plugins/telemetry/DEVICE/1f94f820-2ef0-11ef-a0d4-19a5fffe4fcb/values/timeseries?keys=HMI_Mixing:Run_Time,HMI_Mixing:Lock_Number,HMI_Mixing:RE_DAU,HMI_Mixing:RE_Lieu,HMI_Mixing:Chot_VT',
+          'http://103.77.215.18:3030/api/plugins/telemetry/DEVICE/9032a0e0-45bc-11ef-b8c3-a13625245eca/values/timeseries?keys=PLC:STATUS',
           {
             headers: {
-              Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtZXNzeXN0ZW1AZ21haWwuY29tIiwidXNlcklkIjoiYTgzNDkyNjAtMmUyNS0xMWVmLWEwZDQtMTlhNWZmZmU0ZmNiIiwic2NvcGVzIjpbIlRFTkFOVF9BRE1JTiJdLCJzZXNzaW9uSWQiOiJjNDcyM2Y5My04NDY5LTQ1YzEtOTE4My0zNmVmODE1NDVlODQiLCJleHAiOjE3MjY3MjEwMjQsImlzcyI6InRoaW5nc2JvYXJkLmlvIiwiaWF0IjoxNzI2NzEyMDI0LCJmaXJzdE5hbWUiOiJNRVMiLCJsYXN0TmFtZSI6Ik9SUyIsImVuYWJsZWQiOnRydWUsImlzUHVibGljIjpmYWxzZSwidGVuYW50SWQiOiI5YWE0NDgyMC0yZTI1LTExZWYtYTBkNC0xOWE1ZmZmZTRmY2IiLCJjdXN0b21lcklkIjoiMTM4MTQwMDAtMWRkMi0xMWIyLTgwODAtODA4MDgwODA4MDgwIn0.M684CkEMKMXZpo6CXxNzkBV4LU6mal-oRcctUPMSJc-oO3WyjohY6XyvVh5cM6bo7F77APdysKIRBxz34M8x2w`, // Thay thế bằng JWT Token của bạn
+              Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtZXNzeXN0ZW1AZ21haWwuY29tIiwidXNlcklkIjoiZDQwNWQ2MDAtNDUwNS0xMWVmLWI4YzMtYTEzNjI1MjQ1ZWNhIiwic2NvcGVzIjpbIlRFTkFOVF9BRE1JTiJdLCJzZXNzaW9uSWQiOiJiNDkzMjI1YS1jOWI5LTRjNTQtODg5Yy05YTUwMzYyNmZhMjkiLCJleHAiOjE3MjY3MjY2ODAsImlzcyI6InRoaW5nc2JvYXJkLmlvIiwiaWF0IjoxNzI2NzE3NjgwLCJmaXJzdE5hbWUiOiJNRVMiLCJsYXN0TmFtZSI6Ik9SUyIsImVuYWJsZWQiOnRydWUsImlzUHVibGljIjpmYWxzZSwidGVuYW50SWQiOiI4MDc0MTkyMC00NTA1LTExZWYtYTkxMC05ZjYzZTY1ZjJhNzciLCJjdXN0b21lcklkIjoiMTM4MTQwMDAtMWRkMi0xMWIyLTgwODAtODA4MDgwODA4MDgwIn0.UQmvIN4nPWK8tiESHcEZJqXGJx1Oj8-rzy_5rY0dSAAJdA4DhIBobtEHeQgmQkCrLOD9mXSxsEWgnlkDhFEsjg`, // Thay thế bằng JWT Token của bạn
             },
           }
         );
@@ -53,6 +47,7 @@ const MachineStatusHistory = () => {
       const telemetryData = rawData[key]; // Dữ liệu telemetry theo key
       telemetryData.forEach((entry) => {
         const timeInMinutes = new Date(entry.ts).getHours() * 60 + new Date(entry.ts).getMinutes();
+        console.log (timeInMinutes)
         const duration = parseFloat(entry.value); // Chuyển đổi giá trị thành thời gian
         formattedData.push({
           time: timeInMinutes,
@@ -69,7 +64,7 @@ const MachineStatusHistory = () => {
     if (!historyData || historyData.length === 0) return;
 
     // Set kích thước của biểu đồ
-    const width = 1000;
+    const width = 1200;
     const height = 100;  // Chiều cao của biểu đồ chính
     const margin = { top: 20, right: 30, bottom: 40, left: 20 };
 
@@ -146,10 +141,10 @@ const MachineStatusHistory = () => {
       .attr('fill', d => colors[d]);
 
     legendGroup.append('text')
-      .attr('x', 24)
-      .attr('y', 9)
-      .attr('dy', '0.3em')
-      .style('font-size', '12px')
+      .attr('x', 18)
+      .attr('y', 10)
+      .attr('dy', '0.2em')
+      .style('font-size', '10px')
       .text(d => {
         const statusDuration = d3.sum(historyData.filter(item => item.key === d), item => item.duration);
         const percentage = totalDuration > 0 ? ((statusDuration / totalDuration) * 100).toFixed(2) : 0;
