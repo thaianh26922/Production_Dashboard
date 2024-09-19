@@ -19,7 +19,7 @@ function MainContent({ currentView }) {
   const ViewComponent = viewComponents[currentView] || Dashboard;
 
   return (
-    <div className="p-4 bg-gray-100 flex-grow">
+    <div className="p-4 bg-gray-700 flex-grow">
       <ViewComponent />
     </div>
   );

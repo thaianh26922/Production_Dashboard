@@ -39,13 +39,13 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   };
 
   return (
-    <div className={`relative bg-primary-500 h-full shadow-md ${isCollapsed ? 'w-20' : 'w-48'} flex flex-col justify-between transition-all duration-300 overflow-y-auto`}
+    <div className={`relative bg-primary-700 h-full shadow-md ${isCollapsed ? 'w-20' : 'w-48'} flex flex-col justify-between transition-all duration-300 overflow-y-auto`}
       style={{ maxHeight: '100vh' }} // Giới hạn chiều cao sidebar
     >
       <div className="flex items-center justify-between p-2">
         {!isCollapsed && (
-          <h2 className="text-lg font-bold transition-opacity duration-300">
-            Candy Company
+          <h2 className="ml-4 text-lg font-bold transition-opacity duration-300">
+            Data Insight
           </h2>
         )}
         <button

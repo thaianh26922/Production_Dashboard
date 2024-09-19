@@ -6,10 +6,10 @@ import UserDropdown from './UserDropdown';
 
 const Header = () => {
   return (
-    <header className="bg-white shadow h-16 px-4 flex justify-between items-center">
+    <header className="bg-gray-50 shadow h-16 px-4 flex justify-between items-center">
       <div className="flex items-center">
         {/* Hiển thị Logo */}
-        <img src={logo} alt="Logo" className="w-16 h-full object-contain" />
+        <img src={logo} alt="Logo" className="w-28 h-full object-contain bg-slate-400 rounded-full" />
       </div>
 
       <div className="flex items-center space-x-6">
