@@ -28,7 +28,7 @@ const MachineStatusHistory = () => {
           'http://172.104.177.67:3030/api/plugins/telemetry/DEVICE/1f94f820-2ef0-11ef-a0d4-19a5fffe4fcb/values/timeseries?keys=HMI_Mixing:Run_Time,HMI_Mixing:Lock_Number,HMI_Mixing:RE_DAU,HMI_Mixing:RE_Lieu,HMI_Mixing:Chot_VT',
           {
             headers: {
-              Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtZXNzeXN0ZW1AZ21haWwuY29tIiwidXNlcklkIjoiYTgzNDkyNjAtMmUyNS0xMWVmLWEwZDQtMTlhNWZmZmU0ZmNiIiwic2NvcGVzIjpbIlRFTkFOVF9BRE1JTiJdLCJzZXNzaW9uSWQiOiJjOGI0MTkwZi1mNzljLTQ0MDctYmMwYS00YTlhYjYwM2ZjMmMiLCJleHAiOjE3MjY2NTY5ODMsImlzcyI6InRoaW5nc2JvYXJkLmlvIiwiaWF0IjoxNzI2NjQ3OTgzLCJmaXJzdE5hbWUiOiJNRVMiLCJsYXN0TmFtZSI6Ik9SUyIsImVuYWJsZWQiOnRydWUsImlzUHVibGljIjpmYWxzZSwidGVuYW50SWQiOiI5YWE0NDgyMC0yZTI1LTExZWYtYTBkNC0xOWE1ZmZmZTRmY2IiLCJjdXN0b21lcklkIjoiMTM4MTQwMDAtMWRkMi0xMWIyLTgwODAtODA4MDgwODA4MDgwIn0.zEb0Dr3j3tQ957kiVt5SK9m0a6UZrJNpJNUykQjzsDZ-nSyAPRJlyR2GR0CMAsR4ZmkzWHdXZ1SEmNjV7-bYQw`, // Thay thế bằng JWT Token của bạn
+              Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtZXNzeXN0ZW1AZ21haWwuY29tIiwidXNlcklkIjoiYTgzNDkyNjAtMmUyNS0xMWVmLWEwZDQtMTlhNWZmZmU0ZmNiIiwic2NvcGVzIjpbIlRFTkFOVF9BRE1JTiJdLCJzZXNzaW9uSWQiOiJjNDcyM2Y5My04NDY5LTQ1YzEtOTE4My0zNmVmODE1NDVlODQiLCJleHAiOjE3MjY3MjEwMjQsImlzcyI6InRoaW5nc2JvYXJkLmlvIiwiaWF0IjoxNzI2NzEyMDI0LCJmaXJzdE5hbWUiOiJNRVMiLCJsYXN0TmFtZSI6Ik9SUyIsImVuYWJsZWQiOnRydWUsImlzUHVibGljIjpmYWxzZSwidGVuYW50SWQiOiI5YWE0NDgyMC0yZTI1LTExZWYtYTBkNC0xOWE1ZmZmZTRmY2IiLCJjdXN0b21lcklkIjoiMTM4MTQwMDAtMWRkMi0xMWIyLTgwODAtODA4MDgwODA4MDgwIn0.M684CkEMKMXZpo6CXxNzkBV4LU6mal-oRcctUPMSJc-oO3WyjohY6XyvVh5cM6bo7F77APdysKIRBxz34M8x2w`, // Thay thế bằng JWT Token của bạn
             },
           }
         );
