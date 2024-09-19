@@ -39,12 +39,12 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   };
 
   return (
-    <div className={`relative bg-primary-700 h-full shadow-md ${isCollapsed ? 'w-20' : 'w-48'} flex flex-col justify-between transition-all duration-300 overflow-y-auto`}
+    <div className={`relative bg-cyan-700 h-full shadow-md ${isCollapsed ? 'w-20' : 'w-48'} flex flex-col justify-between transition-all duration-300 overflow-y-auto`}
       style={{ maxHeight: '100vh' }} // Giới hạn chiều cao sidebar
     >
       <div className="flex items-center justify-between p-2">
         {!isCollapsed && (
-          <h2 className="ml-4 text-lg font-bold transition-opacity duration-300">
+          <h2 className="ml-4 text-lg font-bold transition-opacity duration-300 text-white">
             Data Insight
           </h2>
         )}
@@ -52,24 +52,24 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
           onClick={toggleSidebar}
           className="p-2 ml-1 rounded-full hover:bg-gray-200 focus:outline-none flex items-center"
         >
-          {isCollapsed ? <FiChevronRight className="text-sm text-gray-600 ml-2" /> : <FiChevronLeft className="text-sm text-gray-600" />}
+          {isCollapsed ? <FiChevronRight className="text-sm text-white ml-2" /> : <FiChevronLeft className="text-sm text-white" />}
         </button>
       </div>
 
-      <div className="flex flex-col space-y-4 p-4">
+      <div className="flex flex-col space-y-4 p-4 text-white">
         <nav className="flex flex-col space-y-4">
           {/* Mục menu chung: Dashboard */}
           <Link
             to="/dashboard"
             className="flex items-center text-gray-700 hover:text-black"
           >
-            <FiHome className="mr-4 text-lg" />
-            {!isCollapsed && <span>Trang chủ</span>}
+            <FiHome className="mr-4 text-lg text-white" />
+            {!isCollapsed && <span className="text-white">Trang chủ</span>}
           </Link>
 
           {/* Submenu Sản xuất */}
           <Submenu
-            title={<><FiBarChart2 className="mr-4 text-lg" />{!isCollapsed && <span>Sản xuất</span>}</>}
+            title={<><FiBarChart2 className="mr-4 text-lg text-white" />{!isCollapsed && <span className="text-white">Sản xuất</span>}</>}
             items={productionItems}
             mainLink="/production/overview"
             isCollapsed={isCollapsed}
@@ -78,7 +78,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
 
           {/* Submenu Thiết bị */}
           <Submenu
-            title={<><FiGrid className="mr-4 text-lg" />{!isCollapsed && <span>Thiết bị</span>}</>}
+            title={<><FiGrid className="mr-4 text-lg text-white" />{!isCollapsed && <span className="text-white">Thiết bị</span>}</>}
             items={equipmentItems}
             mainLink="/equipment/machines"
             isCollapsed={isCollapsed}
@@ -87,16 +87,17 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
 
           {/* Submenu Chất lượng */}
           <Submenu
-            title={<><FiClipboard className="mr-4 text-lg" />{!isCollapsed && <span>Chất lượng</span>}</>}
+            title={<><FiClipboard className="mr-4 text-lg text-white" />{!isCollapsed && <span className="text-white" >Chất lượng</span>}</>}
             items={qualityItems}
             mainLink="/quality/overview"
             isCollapsed={isCollapsed}
             onSubmenuClick={handleSubmenuClick}
+            className="text-white"
           />
 
           {/* Submenu Tồn kho */}
           <Submenu
-            title={<><FiDatabase className="mr-4 text-lg" />{!isCollapsed && <span>Tồn kho</span>}</>}
+            title={<><FiDatabase className="mr-4 text-lg text-white" />{!isCollapsed && <span className="text-white" >Tồn kho</span>}</>}
             items={inventoryItems}
             mainLink="/inventory/material"
             isCollapsed={isCollapsed}
@@ -106,7 +107,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
           {/* Mục menu của admin chỉ hiển thị nếu userRole là "Admin" */}
           {userRole === 'Admin' && (
             <Submenu
-              title={<><FiSettings className="mr-4 text-lg" />{!isCollapsed && <span>Hệ thống</span>}</>}
+              title={<><FiSettings className="mr-4 text-lg text-white" />{!isCollapsed && <span className="text-white">Hệ thống</span>}</>}
               items={adminItems}
               mainLink="/admin/userlist"
               isCollapsed={isCollapsed}
@@ -120,7 +121,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
         <nav className="flex flex-col space-y-4">
           {/* Submenu Hỗ trợ */}
           <Submenu
-            title={<><FiHeadphones className="mr-4 text-lg" />{!isCollapsed && <span>Hỗ trợ</span>}</>}
+            title={<><FiHeadphones className="mr-4 text-lg text-white" />{!isCollapsed && <span className="text-white">Hỗ trợ</span>}</>}
             items={supportItems}
             mainLink="/support/faq"
             isCollapsed={isCollapsed}
@@ -129,7 +130,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
 
           {/* Submenu Cài đặt */}
           <Submenu
-            title={<><FiSettings className="mr-4 text-lg" />{!isCollapsed && <span>Cài Đặt</span>}</>}
+            title={<><FiSettings className="mr-4 text-lg text-white" />{!isCollapsed && <span className="text-white">Cài Đặt</span>}</>}
             items={settingItems}
             mainLink="/settings/profile"
             isCollapsed={isCollapsed}
@@ -141,8 +142,8 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
             onClick={handleLogout}
             className="flex items-center text-gray-700 hover:text-black focus:outline-none"
           >
-            <FiLogOut className="mr-4 text-lg" />
-            {!isCollapsed && <span>Đăng xuất</span>}
+            <FiLogOut className="mr-4 text-lg text-white" />
+            {!isCollapsed && <span className="text-white">Đăng xuất</span>}
           </button>
         </nav>
       </div>

@@ -7,7 +7,7 @@ const NotificationDropdown = () => {
     <Menu as="div" className="relative">
       <div>
         <Menu.Button className="flex items-center focus:outline-none">
-          <FiBell className="text-gray-600 text-xl" />
+          <FiBell className="text-white text-xl" />
         </Menu.Button>
       </div>
       <Transition
