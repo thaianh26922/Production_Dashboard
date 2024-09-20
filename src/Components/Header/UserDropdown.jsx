@@ -1,9 +1,21 @@
 import React, { Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { FiChevronDown } from 'react-icons/fi';
-import user_avatar from '../../assets/image/user.png'
+import { useNavigate } from 'react-router-dom'; // Import useNavigate để điều hướng
+import user_avatar from '../../assets/image/user.png';
 
 const UserDropdown = () => {
+  const navigate = useNavigate(); // Khởi tạo useNavigate
+
+  const handleLogout = () => {
+    // Xóa token khỏi localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('role'); // Nếu bạn lưu role
+
+    // Điều hướng về trang login
+    navigate('/login');
+  };
+
   return (
     <Menu as="div" className="relative">
       <div>
@@ -102,6 +114,7 @@ const UserDropdown = () => {
             <Menu.Item>
               {({ active }) => (
                 <a
+                  onClick={handleLogout} // Gọi hàm handleLogout khi nhấn Đăng xuất
                   href="#"
                   className={`${
                     active ? 'bg-gray-100' : ''

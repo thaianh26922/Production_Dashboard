@@ -1,32 +1,32 @@
 import React from 'react';
+import { FiScissors, FiHardDrive, FiTool } from 'react-icons/fi';
 
 const MachineSelection = ({ currentMachine, setCurrentMachine }) => {
   return (
-    <div className="lg:col-span-1 flex flex-col items-stretch bg-">
+    <div className="lg:col-span-1 flex flex-col items-stretch bg">
+      
       <button 
-        className={`p-2 my-2 rounded transition duration-300 text-center ${currentMachine === 'Máy Trộn' ? 'bg-green-500 text-white' : 'bg-green-200 text-black'}`} 
-        onClick={() => setCurrentMachine('Máy Trộn')}
+        className={`p-2 my-4 rounded transition duration-300 text-center ${currentMachine === 'Máy Cắt' ? 'bg-green-500 text-white font-bold' : 'bg-cyan-700 text-white font-bold'}`} 
+        onClick={() => setCurrentMachine('Máy Cắt')}
+        
       >
-        Máy Trộn
+
+       
+        Máy Cắt
       </button>
       <button 
-        className={`p-2 my-2 rounded transition duration-300 text-center ${currentMachine === 'Máy Định Hình' ? 'bg-green-500 text-white' : 'bg-green-200 text-black'}`} 
-        onClick={() => setCurrentMachine('Máy Định Hình')}
+        className={`p-2 my-4 rounded transition duration-300 text-center ${currentMachine === 'Máy Dập' ? 'bg-green-500 text-white font-bold' : 'bg-cyan-700 text-white font-bold'}`} 
+        onClick={() => setCurrentMachine('Máy Dập')}
       >
-        Máy Định Hình
+        Máy Dập
       </button>
       <button 
-        className={`p-2 my-2 rounded transition duration-300 text-center ${currentMachine === 'Máy Nướng' ? 'bg-green-500 text-white' : 'bg-green-200 text-black'}`} 
-        onClick={() => setCurrentMachine('Máy Nướng')}
+        className={`p-2 my-4   rounded transition duration-300 text-center ${currentMachine === 'Máy Uốn' ? 'bg-green-500 text-white font-bold' : 'bg-cyan-700 text-white font-bold'}`} 
+        onClick={() => setCurrentMachine('Máy Uốn')}
       >
-        Máy Nướng
+        Máy Uốn
       </button>
-      <button 
-        className={`p-2 my-2 rounded transition duration-300 text-center ${currentMachine === 'Máy Đóng Gói' ? 'bg-green-500 text-white' : 'bg-green-200 text-black'}`} 
-        onClick={() => setCurrentMachine('Máy Đóng Gói')}
-      >
-        Máy Đóng Gói
-      </button>
+      
     </div>
   );
 };

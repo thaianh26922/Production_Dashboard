@@ -14,6 +14,7 @@ const MachineStatusHistory = () => {
   const [historyData, setHistoryData] = useState([]); // Lưu trữ dữ liệu lịch sử máy
   const svgRef = useRef();
   const legendRef = useRef();
+  const containerRef = useRef(); // Ref để theo dõi kích thước container
 
   // Lấy dữ liệu từ API
   useEffect(() => {
@@ -36,72 +37,74 @@ const MachineStatusHistory = () => {
   }, []);
 
   // Hàm xử lý dữ liệu thô từ API thành dữ liệu lịch sử máy
- const formatHistoryData = (rawData) => {
-  const formattedData = [];
+  const formatHistoryData = (rawData) => {
+    const formattedData = [];
 
-  // Sắp xếp dữ liệu theo timestamp
-  const sortedData = rawData.sort((a, b) => new Date(a.ts) - new Date(b.ts));
+    // Sắp xếp dữ liệu theo timestamp
+    const sortedData = rawData.sort((a, b) => new Date(a.ts) - new Date(b.ts));
 
-  // Duyệt qua dữ liệu và tính duration giữa các trạng thái liên tiếp
-  for (let i = 0; i < sortedData.length - 1; i++) {
-    const telemetryData = sortedData[i];
-    const nextTelemetryData = sortedData[i + 1];  // Lấy dữ liệu tiếp theo
+    // Duyệt qua dữ liệu và tính duration giữa các trạng thái liên tiếp
+    for (let i = 0; i < sortedData.length - 1; i++) {
+      const telemetryData = sortedData[i];
+      const nextTelemetryData = sortedData[i + 1];  // Lấy dữ liệu tiếp theo
 
-    // Lấy timestamp của trạng thái hiện tại và tiếp theo
-    const startTime = new Date(telemetryData.ts);
-    const endTime = new Date(nextTelemetryData.ts);
+      // Lấy timestamp của trạng thái hiện tại và tiếp theo
+      const startTime = new Date(telemetryData.ts);
+      const endTime = new Date(nextTelemetryData.ts);
 
-    const duration = (endTime - startTime) / 60000;  // Tính thời gian kéo dài (phút)
+      const duration = (endTime - startTime) / 60000;  // Tính thời gian kéo dài (phút)
 
-    // Tính số phút từ đầu ngày
-    const hours = startTime.getHours();
-    const minutes = startTime.getMinutes();
-    const timeInMinutes = hours * 60 + minutes; // Tính tổng số phút từ đầu ngày
+      // Tính số phút từ đầu ngày
+      const hours = startTime.getHours();
+      const minutes = startTime.getMinutes();
+      const timeInMinutes = hours * 60 + minutes; // Tính tổng số phút từ đầu ngày
 
-    // Parse key để đảm bảo giá trị đúng
-    const key = parseInt(telemetryData.value);
-    
-    if (isNaN(key) || !statusMapping[key]) {
-      console.warn(`Unknown status key: ${telemetryData.value}`);
+      // Parse key để đảm bảo giá trị đúng
+      const key = parseInt(telemetryData.value);
+      
+      if (isNaN(key) || !statusMapping[key]) {
+        console.warn(`Unknown status key: ${telemetryData.value}`);
+      }
+
+      // Thêm dữ liệu đã xử lý vào mảng formattedData
+      formattedData.push({
+        time: timeInMinutes, // Thời gian (phút trong ngày)
+        key: !isNaN(key) && statusMapping[key] ? key : 'default', // Sử dụng 'default' nếu key không hợp lệ
+        duration, // Thời gian kéo dài của trạng thái
+      });
     }
 
-    // Thêm dữ liệu đã xử lý vào mảng formattedData
-    formattedData.push({
-      time: timeInMinutes, // Thời gian (phút trong ngày)
-      key: !isNaN(key) && statusMapping[key] ? key : 'default', // Sử dụng 'default' nếu key không hợp lệ
-      duration, // Thời gian kéo dài của trạng thái
-    });
-  }
+    // Xử lý trạng thái cuối cùng (không có trạng thái tiếp theo để tính duration)
+    const lastTelemetryData = sortedData[sortedData.length - 1];
+    const lastStartTime = new Date(lastTelemetryData.ts);
+    const lastKey = parseInt(lastTelemetryData.value);
 
-  // Xử lý trạng thái cuối cùng (không có trạng thái tiếp theo để tính duration)
-  const lastTelemetryData = sortedData[sortedData.length - 1];
-  const lastStartTime = new Date(lastTelemetryData.ts);
-  const lastKey = parseInt(lastTelemetryData.value);
+    if (!isNaN(lastKey) && statusMapping[lastKey]) {
+      formattedData.push({
+        time: lastStartTime.getHours() * 60 + lastStartTime.getMinutes(), // Thời gian (phút trong ngày)
+        key: lastKey, // Trạng thái cuối cùng
+        duration: 0, // Không có trạng thái tiếp theo để tính duration
+      });
+    }
 
-  if (!isNaN(lastKey) && statusMapping[lastKey]) {
-    formattedData.push({
-      time: lastStartTime.getHours() * 60 + lastStartTime.getMinutes(), // Thời gian (phút trong ngày)
-      key: lastKey, // Trạng thái cuối cùng
-      duration: 0, // Không có trạng thái tiếp theo để tính duration
-    });
-  }
-
-  return formattedData;
-};
-
+    return formattedData;
+  };
 
   useEffect(() => {
     if (!historyData || historyData.length === 0) return;
 
+    // Lấy kích thước của container
+    const containerWidth = containerRef.current.getBoundingClientRect().width;
+
     // Set kích thước của biểu đồ
-    const width = 1200;
-    const height = 120;  // Chiều cao của biểu đồ chính
+    const width = containerWidth || 1200;
+    const height =  120;  // Chiều cao của biểu đồ chính
     const margin = { top: 20, right: 30, bottom: 60, left: 20 };  // Thêm padding cho trục
 
     // Tạo SVG cho biểu đồ chính
     const svg = d3.select(svgRef.current)
-      .attr('width', width)
-      .attr('height', height)
+      .attr('viewBox', `0 0 ${width} ${height}`) // Sử dụng viewBox để responsive
+      .attr('preserveAspectRatio', 'xMidYMid meet') // Đảm bảo responsive
       .style('background-color', '#0000'); // Đặt màu nền trong suốt
 
     // Tạo thang đo x cho trục thời gian từ 00:00 đến 23:59
@@ -197,7 +200,7 @@ const MachineStatusHistory = () => {
   }, [historyData]);
 
   return (
-    <div>
+    <div ref={containerRef} style={{ width: '100%', height: 'auto' }}>
       <svg ref={svgRef}></svg>
       <svg ref={legendRef}></svg>
     </div>

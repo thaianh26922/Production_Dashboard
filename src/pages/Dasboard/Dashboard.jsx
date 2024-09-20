@@ -7,9 +7,9 @@ import EquipmentPerformance from '../../Components/Equiment/EquipmentPerformance
 
 function Dashboard() {
   return (
-    <div className="grid gap-4 bg-gray-100  h-screen">
+    <div className="grid gap-4  h-screen">
       {/* Dashboard Stats Grid */}
-      <div className=" p-2 rounded-lg shadow-md">
+      <div className=" p-1 ">
         <DashboardStatsGrid />
       </div>
 

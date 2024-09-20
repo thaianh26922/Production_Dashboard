@@ -103,7 +103,7 @@ function ProductionChart() {
         <h3 className="text-lg font-semibold">Tổng sản lượng</h3>
         <button
           onClick={() => setIsFilterModalOpen(true)}
-          className="p-1 bg-green-500 text-white rounded"
+          className=" bg-green-500 text-white rounded-lg"
         >
           <FaFilter /> {/* Sử dụng icon filter */}
         </button>

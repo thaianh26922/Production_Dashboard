@@ -11,13 +11,13 @@ import axios from 'axios';
 import MayTron from '../../assets/image/May_tron.png';
 import MayDinhHinh from '../../assets/image/May_Dinh_Hinh.png';
 import MayNuong from '../../assets/image/May_nuong_banh.webp';
-import MayDongGoi from '../../assets/image/May-dong-goi.png';
+
 
 const machineImages = {
-  'Máy Trộn': MayTron,
-  'Máy Định Hình': MayDinhHinh,
-  'Máy Nướng': MayNuong,
-  'Máy Đóng Gói': MayDongGoi,
+  'Máy Cắt': MayTron,
+  'Máy Dập': MayDinhHinh,
+  'Máy Uốn': MayNuong,
+  
 };
 
 // Hàm lấy dữ liệu từ API
@@ -38,7 +38,7 @@ const fetchMachineData = async (startDate, endDate) => {
 
 // Component chính để hiển thị chi tiết máy
 const MachineDetails = () => {
-  const [currentMachine, setCurrentMachine] = useState('Máy Trộn'); // Lưu trạng thái máy hiện tại
+  const [currentMachine, setCurrentMachine] = useState('Máy Cắt'); // Lưu trạng thái máy hiện tại
   const [startDate, setStartDate] = useState(new Date()); // Ngày bắt đầu
   const [endDate, setEndDate] = useState(addDays(new Date(), 7)); // Ngày kết thúc
   const [historyData, setHistoryData] = useState([]); // Dữ liệu trạng thái máy từ API
@@ -67,23 +67,22 @@ const MachineDetails = () => {
   const statusColor = machineStatus === 'RUN' ? 'bg-green-500' : machineStatus === 'STOP' ? 'bg-red-500' : 'bg-yellow-500';
 
   return (
-    <div className="bg-gray-100 p-1 rounded-lg shadow-md grid gap-2 w-full grid-rows-auto">
+    <div className=" p-1 rounded-lg shadow-md grid gap-2 w-full grid-rows-auto">
       {/* Phần trên hiển thị trạng thái máy và lựa chọn máy */}
       <div className="grid grid-cols-4 gap-2">
-        <div className="col-span-1 bg-white p-2 rounded-lg shadow">
+        <div className="col-span-1 w-64 h-full p-2 ">
           <MachineSelection currentMachine={currentMachine} setCurrentMachine={setCurrentMachine} />
         </div>
-
         <div className="col-span-1 flex flex-col items-center bg-white p-2 rounded-lg shadow">
           <img
             src={machineImages[currentMachine]}
             alt={`${currentMachine} image`}
-            className="w-40 h-48 object-contain object-center rounded"
+            className="w-40 h-48 object-contain object-center rounded "
           />
           <h2 className="text-center text-xl font-bold mt-1">{currentMachine}</h2>
         </div>
-
-        <div className="col-span-1 bg-white p-2 rounded-lg shadow">
+        
+        <div className="col-span-1  w-64 bg-white p-2 rounded-lg shadow">
           <div className="mb-2">
             <h3 className="font-semibold text-sm mb-1 text-left">Trạng Thái Máy</h3>
             <div className={`py-8 px-3 rounded shadow text-white text-center text-xl font-bold ${statusColor}`}>
@@ -131,9 +130,9 @@ const MachineDetails = () => {
           </div>
         </div>
       </div>
-
+      <hr />
       {/* Phần dưới hiển thị lịch sử trạng thái máy và biểu đồ */}
-      <div className="bg-white p-2 rounded-lg shadow w-full max-h-96 overflow-y-auto">
+      <div className="bg-white p-2 mt-3 rounded-lg shadow w-full max-h-96 overflow-y-auto">
         <div className="mb-4 flex items-center justify-between gap-1">
           <div className="flex items-center gap-1">
             <h3 className="font-semibold mr-2">Lịch sử trạng thái máy</h3>

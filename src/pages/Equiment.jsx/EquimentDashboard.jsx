@@ -9,7 +9,7 @@ const EquipmentDashboard = () => {
 
   return (
     <>
-      <div className="w-full h-full  ">
+      <div className="w-full h-full row-span-3  ">
         
         {/* Hàng 1: MachineDetails (đã tích hợp MachineSelection) */}
         <div className="bg-white rounded-lg  shadow-lg   ">
