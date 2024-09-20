@@ -46,6 +46,10 @@ function QualityChart() {
       legend: {
         display: false,
       },
+      datalabels: {
+        display: false,  // Tắt datalabels cho biểu đồ Bar này
+      },
+   
       tooltip: {
         enabled: true,
         backgroundColor: '#4A90E2',

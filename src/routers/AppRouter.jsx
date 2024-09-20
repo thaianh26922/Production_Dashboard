@@ -15,7 +15,11 @@ import InventoryForm from '../pages/Inventory/InventoryForm';
 import InventoryTable from '../pages/Inventory/InventoryTable';
 import UserManagement from '../pages/Admin/UserManagement';
 import Login from '../Components/Login';
-
+import EquipmentAnalysis from '../pages/Equiment.jsx/EquipmentAnalysis';
+import MachineReport from '../pages/Equiment.jsx/MachineReport'
+import Profile  from '../pages/Profile/Profile'
+import Messenger from '../pages/Message/Messenger '
+import FAQAccordion from '../pages/FAQ/FAQAccordion'
 const ProtectedRoute = ({ children, isAuthenticated, requiredRole, userRole }) => {
   if (!isAuthenticated) {
     console.log('User is not authenticated, redirecting to login.');
@@ -115,7 +119,7 @@ const AppRouter = () => {
           path="/equipment/analysis"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <MainLayout><EquimentReports /></MainLayout>
+              <MainLayout> <EquipmentAnalysis /> </MainLayout>
             </ProtectedRoute>
           }
         />
@@ -123,7 +127,7 @@ const AppRouter = () => {
           path="/equipment/reports"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <MainLayout><EquimentReports /></MainLayout>
+              <MainLayout><MachineReport /></MainLayout>
             </ProtectedRoute>
           }
         />
@@ -182,6 +186,38 @@ const AppRouter = () => {
               userRole={userRole}
             >
               <MainLayout><UserManagement /></MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/settings/profile"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isAuthenticated}
+            >
+              <MainLayout><Profile /></MainLayout>
+            </ProtectedRoute>
+          }
+        />
+          <Route
+          path="/support/faq"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isAuthenticated}
+            >
+              <MainLayout> <FAQAccordion /> </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/message"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isAuthenticated}
+            >
+              <MainLayout><Messenger /></MainLayout>
             </ProtectedRoute>
           }
         />

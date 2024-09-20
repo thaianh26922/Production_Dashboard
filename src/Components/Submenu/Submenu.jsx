@@ -2,43 +2,57 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
 
-const Submenu = ({ title, items, isCollapsed, mainLink, onSubmenuClick }) => {
+const Submenu = ({ title, items, isCollapsed, mainLink, setIsCollapsed }) => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
   const toggleSubmenu = () => {
-    setIsOpen(!isOpen);
+    // Nếu sidebar bị collapsed, mở rộng sidebar
+    if (isCollapsed) {
+      setIsCollapsed(false); // Mở rộng sidebar
+    } else {
+      // Nếu không bị collapsed, toggle submenu
+      setIsOpen(!isOpen);
+    }
   };
 
   const handleMainLinkClick = () => {
+    // Điều hướng đến mainLink khi click vào tiêu đề
     navigate(mainLink);
-    onSubmenuClick(toggleSubmenu);
   };
 
   return (
     <div className="flex flex-col">
+      {/* Main Title của Submenu */}
       <div 
         className="flex items-center justify-between text-white hover:text-black cursor-pointer"
-        onClick={handleMainLinkClick}
+        onClick={toggleSubmenu} // Sử dụng toggleSubmenu khi click vào tiêu đề
       >
         <span className="flex items-center">
           {title}
         </span>
+        {/* Hiển thị icon tùy theo trạng thái của submenu */}
         <span>
-          {isOpen ? <FiChevronDown /> : <FiChevronRight />}
+          {isCollapsed ? (
+            <FiChevronRight onClick={() => setIsCollapsed(false)} /> // Khi bị collapsed, click để mở rộng sidebar
+          ) : isOpen ? (
+            <FiChevronDown />
+          ) : (
+            <FiChevronRight />
+          )}
         </span>
       </div>
+
+      {/* Submenu items, chỉ hiển thị nếu submenu đang mở và sidebar không bị collapsed */}
       <div className={`${isOpen && !isCollapsed ? 'block' : 'hidden'} pl-4 mt-2`}>
         {items.map((item, index) => (
-          item.name && (
-            <Link
-              key={index}
-              to={item.link}
-              className="block py-1 px-6 text-white hover:text-black"
-            >
-              {item.name}
-            </Link>
-          )
+          <Link
+            key={index}
+            to={item.link}
+            className="block py-1 px-6 text-white hover:text-black"
+          >
+            {item.name}
+          </Link>
         ))}
       </div>
     </div>

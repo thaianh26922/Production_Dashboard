@@ -140,7 +140,7 @@ const MachineStatusHistory = () => {
 
     // Thêm trục x với các mốc thời gian chính từ 00:00 đến 23:59
     const xAxis = d3.axisBottom(xScale)
-      .tickValues(d3.range(startTime, endTime + 60, 60))  // Mốc thời gian mỗi giờ
+      .tickValues(d3.range(startTime, endTime + 120, 120))  // Mốc thời gian hai giờ
       .tickFormat(d => {
         let hour = Math.floor((d % totalMinutesInDay) / 60); // Đảm bảo không vượt qua 24 giờ
         return hour.toString().padStart(2, '0') + ":00";  // Hiển thị giờ dưới dạng HH:00
@@ -179,8 +179,8 @@ const MachineStatusHistory = () => {
     // Thêm hình chữ nhật vào legend
     legendGroup.append('rect')
       .attr('x', 0)
-      .attr('width', 12)
-      .attr('height', 12)
+      .attr('width', 10)
+      .attr('height', 10)
       .attr('fill', d => {
         const key = Object.keys(statusMapping).find(k => statusMapping[k].label === d[0]);
         return statusMapping[key]?.color || statusMapping.default.color;
@@ -189,9 +189,9 @@ const MachineStatusHistory = () => {
     // Thêm nhãn và phần trăm thời gian
     legendGroup.append('text')
       .attr('x', 20)
-      .attr('y', 10)
+      .attr('y',6)
       .attr('dy', '0.2em')
-      .style('font-size', '12px')
+      .style('font-size', '10px')
       .text(d => {
         const percent = totalDuration > 0 ? ((d[1] / totalDuration) * 100).toFixed(2) : "0.00"; // Tính phần trăm
         return `${d[0]}: ${percent}%`; // Hiển thị nhãn và phần trăm

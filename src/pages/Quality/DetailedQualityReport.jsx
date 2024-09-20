@@ -8,7 +8,9 @@ const DetailedErrorChart = ({ detailedErrorData }) => {
       legend: {
         display: false, // Ẩn phần legend
       },
+     
       datalabels: {
+        
         color: '#ff00ff', // Màu sắc của text (giống màu trong hình)
         anchor: 'end', // Vị trí của label
         align: 'start', // Căn lề của label

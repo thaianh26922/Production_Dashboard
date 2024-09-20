@@ -53,6 +53,9 @@ const CycleTimeBarChart = () => {
         display: true,
         position: 'top',
       },
+      datalabels: {
+        display: false,  // Tắt datalabels cho biểu đồ Bar này
+      },
       tooltip: {
         callbacks: {
           label: (context) => {

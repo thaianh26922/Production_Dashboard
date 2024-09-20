@@ -9,7 +9,6 @@ import { toast } from 'react-toastify';
 const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   const { userRole } = useContext(AuthContext);
   const navigate = useNavigate();
-  console.log('Current role:', userRole);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -27,84 +26,68 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
 
   // Hàm xử lý logout
   const handleLogout = () => {
-    // Xóa thông tin token và role khỏi localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('role');
-
-    // Thông báo cho người dùng
     toast.success('Đã đăng xuất thành công!');
-    
-    // Điều hướng về trang login
     navigate('/login');
   };
 
   return (
-    <div className={`relative bg-cyan-700 h-full shadow-md ${isCollapsed ? 'w-20' : 'w-48'} flex flex-col justify-between transition-all duration-300 overflow-y-auto`}
-      style={{ maxHeight: '100vh' }} // Giới hạn chiều cao sidebar
-    >
+    <div className={`relative bg-cyan-700 h-full shadow-md ${isCollapsed ? 'w-20' : 'w-48'} flex flex-col justify-between transition-all duration-300 overflow-y-auto`} style={{ maxHeight: '100vh' }}>
       <div className="flex items-center justify-between p-2">
         {!isCollapsed && (
           <h2 className="ml-4 text-lg font-bold transition-opacity duration-300 text-white">
             Data Insight
           </h2>
         )}
-        <button
-          onClick={toggleSidebar}
-          className="p-2 ml-1 rounded-full hover:bg-gray-200 focus:outline-none flex items-center"
-        >
+        <button onClick={toggleSidebar} className="p-2 ml-1 rounded-full hover:bg-gray-200 focus:outline-none flex items-center">
           {isCollapsed ? <FiChevronRight className="text-sm text-white ml-2" /> : <FiChevronLeft className="text-sm text-white" />}
         </button>
       </div>
 
       <div className="flex flex-col space-y-4 p-4 text-white">
         <nav className="flex flex-col space-y-4">
-          {/* Mục menu chung: Dashboard */}
-          <Link
-            to="/dashboard"
-            className="flex items-center text-gray-700 hover:text-black"
-          >
+          <Link to="/dashboard" className="flex items-center text-gray-700 hover:text-black">
             <FiHome className="mr-4 text-lg text-white" />
             {!isCollapsed && <span className="text-white">Trang chủ</span>}
           </Link>
 
-          {/* Submenu Sản xuất */}
           <Submenu
             title={<><FiBarChart2 className="mr-4 text-lg text-white" />{!isCollapsed && <span className="text-white">Sản xuất</span>}</>}
             items={productionItems}
             mainLink="/production/overview"
             isCollapsed={isCollapsed}
             onSubmenuClick={handleSubmenuClick}
+            setIsCollapsed={setIsCollapsed}
           />
 
-          {/* Submenu Thiết bị */}
           <Submenu
             title={<><FiGrid className="mr-4 text-lg text-white" />{!isCollapsed && <span className="text-white">Thiết bị</span>}</>}
             items={equipmentItems}
             mainLink="/equipment/machines"
             isCollapsed={isCollapsed}
             onSubmenuClick={handleSubmenuClick}
+            setIsCollapsed={setIsCollapsed}
           />
 
-          {/* Submenu Chất lượng */}
           <Submenu
-            title={<><FiClipboard className="mr-4 text-lg text-white" />{!isCollapsed && <span className="text-white" >Chất lượng</span>}</>}
+            title={<><FiClipboard className="mr-4 text-lg text-white" />{!isCollapsed && <span className="text-white">Chất lượng</span>}</>}
             items={qualityItems}
             mainLink="/quality/overview"
             isCollapsed={isCollapsed}
             onSubmenuClick={handleSubmenuClick}
-            className="text-white"
+            setIsCollapsed={setIsCollapsed}
           />
 
-          {/* Submenu Tồn kho */}
           <Submenu
-            title={<><FiDatabase className="mr-4 text-lg text-white" />{!isCollapsed && <span className="text-white" >Tồn kho</span>}</>}
+            title={<><FiDatabase className="mr-4 text-lg text-white" />{!isCollapsed && <span className="text-white">Tồn kho</span>}</>}
             items={inventoryItems}
             mainLink="/inventory/material"
             isCollapsed={isCollapsed}
             onSubmenuClick={handleSubmenuClick}
+            setIsCollapsed={setIsCollapsed}
           />
 
-          {/* Mục menu của admin chỉ hiển thị nếu userRole là "Admin" */}
           {userRole === 'Admin' && (
             <Submenu
               title={<><FiSettings className="mr-4 text-lg text-white" />{!isCollapsed && <span className="text-white">Hệ thống</span>}</>}
@@ -112,6 +95,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
               mainLink="/admin/userlist"
               isCollapsed={isCollapsed}
               onSubmenuClick={handleSubmenuClick}
+              setIsCollapsed={setIsCollapsed}
             />
           )}
         </nav>
@@ -119,29 +103,25 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
 
       <div className="p-4 mt-2">
         <nav className="flex flex-col space-y-4">
-          {/* Submenu Hỗ trợ */}
           <Submenu
             title={<><FiHeadphones className="mr-4 text-lg text-white" />{!isCollapsed && <span className="text-white">Hỗ trợ</span>}</>}
             items={supportItems}
             mainLink="/support/faq"
             isCollapsed={isCollapsed}
             onSubmenuClick={handleSubmenuClick}
+            setIsCollapsed={setIsCollapsed}
           />
 
-          {/* Submenu Cài đặt */}
           <Submenu
             title={<><FiSettings className="mr-4 text-lg text-white" />{!isCollapsed && <span className="text-white">Cài Đặt</span>}</>}
             items={settingItems}
             mainLink="/settings/profile"
             isCollapsed={isCollapsed}
             onSubmenuClick={handleSubmenuClick}
+            setIsCollapsed={setIsCollapsed}
           />
 
-          {/* Mục Đăng xuất */}
-          <button
-            onClick={handleLogout}
-            className="flex items-center text-gray-700 hover:text-black focus:outline-none"
-          >
+          <button onClick={handleLogout} className="flex items-center text-gray-700 hover:text-black focus:outline-none">
             <FiLogOut className="mr-4 text-lg text-white" />
             {!isCollapsed && <span className="text-white">Đăng xuất</span>}
           </button>

@@ -3,10 +3,10 @@ import { FiScissors, FiHardDrive, FiTool } from 'react-icons/fi';
 
 const MachineSelection = ({ currentMachine, setCurrentMachine }) => {
   return (
-    <div className="lg:col-span-1 flex flex-col items-stretch bg">
+    <div className="lg:col-span-1 sflex items-stretch bg">
       
       <button 
-        className={`p-2 my-4 rounded transition duration-300 text-center ${currentMachine === 'Máy Cắt' ? 'bg-green-500 text-white font-bold' : 'bg-cyan-700 text-white font-bold'}`} 
+        className={`p-3 my-4 rounded transition duration-300 text-center ${currentMachine === 'Máy Cắt' ? 'bg-green-500 text-white font-bold' : 'bg-cyan-700 text-white font-bold'}`} 
         onClick={() => setCurrentMachine('Máy Cắt')}
         
       >
@@ -15,13 +15,13 @@ const MachineSelection = ({ currentMachine, setCurrentMachine }) => {
         Máy Cắt
       </button>
       <button 
-        className={`p-2 my-4 rounded transition duration-300 text-center ${currentMachine === 'Máy Dập' ? 'bg-green-500 text-white font-bold' : 'bg-cyan-700 text-white font-bold'}`} 
+        className={`p-3  my-4 rounded transition duration-300 text-center ${currentMachine === 'Máy Dập' ? 'bg-green-500 text-white font-bold' : 'bg-cyan-700 text-white font-bold'}`} 
         onClick={() => setCurrentMachine('Máy Dập')}
       >
         Máy Dập
       </button>
       <button 
-        className={`p-2 my-4   rounded transition duration-300 text-center ${currentMachine === 'Máy Uốn' ? 'bg-green-500 text-white font-bold' : 'bg-cyan-700 text-white font-bold'}`} 
+        className={`p-3  my-4   rounded transition duration-300 text-center ${currentMachine === 'Máy Uốn' ? 'bg-green-500 text-white font-bold' : 'bg-cyan-700 text-white font-bold'}`} 
         onClick={() => setCurrentMachine('Máy Uốn')}
       >
         Máy Uốn

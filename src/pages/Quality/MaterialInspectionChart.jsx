@@ -41,6 +41,8 @@ function MaterialInspectionChart() {
             size: 14,
           },
         },
+       
+       
       },
       tooltip: {
         enabled: true,

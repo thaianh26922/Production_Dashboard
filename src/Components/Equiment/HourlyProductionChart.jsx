@@ -31,6 +31,11 @@ const HourlyProductionChart = () => {
         },
       },
     },
+    plugins : {
+      datalabels: {
+        display: false,  // Tắt datalabels cho biểu đồ Bar này
+      },
+    }
   };
 
   return (

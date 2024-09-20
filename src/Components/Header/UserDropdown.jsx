@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { FiChevronDown } from 'react-icons/fi';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate để điều hướng
+import { useNavigate, Link } from 'react-router-dom'; // Import Link và useNavigate
 import user_avatar from '../../assets/image/user.png';
 
 const UserDropdown = () => {
@@ -63,65 +63,64 @@ const UserDropdown = () => {
             <div className="border-t border-gray-200"></div>
             <Menu.Item>
               {({ active }) => (
-                <a
-                  href="#"
+                <Link
+                  to="/settings/profile" // Điều hướng tới trang Thông tin cá nhân
                   className={`${
                     active ? 'bg-gray-100' : ''
                   } block px-4 py-2 text-sm text-gray-700`}
                 >
                   Thông tin cá nhân
-                </a>
+                </Link>
               )}
             </Menu.Item>
             <Menu.Item>
               {({ active }) => (
-                <a
-                  href="#"
+                <Link
+                  to="/message" // Điều hướng tới trang Tin nhắn
                   className={`${
                     active ? 'bg-gray-100' : ''
                   } block px-4 py-2 text-sm text-gray-700`}
                 >
                   Tin nhắn
-                </a>
+                </Link>
               )}
             </Menu.Item>
             <Menu.Item>
               {({ active }) => (
-                <a
-                  href="#"
+                <Link
+                  to="/tasks" // Điều hướng tới trang Công việc
                   className={`${
                     active ? 'bg-gray-100' : ''
                   } block px-4 py-2 text-sm text-gray-700`}
                 >
                   Công việc
-                </a>
+                </Link>
               )}
             </Menu.Item>
            
             <div className="border-t border-gray-200"></div>
             <Menu.Item>
               {({ active }) => (
-                <a
-                  href="#"
+                <Link
+                  to="/settings" // Điều hướng tới trang Cài đặt
                   className={`${
                     active ? 'bg-gray-100' : ''
                   } block px-4 py-2 text-sm text-gray-700`}
                 >
                   Cài đặt
-                </a>
+                </Link>
               )}
             </Menu.Item>
             <Menu.Item>
               {({ active }) => (
-                <a
+                <button
                   onClick={handleLogout} // Gọi hàm handleLogout khi nhấn Đăng xuất
-                  href="#"
                   className={`${
                     active ? 'bg-gray-100' : ''
-                  } block px-4 py-2 text-sm text-gray-700`}
+                  } block w-full text-left px-4 py-2 text-sm text-gray-700`}
                 >
                   Đăng xuất
-                </a>
+                </button>
               )}
             </Menu.Item>
           </div>

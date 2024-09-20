@@ -19,7 +19,7 @@ const PerformanceMetrics = () => {
       legend: { display: false },
       tooltip: { enabled: false },
       datalabels: {
-        display: true,
+        display: false,
         color: 'black',
         formatter: function (value, context) {
           return context.chart.data.datasets[0].data[0] + '%';

@@ -69,6 +69,9 @@ const ErrorHistoryChart = () => {
       legend: {
         position: 'bottom',
       },
+      datalabels: {
+        display: false,  // Tắt datalabels cho biểu đồ Bar này
+      },
       tooltip: {
         callbacks: {
           label: (tooltipItem) => `Giờ: ${tooltipItem.xLabel}:00`,

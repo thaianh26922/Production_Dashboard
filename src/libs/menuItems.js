@@ -32,8 +32,8 @@ export const supportItems = [
 
 export const settingItems = [
     { name: 'Profile', link: '/settings/profile' },
-    { name: ' Bảo mật', link: '/settings/security' },
-    { name: ' Thông báo', link: '/settings/notifications' },
+    { name: ' Cấu hình', link: '/settings/configure' },
+  
 ];
 
 export const adminItems = [

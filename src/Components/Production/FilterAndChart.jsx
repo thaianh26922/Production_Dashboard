@@ -23,7 +23,6 @@ const FilterAndChart = ({ onFilterData }) => {
   };
 
   useEffect(() => {
-    
     const loadData = async () => {
       const data = await fetchData('All', 'All', [null, null]);
       if (data.length > 15) {
@@ -41,8 +40,8 @@ const FilterAndChart = ({ onFilterData }) => {
   return (
     <div>
       {/* Bộ lọc */}
-      <div className="mb-2 grid grid-cols-4 md:grid-cols-4 gap-2">
-        <div className="col-span-2 flex space-x-2">
+      <div className="mb-2 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="flex flex-col md:flex-row md:col-span-2 space-y-2 md:space-y-0 md:space-x-2">
           <Select
             value={selectedLine}
             onChange={handleLineChange}
@@ -52,7 +51,7 @@ const FilterAndChart = ({ onFilterData }) => {
               { value: 'Line 2', label: 'Line 2' },
               { value: 'Line 3', label: 'Line 3' }
             ]}
-            className="w-[96%] text-sm"
+            className="w-full md:w-[96%] text-sm"
             placeholder="Chọn Line Sản Xuất"
           />
           <Select
@@ -64,12 +63,12 @@ const FilterAndChart = ({ onFilterData }) => {
               { value: 'Shift 2', label: 'Ca 2' },
               { value: 'Shift 3', label: 'Ca 3' }
             ]}
-            className="w-[96%] text-sm"
+            className="w-full md:w-[96%] text-sm"
             placeholder="Chọn Ca"
           />
         </div>
 
-        <div className="col-span-2 flex space-x-2">
+        <div className="flex flex-col md:flex-row md:col-span-2 space-y-2 md:space-y-0 md:space-x-2">
           <DatePicker
             selected={selectedDateRange[0]}
             onChange={handleDateChange}
@@ -77,12 +76,12 @@ const FilterAndChart = ({ onFilterData }) => {
             endDate={selectedDateRange[1]}
             selectsRange
             isClearable
-            className="w-full text-sm py-2 px-6 border rounded "
+            className="w-full md:w-[80%] text-sm py-2 px-4 border rounded"
             placeholderText="Chọn Khoảng Ngày"
           />
           <button
             onClick={handleFilter}
-            className="bg-green-500 text-white rounded-lg flex items-center justify-center h-[96%] px-2"
+            className="bg-green-500 text-white rounded-lg flex items-center justify-center py-2 px-4"
           >
             <FaFilter />
           </button>
@@ -93,18 +92,19 @@ const FilterAndChart = ({ onFilterData }) => {
       {filteredData.length > 0 && (
         <div className="bg-white p-4 rounded-lg shadow-md mb-4">
           <h3 className="text-md font-semibold mb-4">Biểu Đồ Sản Lượng</h3>
-          <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={filteredData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="sản lượng" fill="#8884d8" />
-            <Line type="monotone" dataKey="sản lượng" stroke="#82ca9d" />
-          </BarChart>
-
-          </ResponsiveContainer>
+          <div className="w-full h-96 md:h-60 sm:h-40">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={filteredData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Legend verticalAlign="bottom" />
+                <Bar dataKey="sản lượng" fill="#8884d8" />
+                <Line type="monotone" dataKey="sản lượng" stroke="#82ca9d" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       )}
     </div>
