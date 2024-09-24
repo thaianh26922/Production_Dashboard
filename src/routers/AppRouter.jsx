@@ -4,22 +4,23 @@ import MainLayout from '../layouts/MainLayout';
 import Dashboard from '../pages/Dasboard/Dashboard';
 import ProductionDashboard from '../pages/Production/ProductionDashboard';
 import ProductionPlanCatalog from '../pages/Production/ProductionPlanCatalog';
-import EquipmentDashboard from '../pages/Equiment.jsx/EquimentDashboard';
+import EquipmentDashboard from '../pages/Equiment/EquimentDashboard';
 import ProductionAnalysisPage from '../pages/Production/ProductionAnalysisPage';
 import QualityDashboard from '../pages/Quality/QualityDashboard';
-import EquimentReports from '../pages/Equiment.jsx/EquimentReports';
+import EquimentReports from '../pages/Equiment/EquimentReports';
 import QualityOverView from '../pages/Quality/QualityOverView';
-import MaintenancePlanCatalog from '../pages/Equiment.jsx/MaintenancePlanCatalog';
+import MaintenancePlanCatalog from '../pages/Equiment/MaintenancePlanCatalog';
 import InventoryCatalog from '../pages/Inventory/InventoryCatalog';
 import InventoryForm from '../pages/Inventory/InventoryForm';
 import InventoryTable from '../pages/Inventory/InventoryTable';
 import UserManagement from '../pages/Admin/UserManagement';
 import Login from '../Components/Login';
-import EquipmentAnalysis from '../pages/Equiment.jsx/EquipmentAnalysis';
-import MachineReport from '../pages/Equiment.jsx/MachineReport'
+import EquipmentAnalysis from '../pages/Equiment/EquipmentAnalysis';
+import MachineReport from '../pages/Equiment/MachineReport'
 import Profile  from '../pages/Profile/Profile'
 import Messenger from '../pages/Message/Messenger '
 import FAQAccordion from '../pages/FAQ/FAQAccordion'
+import Dashboard1 from '../pages/Dasboard/Dashboard1';
 const ProtectedRoute = ({ children, isAuthenticated, requiredRole, userRole }) => {
   if (!isAuthenticated) {
     console.log('User is not authenticated, redirecting to login.');
@@ -67,7 +68,7 @@ const AppRouter = () => {
           path="/"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <MainLayout><Dashboard /></MainLayout>
+              <MainLayout><Dashboard1 /></MainLayout>
             </ProtectedRoute>
           }
         />
@@ -75,7 +76,7 @@ const AppRouter = () => {
           path="/dashboard"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <MainLayout><Dashboard /></MainLayout>
+              <MainLayout><Dashboard1 /></MainLayout>
             </ProtectedRoute>
           }
         />

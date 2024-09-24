@@ -1,17 +1,17 @@
 import React from 'react';
 
-import logo from '../../assets/image/logo.png';  
+ 
 import NotificationDropdown from './NotificationDropdown';
 import UserDropdown from './UserDropdown';
 
 
 const Header = () => {
   return (
-    <header className="bg-cyan-700 shadow h-16 px-4 flex  justify-between items-center">
-      <div className="flex items-center">
-        {/* Hiển thị Logo */}
-        <img src={logo} alt="Logo" className="w-28 h-full object-contain " />
-      </div>
+    <header className="bg-slate-100 shadow h-16 px-4 flex  justify-between items-center">
+        <div className="flex items-center">
+         {/* Hiển thị Logo */}
+         <h2>Nha May Smart</h2>
+        </div>
 
       <div className="flex items-center space-x-6">
         {/* Notification Dropdown */}

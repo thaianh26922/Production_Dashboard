@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useRef,useState } from 'react';
 import { Bar, Line } from 'react-chartjs-2';
 import MachineTabs from '../../Components/Equiment/Analysis/MachineTabs';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Legend } from 'chart.js';
+import TitleChart from '../../Components/TitleChart/TitleChart'; // Import TitleChart component
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Legend, ChartDataLabels);
@@ -9,16 +10,22 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarEleme
 const MachineReport = () => {
   const [currentMachine, setCurrentMachine] = useState('Tham Số Máy Cắt');
 
-  // Cấu hình chung để tắt datalabels và đặt legend dưới trục Ox
+  // Refs for each chart to handle fullscreen and printing
+  const oeeChartRef = useRef(null);
+  const productionChartRef = useRef(null);
+  const energyChartRef = useRef(null);
+  const runtimeChartRef = useRef(null);
+
+  // Common chart options
   const commonOptions = {
     responsive: true,
     plugins: {
       legend: {
         display: true,
-        position: 'bottom', // Đặt legend dưới trục Ox
+        position: 'bottom',
       },
       datalabels: {
-        display: false, // Tắt datalabels
+        display: false,
       },
     },
     scales: {
@@ -28,7 +35,7 @@ const MachineReport = () => {
     },
   };
 
-  // Dữ liệu mẫu cho các biểu đồ
+  // Chart data
   const chartData = {
     labels: ['Aug 24', 'Aug 27', 'Aug 30', 'Sep 02', 'Sep 05', 'Sep 08', 'Sep 11', 'Sep 14', 'Sep 17', 'Sep 20'],
     datasets: [
@@ -97,45 +104,80 @@ const MachineReport = () => {
     { timestamp: '2024-09-18 03:39:18', sanLuong: '99 pcs', dienNang: '1242.00 kWh', thoiGianMayChay: '18 giờ 28 phút 14 giây' },
   ];
 
+  // Fullscreen and print handlers
+  const handleFullscreen = (ref) => {
+    if (ref.current) {
+      if (ref.current.requestFullscreen) {
+        ref.current.requestFullscreen();
+      }
+    }
+  };
+
+  const handlePrint = (ref) => {
+    if (ref.current) {
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write('<html><head><title>Print Chart</title></head><body>');
+      printWindow.document.write(ref.current.innerHTML);
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }
+  };
+
   return (
     <div className="p-2 space-y-4">
-      {/* Hàng 1: Tabs máy */}
-      <div className="grid grid-cols-3 gap-2">
-        <MachineTabs currentMachine={currentMachine} setCurrentMachine={setCurrentMachine} />
-      </div>
-
+     
       {/* Hàng 2: Ba biểu đồ */}
       <div className="grid grid-cols-3 gap-2">
         {/* Biểu đồ 1: Xu Hướng Hiệu Suất OEE */}
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="text-sm font-semibold mb-2">Xu Hướng Hiệu Suất OEE</h3>
+        <div className="bg-white p-4 rounded-lg shadow" ref={oeeChartRef}>
+          <TitleChart 
+            title="Xu Hướng Hiệu Suất OEE"
+            timeWindow="Realtime - Current week (Mon - Sun)"
+            onFullscreen={() => handleFullscreen(oeeChartRef)}
+            onPrint={() => handlePrint(oeeChartRef)}
+          />
           <Line data={chartData} options={commonOptions} />
         </div>
 
         {/* Biểu đồ 2: Biểu Đồ Sản Lượng */}
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="text-sm font-semibold mb-2">Biểu Đồ Sản Lượng</h3>
+        <div className="bg-white p-4 rounded-lg shadow" ref={productionChartRef}>
+          <TitleChart 
+            title="Biểu Đồ Sản Lượng"
+            timeWindow="Realtime - Current week (Mon - Sun)"
+            onFullscreen={() => handleFullscreen(productionChartRef)}
+            onPrint={() => handlePrint(productionChartRef)}
+          />
           <Bar data={productionData} options={commonOptions} />
         </div>
 
-        {/* Biểu đồ 3: Biểu Đồ Năng Lượng */}
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="text-sm font-semibold mb-2">Biểu Đồ Năng Lượng</h3>
-          <Bar data={energyData} options={commonOptions} />
+        {/* Biểu đồ 3: Biểu Đồ Tổng Thời Gian  */}
+        <div className=" bg-white p-4 rounded-lg shadow" ref={runtimeChartRef}>
+          <TitleChart 
+            title="Biểu Đồ Tổng Thời Gian"
+            timeWindow="Realtime - Current week (Mon - Sun)"
+            onFullscreen={() => handleFullscreen(runtimeChartRef)}
+            onPrint={() => handlePrint(runtimeChartRef)}
+          />
+          <Bar data={runtimeData} options={commonOptions} />
         </div>
+       
       </div>
 
       {/* Hàng 3: 1 Biểu đồ + Bảng */}
       <div className="grid grid-cols-5 gap-2">
-        {/* Biểu đồ 4: Biểu Đồ Tổng Thời Gian */}
-        <div className="col-span-2 bg-white p-4 rounded-lg shadow">
-          <h3 className="text-sm font-semibold mb-2">Biểu Đồ Tổng Thời Gian</h3>
-          <Bar data={runtimeData} options={commonOptions} />
-        </div>
+        
 
         {/* Bảng Thống Kê */}
-        <div className="col-span-3 bg-white p-4 rounded-lg shadow">
-          <h3 className="text-sm font-semibold mb-2">Thống Kê</h3>
+        <div className="col-span-5 bg-white p-4 rounded-lg shadow">
+          <TitleChart 
+              title="Bang thong ke san luong "
+              timeWindow="Realtime - Current week (Mon - Sun)"
+              onFullscreen={() => handleFullscreen(runtimeChartRef)}
+              onPrint={() => handlePrint(runtimeChartRef)}
+            />
           <table className="w-full text-left table-auto">
             <thead>
               <tr className="bg-gray-200">

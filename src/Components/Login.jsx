@@ -111,16 +111,7 @@ function Login() {
           </div>
         </form>
 
-        <div className="flex justify-center space-x-4">
-          <a href="#" className="flex items-center text-sm text-blue-600 hover:underline">
-            <FaUsers className="mr-2" />
-            Nhóm hỗ trợ
-          </a>
-          <a href="#" className="flex items-center text-sm text-blue-600 hover:underline">
-            <FaBook className="mr-2" />
-            Tài liệu hướng dẫn
-          </a>
-        </div>
+        
       </div>
     </div>
   );

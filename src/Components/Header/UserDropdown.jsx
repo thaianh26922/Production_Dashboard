@@ -25,8 +25,8 @@ const UserDropdown = () => {
             alt="User Avatar"
             className="w-8 h-8 rounded-full"
           />
-          <span className="ml-2 text-gray-50 dark:text-white">Đồng Duy Hậu</span>
-          <FiChevronDown className="ml-1 text-white" />
+          <span className="ml-2 text-gray-600 dark:text-white">Đồng Duy Hậu</span>
+          <FiChevronDown className="ml-1 text-gray-600" />
         </Menu.Button>
       </div>
       <Transition

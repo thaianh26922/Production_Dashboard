@@ -25,7 +25,7 @@ function MainLayout({ children }) {
         </header>
 
         {/* Nội dung chính */}
-        <main className="flex-grow p-4 bg-cyan-700 rounded-lg overflow-auto mt-2 ml-2">
+        <main className="flex-grow p-4 bg-gray-100 rounded-lg overflow-auto mt-2 ml-2">
           {children}
         </main>
       </div>
