@@ -1,5 +1,8 @@
 import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
+import MachineStatusHistory from './MachineStatusHistory';
+
+
 
 const PerformanceMetrics = () => {
   const doughnutData = (value) => ({
@@ -44,27 +47,28 @@ const PerformanceMetrics = () => {
             <div className="absolute inset-0 flex items-center justify-center text-sm font-bold">{89.79}%</div>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow-lg p-4 flex flex-col items-center">
+        {/*<div className="bg-white rounded-lg shadow-lg p-4 flex flex-col items-center">
           <h3 className="font-semibold text-center text-xs mb-2">Hiệu Suất P (%)</h3>
           <div className="relative w-32 h-40"> 
             <Doughnut data={doughnutData(89.79)} options={doughnutOptions} />
             <div className="absolute inset-0 flex items-center justify-center text-sm font-bold">{89.79}%</div>
           </div>
-        </div>
-        <div className="bg-white rounded-lg shadow-lg p-4 flex flex-col items-center">
+        </div>*/}
+        {/* <div className="bg-white rounded-lg shadow-lg p-4 flex flex-col items-center">
           <h3 className="font-semibold text-center text-xs mb-2">Chất Lượng Q (%)</h3>
           <div className="relative w-32 h-40"> {/* Điều chỉnh kích thước biểu đồ */}
-            <Doughnut data={doughnutData(100)} options={doughnutOptions} />
+            {/* <Doughnut data={doughnutData(100)} options={doughnutOptions} />
             <div className="absolute inset-0 flex items-center justify-center text-sm font-bold">{100}%</div>
           </div>
-        </div>
-        <div className="bg-white rounded-lg shadow-lg p-4 flex flex-col items-center">
+        </div> */} 
+        {/* <div className="bg-white rounded-lg shadow-lg p-4 flex flex-col items-center">
           <h3 className="font-semibold text-center text-xs mb-2">Hiệu Suất Tổng Thể OEE </h3>
           <div className="relative w-32 h-40"> {/* Điều chỉnh kích thước biểu đồ */}
-            <Doughnut data={doughnutData(80.62)} options={doughnutOptions} />
+            {/* <Doughnut data={doughnutData(80.62)} options={doughnutOptions} />
             <div className="absolute inset-0 flex items-center justify-center text-sm font-bold">{80.62}%</div>
           </div>
-        </div>
+        </div> */} 
+         
       </div>
        
        <div className="col-span-4 grid grid-cols-2 gap-2">

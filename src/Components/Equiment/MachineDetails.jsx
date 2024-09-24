@@ -70,12 +70,8 @@ const MachineDetails = () => {
     <div className="p-1 rounded-lg shadow-md grid gap-2 w-full grid-rows-auto">
   {/* Phần trên hiển thị trạng thái máy và lựa chọn máy */}
   <div className="grid grid-cols-12 gap-2">
-  {/* Cột 1: Máy cắt */}
-  <div className="col-span-1 w-full h-full ">
-    <MachineSelection currentMachine={currentMachine} setCurrentMachine={setCurrentMachine} />
-  </div>
 
-  {/* Cột 2: Hình ảnh máy và tên */}
+   {/* Cột 2: Hình ảnh máy và tên */}
   <div className="col-span-3 flex flex-col items-center bg-white p-2 rounded-lg shadow">
     <img
       src={machineImages[currentMachine]}

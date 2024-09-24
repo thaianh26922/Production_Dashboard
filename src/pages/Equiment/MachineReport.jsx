@@ -1,4 +1,4 @@
-import React, { useRef,useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Bar, Line } from 'react-chartjs-2';
 import MachineTabs from '../../Components/Equiment/Analysis/MachineTabs';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Legend } from 'chart.js';
@@ -126,9 +126,36 @@ const MachineReport = () => {
     }
   };
 
+  // Stack bar options for runtime chart
+  const runtimeChartOptions = {
+    responsive: true,
+    scales: {
+      x: {
+        stacked: true,
+      },
+      y: {
+        stacked: true,
+        beginAtZero: true,
+      },
+    },
+    plugins: {
+      legend: {
+        display: true,
+        position: 'bottom',
+      },
+      datalabels: {
+        display: false,
+      },
+    },
+  };
+
   return (
     <div className="p-2 space-y-4">
-     
+      {/* Hàng 1: Tabs máy */}
+      <div className="grid grid-cols-3 gap-2">
+        <MachineTabs currentMachine={currentMachine} setCurrentMachine={setCurrentMachine} />
+      </div>
+
       {/* Hàng 2: Ba biểu đồ */}
       <div className="grid grid-cols-3 gap-2">
         {/* Biểu đồ 1: Xu Hướng Hiệu Suất OEE */}
@@ -161,23 +188,21 @@ const MachineReport = () => {
             onFullscreen={() => handleFullscreen(runtimeChartRef)}
             onPrint={() => handlePrint(runtimeChartRef)}
           />
-          <Bar data={runtimeData} options={commonOptions} />
+          <Bar data={runtimeData} options={runtimeChartOptions} />
         </div>
        
       </div>
 
       {/* Hàng 3: 1 Biểu đồ + Bảng */}
       <div className="grid grid-cols-5 gap-2">
-        
-
         {/* Bảng Thống Kê */}
         <div className="col-span-5 bg-white p-4 rounded-lg shadow">
           <TitleChart 
-              title="Bang thong ke san luong "
-              timeWindow="Realtime - Current week (Mon - Sun)"
-              onFullscreen={() => handleFullscreen(runtimeChartRef)}
-              onPrint={() => handlePrint(runtimeChartRef)}
-            />
+            title="Bảng Thống Kê Sản Lượng"
+            timeWindow="Realtime - Current week (Mon - Sun)"
+            onFullscreen={() => handleFullscreen(runtimeChartRef)}
+            onPrint={() => handlePrint(runtimeChartRef)}
+          />
           <table className="w-full text-left table-auto">
             <thead>
               <tr className="bg-gray-200">

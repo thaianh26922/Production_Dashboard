@@ -22,14 +22,10 @@ const EquipmentDashboard = () => {
         </div>
         
         {/* Hàng 3: RealTimeEnergyChart và HourlyProductionChart (cùng một hàng) */}
-        <div className="grid grid-cols-2 gap-4 mt-2">
-          <div className="bg-white rounded-lg shadow-lg p-4">
-            <RealTimeEnergyChart />
-          </div>
           <div className="bg-white rounded-lg shadow-lg p-4">
             <HourlyProductionChart />
           </div>
-        </div>
+       
 
       </div>
     </>

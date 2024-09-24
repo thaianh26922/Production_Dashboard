@@ -25,14 +25,15 @@ const MachineCard = ({ machine }) => {
   return (
     <div className="shadow-md" style={{ backgroundColor: getOEEColor(machine.oee) }}>
       {/* 1. Header */}
-      <div className={`p-6 text-white ${getHeaderColor(machine.status)}`}>
+      <div className={`p-6 flex text-white items-center justify-center ${getHeaderColor(machine.status)}`}>
         {/* Machine Name in the first line */}
-        <h2 className="text-xl font-bold mb-2">CNC {machine.id}</h2>
+        <div> <h2 className="text-xl font-bold mb-2">CNC {machine.id}</h2></div>
+        
 
         {/* Machine Time and Status in the second line */}
-        <div className="flex justify-between">
-          <span>{machine.time}</span>
-          <span>{machine.status}</span>
+        <div className="flex justify-between items-center">
+          <span>{machine.time} . {machine.status}</span>
+          
         </div>
       </div>
 
