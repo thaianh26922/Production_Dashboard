@@ -2,3 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+
+@keyframes blinkError {
+    0%, 100% {
+      background-color: #fa2e0a; /* Red for Error */
+    }
+    50% {
+      background-color: #fa592d; /* Lighter Red */
+    }
+  }
+  
+  .animate-blinkError {
+    animation: blinkError 0.5s infinite;
+  }
+  

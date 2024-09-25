@@ -4,40 +4,42 @@ import DashboardGrid from './DashboardGrid';
 import Breadcrumb from '../../Components/Breadcrumb/Breadcrumb';
 
 const machines = [
-  { id: '001', status: 'Active', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '002', status: 'Active', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '003', status: 'Active', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '004', status: 'Active', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '005', status: 'Active', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '006', status: 'Active', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '007', status: 'Active', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '008', status: 'Active', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '009', status: 'Error', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '010', status: 'Active', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '011', status: 'Idle', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '012', status: 'Set up', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '006', status: 'Active', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '007', status: 'Active', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '008', status: 'Active', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '009', status: 'Active', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '010', status: 'Active', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '011', status: 'Idle', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '012', status: 'Active', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '006', status: 'Active', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '007', status: 'Active', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '008', status: 'Active', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '009', status: 'Error', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '010', status: 'Active', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '011', status: 'Active', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '012', status: 'Set up', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '006', status: 'Active', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '007', status: 'Active', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '008', status: 'Active', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '009', status: 'Error', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '010', status: 'Active', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '011', status: 'Idle', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '012', status: 'Set up', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-
+  { id: '001', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '002', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '003', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '004', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '005', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '006', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '007', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '008', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '009', status: 'Lỗi', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '010', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '011', status: 'Chờ', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '012', status: 'Chờ', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '006', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '007', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '008', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '009', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '010', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '011', status: 'Chờ', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '012', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '006', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '007', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '008', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '009', status: 'Lỗi', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '010', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '011', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '012', status: 'Cài Đặt', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '006', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '007', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '008', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '009', status: 'Lỗi', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '010', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '011', status: 'Chờ', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '012', status: 'Chờ', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '009', status: 'Lỗi', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '010', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+ 
   // Add more machines here
 ];
 
@@ -153,7 +155,7 @@ const Dashboard1 = () => {
       </div>
 
       {/* Machine Cards Section */}
-      <div ref={cardsRef} className="">
+      <div ref={cardsRef} className="2xl:">
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="w-12 h-12 animate-spin" viewBox="0 0 16 16">

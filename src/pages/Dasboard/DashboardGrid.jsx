@@ -3,7 +3,7 @@ import MachineCard from '../../Components/MachineCard/MachineCard';  // Import t
 
 const DashboardGrid = ({ machines }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+    <div className="grid grid-row md:grid-cols-7 gap-1 2xl:flex-grow-1">
       {machines.map((machine) => (
         <MachineCard key={machine.id} machine={machine} />
       ))}
