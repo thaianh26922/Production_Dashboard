@@ -13,6 +13,6 @@
   }
   
   .animate-blinkError {
-    animation: blinkError 0.5s infinite;
+    animation: blinkError 0.2s infinite;
   }
   

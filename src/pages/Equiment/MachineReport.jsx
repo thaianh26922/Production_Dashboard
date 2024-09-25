@@ -4,6 +4,7 @@ import MachineTabs from '../../Components/Equiment/Analysis/MachineTabs';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Legend } from 'chart.js';
 import TitleChart from '../../Components/TitleChart/TitleChart'; // Import TitleChart component
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { text } from 'd3';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Legend, ChartDataLabels);
 
@@ -21,8 +22,11 @@ const MachineReport = () => {
     responsive: true,
     plugins: {
       legend: {
+        
         display: true,
         position: 'bottom',
+        text:'green'
+        
       },
       datalabels: {
         display: false,
@@ -39,24 +43,15 @@ const MachineReport = () => {
   const chartData = {
     labels: ['Aug 24', 'Aug 27', 'Aug 30', 'Sep 02', 'Sep 05', 'Sep 08', 'Sep 11', 'Sep 14', 'Sep 17', 'Sep 20'],
     datasets: [
-      {
-        label: 'OEE',
-        data: [80, 85, 83, 82, 81, 84, 79, 82, 83, 79],
-        borderColor: 'blue',
-        fill: false,
-      },
+     
       {
         label: 'Availability',
         data: [90, 92, 91, 89, 88, 89, 90, 88, 89, 88],
         borderColor: 'green',
         fill: false,
+        backgroundColor: 'green'
       },
-      {
-        label: 'Performance',
-        data: [88, 89, 90, 87, 86, 85, 86, 87, 88, 89],
-        borderColor: 'orange',
-        fill: false,
-      },
+     
     ],
   };
 
@@ -152,9 +147,7 @@ const MachineReport = () => {
   return (
     <div className="p-2 space-y-4">
       {/* Hàng 1: Tabs máy */}
-      <div className="grid grid-cols-3 gap-2">
-        <MachineTabs currentMachine={currentMachine} setCurrentMachine={setCurrentMachine} />
-      </div>
+     
 
       {/* Hàng 2: Ba biểu đồ */}
       <div className="grid grid-cols-3 gap-2">
@@ -170,15 +163,7 @@ const MachineReport = () => {
         </div>
 
         {/* Biểu đồ 2: Biểu Đồ Sản Lượng */}
-        <div className="bg-white p-4 rounded-lg shadow" ref={productionChartRef}>
-          <TitleChart 
-            title="Biểu Đồ Sản Lượng"
-            timeWindow="Realtime - Current week (Mon - Sun)"
-            onFullscreen={() => handleFullscreen(productionChartRef)}
-            onPrint={() => handlePrint(productionChartRef)}
-          />
-          <Bar data={productionData} options={commonOptions} />
-        </div>
+      
 
         {/* Biểu đồ 3: Biểu Đồ Tổng Thời Gian  */}
         <div className=" bg-white p-4 rounded-lg shadow" ref={runtimeChartRef}>

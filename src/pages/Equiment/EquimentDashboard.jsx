@@ -17,14 +17,10 @@ const EquipmentDashboard = () => {
         </div>
         
         {/* Hàng 2: PerformanceMetrics */}
-        <div className="bg-white rounded-lg p-4 shadow-lg mt-2">
-          <PerformanceMetrics />
-        </div>
+       
         
         {/* Hàng 3: RealTimeEnergyChart và HourlyProductionChart (cùng một hàng) */}
-          <div className="bg-white rounded-lg shadow-lg p-4">
-            <HourlyProductionChart />
-          </div>
+         
        
 
       </div>

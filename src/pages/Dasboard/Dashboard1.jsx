@@ -7,7 +7,7 @@ const machines = [
   { id: '001', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
   { id: '002', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
   { id: '003', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '004', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '004', status: 'Off', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
   { id: '005', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
   { id: '006', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
   { id: '007', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
@@ -38,7 +38,7 @@ const machines = [
   { id: '011', status: 'Chờ', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
   { id: '012', status: 'Chờ', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
   { id: '009', status: 'Lỗi', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '010', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '010', status: 'Tắt máy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
  
   // Add more machines here
 ];
@@ -155,7 +155,7 @@ const Dashboard1 = () => {
       </div>
 
       {/* Machine Cards Section */}
-      <div ref={cardsRef} className="2xl:">
+      <div ref={cardsRef} className="">
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="w-12 h-12 animate-spin" viewBox="0 0 16 16">
