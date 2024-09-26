@@ -20,6 +20,10 @@ import Profile from '../pages/Profile/Profile'
 import Messenger from '../pages/Message/Messenger ';
 import FAQAccordion from '../pages/FAQ/FAQAccordion'
 import Dashboard1 from '../pages/Dasboard/Dashboard1';
+import DeviceManagement from '../pages/Equiment/Management/DeviceManagement';
+import MachineWorkScheduleList from '../pages/Equiment/Management/MachineWorkScheduleList';
+import DeviceAnalysis from '../pages/Equiment/Management/Analysis/DeviceAnalysis';
+import ErrorReportCatalog from '../pages/ErrorReportCatalog/ErrorReportCatalog';
 
 const AppRouter = () => {
   return (
@@ -28,16 +32,26 @@ const AppRouter = () => {
         <Route path="/" element={<MainLayout><Dashboard1 /></MainLayout>} />
         <Route path="/dashboard" element={<MainLayout><Dashboard1 /></MainLayout>} />
 
-        {/* Production Routes */}
+        {/* Production Routes
         <Route path="/production/overview" element={<MainLayout><ProductionDashboard /></MainLayout>} />
         <Route path="/production/reports" element={<MainLayout><ProductionAnalysisPage /></MainLayout>} />
-        <Route path="/production/schedule" element={<MainLayout><ProductionPlanCatalog /></MainLayout>} />
-
+        <Route path="/production/schedule" element={<MainLayout><ProductionPlanCatalog /></MainLayout>} /> */}
         {/* Equipment Routes */}
+        <Route path="/equipment/devivce" element={<MainLayout><DeviceManagement /></MainLayout>} />
+        <Route path="/equipment/schedule" element={<MainLayout><MachineWorkScheduleList /></MainLayout>} />
+
+          {/* QCS Routes */}
+        {/* <Route path="/QCS/overview" element={<MainLayout><QualityOverView /></MainLayout>} /> */}
+        <Route path="/QCS/analysis" element={<MainLayout><DeviceAnalysis /></MainLayout>} />
+        <Route path="/QCS/reports" element={<MainLayout><MachineReport/></MainLayout>} />
+        <Route path="/QCS/issue" element={<MainLayout><ErrorReportCatalog /></MainLayout>} />
+
+
+        {/* Equipment Routes
         <Route path="/equipment/machines" element={<MainLayout><EquipmentDashboard /></MainLayout>} />
         <Route path="/equipment/analysis" element={<MainLayout> <EquipmentAnalysis /> </MainLayout>} />
         <Route path="/equipment/reports" element={<MainLayout><MachineReport /></MainLayout>} />
-        <Route path="/equipment/maintenance" element={<MainLayout><MaintenancePlanCatalog /></MainLayout>} />
+        <Route path="/equipment/maintenance" element={<MainLayout><MaintenancePlanCatalog /></MainLayout>} /> */}
 
         {/* Quality Routes */}
         <Route path="/quality/overview" element={<MainLayout><QualityOverView /></MainLayout>} />

@@ -5,6 +5,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import TitleChart from '../../Components/TitleChart/TitleChart'; // Import TitleChart component
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { text } from 'd3';
+import MachineStatusHistory from '../../Components/Equiment/MachineStatusHistory';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Legend, ChartDataLabels);
 
@@ -150,7 +151,7 @@ const MachineReport = () => {
      
 
       {/* Hàng 2: Ba biểu đồ */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2">
         {/* Biểu đồ 1: Xu Hướng Hiệu Suất OEE */}
         <div className="bg-white p-4 rounded-lg shadow" ref={oeeChartRef}>
           <TitleChart 
@@ -182,32 +183,13 @@ const MachineReport = () => {
       <div className="grid grid-cols-5 gap-2">
         {/* Bảng Thống Kê */}
         <div className="col-span-5 bg-white p-4 rounded-lg shadow">
-          <TitleChart 
-            title="Bảng Thống Kê Sản Lượng"
+        <TitleChart 
+            title="Biểu Đồ Trạng Thái"
             timeWindow="Realtime - Current week (Mon - Sun)"
             onFullscreen={() => handleFullscreen(runtimeChartRef)}
             onPrint={() => handlePrint(runtimeChartRef)}
           />
-          <table className="w-full text-left table-auto">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="p-2">Timestamp</th>
-                <th className="p-2">Sản Lượng</th>
-                <th className="p-2">Điện Năng</th>
-                <th className="p-2">Thời Gian Máy Chạy</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tableData.map((row, index) => (
-                <tr key={index} className="border-b">
-                  <td className="p-2">{row.timestamp}</td>
-                  <td className="p-2">{row.sanLuong}</td>
-                  <td className="p-2">{row.dienNang}</td>
-                  <td className="p-2">{row.thoiGianMayChay}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+         <MachineStatusHistory />
         </div>
       </div>
     </div>

@@ -10,7 +10,7 @@ function MainLayout({ children }) {
   return (
     <div className="flex h-screen w-screen">
       
-      <aside className={`bg-gray-200 flex-shrink-0 transition-all duration-300 ${isSidebarCollapsed ? 'w-20' : 'w-48'}`}>
+      <aside className={`bg-gray-200 flex-shrink-0 transition-all duration-300 ${isSidebarCollapsed ? 'w-20' : 'w-54'}`}>
         <Sidebar 
           isCollapsed={isSidebarCollapsed} 
           setIsCollapsed={setIsSidebarCollapsed} 

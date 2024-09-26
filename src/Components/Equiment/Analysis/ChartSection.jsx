@@ -200,6 +200,7 @@ const ChartSection = ({ downtimeData, errorOccurrenceData, errorTimeData }) => {
 
       {/* Biểu đồ Pareto (Thời Gian Dừng Máy) */}
       <div className="bg-white p-6 rounded-lg shadow" style={{ height: '500px' }}>
+        
         <h3 className="text-sm font-semibold mb-2">Thời Gian Dừng Máy</h3>
         <Bar data={errorTimeChartData} options={paretoTimeOptions} />
       </div>

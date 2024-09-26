@@ -3,54 +3,53 @@ import { AiOutlineFullscreen, AiOutlineFullscreenExit } from 'react-icons/ai';
 import DashboardGrid from './DashboardGrid';
 import Breadcrumb from '../../Components/Breadcrumb/Breadcrumb';
 
+// Dữ liệu mẫu về các máy
 const machines = [
-  { id: '001', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '002', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '003', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '004', status: 'Off', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '005', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '006', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '007', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '008', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '009', status: 'Lỗi', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '010', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '011', status: 'Chờ', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '012', status: 'Chờ', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '006', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '007', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '008', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '009', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '010', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
-  { id: '011', status: 'Chờ', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '012', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '006', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '007', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '008', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '009', status: 'Lỗi', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '010', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '011', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '012', status: 'Cài Đặt', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '006', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '007', status: 'Chạy', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '008', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '009', status: 'Lỗi', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '010', status: 'Chạy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '011', status: 'Chờ', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '012', status: 'Chờ', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '009', status: 'Lỗi', time: '3m', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
-  { id: '010', status: 'Tắt máy', time: '3m', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
- 
-  // Add more machines here
+  { id: '001', status: 'Chạy', time: '3 phút', oee: 78, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '002', status: 'Chạy', time: '3 phút', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '003', status: 'Chạy', time: '3 phút', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '004', status: 'Chạy', time: '3 phút', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '005', status: 'Chạy', time: '3 phút', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '006', status: 'Chạy', time: '3 phút', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '007', status: 'Lỗi', time: '3 phút', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '008', status: 'Chạy', time: '3 phút', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '009', status: 'Chờ', time: '3 phút', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '010', status: 'Chạy', time: '3 giờ 56 phút', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '011', status: 'Tắt Máy', time: '3 phút', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '012', status: 'Chờ', time: '3 phút', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '006', status: 'Chạy', time: '3 giờ 10 phút', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '007', status: 'Chạy', time: '3 phút', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '008', status: 'Chạy', time: '3 phút', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '009', status: 'Chạy', time: '3 phút', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '010', status: 'Chạy', time: '3 phút', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 01', chartData: [5, 4, 6, 3, 7] },
+  { id: '011', status: 'Chờ', time: '3 phút', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '012', status: 'Lỗi', time: '3 phút', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '006', status: 'Chạy', time: '3 phút', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '007', status: 'Chạy', time: '3 phút', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '008', status: 'Chạy', time: '3 phút', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '009', status: 'Chờ', time: '3 phút', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '010', status: 'Chạy', time: '3 phút', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '011', status: 'Chạy', time: '3 phút', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '012', status: 'Cài Đặt', time: '3 phút', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '006', status: 'Chạy', time: '3 phút', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '007', status: 'Chạy', time: '3 phút', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '008', status: 'Chạy', time: '3 phút', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '009', status: 'Chờ', time: '3 phút', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '010', status: 'Chạy', time: '3 phút', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '011', status: 'Chờ', time: '3 phút', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '012', status: 'Chờ', time: '3 phút', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '009', status: 'Chờ', time: '3 phút', oee: 94, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  { id: '010', status: 'Chạy', time: '3 phút', oee: 100, pcs: 66, diff: 6, workcenter: 'Line 02', chartData: [5, 4, 6, 3, 7] },
+  // ... Các máy khác
 ];
 
 const Dashboard1 = () => {
   const [selectedWorkcenter, setSelectedWorkcenter] = useState('All Workcenters');
-  const [selectedOEE, setSelectedOEE] = useState('OEE');
   const [loading, setLoading] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);  // State for fullscreen toggle
-  const cardsRef = useRef(null);  // Ref to access the machine cards section
+  const [isFullscreen, setIsFullscreen] = useState(false);  
+  const cardsRef = useRef(null); 
 
-  // Function to handle workcenter selection
+  // Hàm xử lý khi thay đổi workcenter
   const handleWorkcenterChange = (e) => {
     setLoading(true);
     setSelectedWorkcenter(e.target.value);
@@ -59,12 +58,7 @@ const Dashboard1 = () => {
     }, 500);
   };
 
-  // Function to handle OEE selection
-  const handleOEEChange = (e) => {
-    setSelectedOEE(e.target.value);
-  };
-
-  // Function to toggle fullscreen mode using Fullscreen API for machine card section
+  // Hàm bật/tắt chế độ fullscreen
   const toggleFullscreen = () => {
     if (!isFullscreen) {
       if (cardsRef.current.requestFullscreen) {
@@ -87,10 +81,10 @@ const Dashboard1 = () => {
         document.msExitFullscreen();
       }
     }
-    setIsFullscreen(!isFullscreen);  // Toggle fullscreen state
+    setIsFullscreen(!isFullscreen);
   };
 
-  // Add event listener to detect fullscreen change
+  // Thêm event listener để phát hiện thay đổi fullscreen
   useEffect(() => {
     const handleFullscreenChange = () => {
       if (!document.fullscreenElement) {
@@ -105,14 +99,14 @@ const Dashboard1 = () => {
     };
   }, []);
 
-  // Filter machines based on the selected workcenter
+  // Lọc các máy dựa trên workcenter được chọn
   const filteredMachines = machines.filter((machine) =>
     selectedWorkcenter === 'All Workcenters' || machine.workcenter === selectedWorkcenter
   );
 
   return (
     <div className="w-full h-full mx-auto relative">
-      {/* Breadcrumb and Dropdowns */}
+      {/* Breadcrumb và các dropdown */}
       <div className="flex justify-between items-center mb-4 px-2 ">
         <div className="text-gray-600">
           <Breadcrumb />
@@ -123,7 +117,7 @@ const Dashboard1 = () => {
             <select
               value={selectedWorkcenter}
               onChange={handleWorkcenterChange}
-              className="appearance-none bg-white border border-gray-300 rounded-lg py-2 px-6 leading-tight focus:outline-none hover:bg-gray-50 transition duration-150"
+              className="appearance-none bg-white border border-gray-300 rounded-lg py-2 px-8 leading-tight focus:outline-none hover:bg-gray-50 transition duration-150"
             >
               <option value="All Workcenters">All Workcenters</option>
               <option value="Line 01">Line 01</option>
@@ -135,26 +129,10 @@ const Dashboard1 = () => {
               </svg>
             </div>
           </div>
-
-          <div className="relative">
-            <select
-              value={selectedOEE}
-              onChange={handleOEEChange}
-              className="appearance-none bg-white border border-gray-300 rounded-lg py-2 px-6 text-left leading-tight focus:outline-none hover:bg-gray-50 transition duration-150"
-            >
-              <option value="OEE">OEE</option>
-              <option value="DownTime">DownTime</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
-              </svg>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Machine Cards Section */}
+      {/* Phần hiển thị máy móc */}
       <div ref={cardsRef} className="">
         {loading ? (
           <div className="flex justify-center items-center h-64">
@@ -164,11 +142,11 @@ const Dashboard1 = () => {
             </svg>
           </div>
         ) : (
-          <DashboardGrid machines={filteredMachines} />
+          <DashboardGrid machines={filteredMachines} /> 
         )}
       </div>
 
-      {/* Fullscreen Button */}
+      {/* Nút bật/tắt fullscreen */}
       <button
         className="fixed bottom-4 right-4 z-50 text-white p-3 rounded-full shadow-lg focus:outline-none bg-blue-500 hover:bg-blue-600"
         onClick={toggleFullscreen}

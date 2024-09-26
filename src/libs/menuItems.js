@@ -13,10 +13,18 @@ export const qualityItems = [
 ];
 
 export const equipmentItems = [
-    { name: 'Tổng quan', link: '/equipment/machines' },
-    { name: 'Phân Tích', link: '/equipment/analysis' },
-    { name: 'Báo cáo ', link: '/equipment/reports' },
-    { name: 'Bảo dưỡng', link: '/equipment/maintenance' },
+    { name: 'Thiết bị', link: '/equipment/devivce' },
+    { name: 'Lịch làm việc', link: '/equipment/schedule' },
+    
+    // { name: 'Bảo dưỡng', link: '/equipment/maintenance' },
+];
+
+export const QCStItems = [
+    // { name: 'Tổng quan', link: '/QCS/overview' },
+    { name: 'Phân Tích', link: '/QCS/analysis' },
+    { name: 'Báo cáo ', link: '/QCS/reports' },
+    { name: 'Nhập dữ liệu lỗi ', link: '/QCS/issue' },
+    // { name: 'Bảo dưỡng', link: '/equipment/maintenance' },
 ];
 
 export const inventoryItems = [
