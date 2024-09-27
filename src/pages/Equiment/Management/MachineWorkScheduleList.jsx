@@ -1,42 +1,46 @@
 import React, { useState } from 'react';
-import Select from 'react-select';
+import { Modal, Select, DatePicker, Space, Button, Input } from 'antd';
 import Breadcrumb from '../../../Components/Breadcrumb/Breadcrumb';
 import MachineWorkScheduleCard from '../../../Components/Equiment/MachineSchedule/MachineWorkScheduleCard';
+const { Option } = Select;
 
 const MachineWorkScheduleList = () => {
-  const [selectedArea, setSelectedArea] = useState({ value: 'all', label: 'Toàn nhà máy' });
+  const [selectedArea, setSelectedArea] = useState('all'); // State to store selected area
+  const [selectedMachine, setSelectedMachine] = useState(null); // Track the selected machine for editing
+  const [isModalVisible, setIsModalVisible] = useState(false); // Modal visibility
 
-  // Dữ liệu mẫu cho các máy (có thể lấy từ API)
+  // Sample data for machines (can be fetched from an API)
   const machines = [
-    { id: 1, name: 'CNC1', status: 'Chạy', area: 'area1' },
-    { id: 2, name: 'CNC2', status: 'Chờ', area: 'area1' },
-    { id: 3, name: 'CNC3', status: 'Lỗi', area: 'area1' },
-    { id: 4, name: 'CNC4', status: 'Tắt', area: 'area1' },
-    { id: 5, name: 'CNC5', status: 'Chạy', area: 'area1' },
-    { id: 6, name: 'CNC6', status: 'Chờ', area: 'area1' },
-    { id: 7, name: 'CNC7', status: 'Lỗi', area: 'area2' },
-    { id: 8, name: 'CNC8', status: 'Tắt', area: 'area2' },
-    { id: 9, name: 'CNC9', status: 'Chạy', area: 'area1' },
-    { id: 10, name: 'CNC10', status: 'Chờ', area: 'area2' },
-    { id: 11, name: 'CNC11', status: 'Lỗi', area: 'area2' },
-    { id: 12, name: 'CNC12', status: 'Tắt', area: 'area2' },
+    { id: 1, name: 'CNC1', status: 'Chạy', area: 'area1', shift: 'Ca Sáng', employees: ['nv1', 'nv2'] },
+    { id: 2, name: 'CNC2', status: 'Chờ', area: 'area1', shift: 'Ca Chiều', employees: ['nv3','nv2'] },
+    { id: 3, name: 'CNC3', status: 'Lỗi', area: 'area1', shift: 'Ca Sáng', employees: ['nv3','nv2'] },
+    { id: 4, name: 'CNC3', status: 'Lỗi', area: 'area1', shift: 'Ca Sáng', employees: ['nv3','nv2'] },
+    
+    { id: 5, name: 'CNC3', status: 'Lỗi', area: 'area1', shift: 'Ca Sáng', employees: ['nv3','nv2'] },
+    
+    { id: 6, name: 'CNC3', status: 'Lỗi', area: 'area2', shift: 'Ca Sáng', employees: ['nv3','nv2'] },
+    { id: 7, name: 'CNC3', status: 'Lỗi', area: 'area2', shift: 'Ca Sáng', employees: ['nv3','nv2'] },
+    
+    { id: 8, name: 'CNC3', status: 'Lỗi', area: 'area2', shift: 'Ca Sáng', employees: ['nv3','nv2'] },
+    
+    { id: 9, name: 'CNC3', status: 'Lỗi', area: 'area2', shift: 'Ca Sáng', employees: ['nv3','nv2'] },
+    
   ];
 
-  // Dữ liệu mẫu cho các khu vực (có thể lấy từ API)
+  // Options for selecting different areas (can be fetched from an API)
   const areaOptions = [
-    { value: 'all', label: 'Toàn nhà máy' },
+    { value: 'all', label: 'All' },
     { value: 'area1', label: 'Line 01' },
     { value: 'area2', label: 'Line 02' },
   ];
 
-  // Dữ liệu mẫu cho các ca làm việc
+  // Shift and employee options (optional)
   const shiftOptions = [
-    { value: 'morning', label: 'Ca Sáng' },
-    { value: 'afternoon', label: 'Ca Chiều' },
-    { value: 'night', label: 'Ca Tối' },
+    { value: 'Ca Sáng', label: 'Ca Sáng' },
+    { value: 'Ca Chiều', label: 'Ca Chiều' },
+    { value: 'Ca Tối', label: 'Ca Tối' },
   ];
 
-  // Dữ liệu mẫu về nhân viên
   const employeeOptions = [
     { value: 'nv1', label: 'Nhân viên 1' },
     { value: 'nv2', label: 'Nhân viên 2' },
@@ -44,39 +48,124 @@ const MachineWorkScheduleList = () => {
     { value: 'nv4', label: 'Nhân viên 4' },
   ];
 
-  // Lọc máy theo khu vực được chọn
+  // Filter machines based on the selected area
   const filteredMachines =
-    selectedArea.value === 'all'
-      ? machines // Hiển thị tất cả máy nếu chọn "Toàn nhà máy"
-      : machines.filter((machine) => machine.area === selectedArea.value);
+    selectedArea === 'all'
+      ? machines // Show all machines if "All" is selected
+      : machines.filter((machine) => machine.area === selectedArea);
+
+  // Handle card click to open the modal for editing
+  const handleCardClick = (machine) => {
+    setSelectedMachine(machine);
+    setIsModalVisible(true);
+  };
+
+  // Handle form submission to save the edited details
+  const handleSave = () => {
+    console.log('Updated machine details:', selectedMachine);
+    setIsModalVisible(false);
+  };
 
   return (
     <>
-      {/* Breadcrumb và chọn khu vực trên cùng hàng */}
-      <div className="flex justify-between items-center mb-2">
+      {/* Breadcrumb and Area Selection */}
+      <div className="flex justify-between items-center mb-4">
         <Breadcrumb />
-        <div className="w-[10%] p-4">
+        <div className="flex items-center space-x-1">
+          {/* Select Dropdown for Area */}
           <Select
-            options={areaOptions}
             value={selectedArea}
-            onChange={setSelectedArea}
+            onChange={(value) => setSelectedArea(value)} // Update selected area
             placeholder="Chọn khu vực"
-            classNamePrefix="select"
-          />
+            style={{ width: 100 }}
+          >
+            {areaOptions.map((option) => (
+              <Option key={option.value} value={option.value}>
+                {option.label}
+              </Option>
+            ))}
+          </Select>
+          {/* DatePicker */}
+          <Space direction="vertical">
+            <DatePicker onChange={(date, dateString) => console.log(date, dateString)} />
+          </Space>
         </div>
       </div>
 
-      {/* Danh sách lịch làm việc của máy */}
+      {/* Machine List */}
       <div className="grid grid-cols-4 gap-2">
         {filteredMachines.map((machine) => (
-          <MachineWorkScheduleCard
-            key={machine.id}
-            machine={machine}
-            shiftOptions={shiftOptions}
-            employeeOptions={employeeOptions}
-          />
+          <div key={machine.id} onClick={() => handleCardClick(machine)}>
+            <MachineWorkScheduleCard
+              machine={machine}
+              shiftOptions={shiftOptions}
+              employeeOptions={employeeOptions}
+            />
+          </div>
         ))}
       </div>
+
+      {/* Modal for Editing */}
+      {selectedMachine && (
+        <Modal
+          title={`Edit Machine: ${selectedMachine.name}`}
+          visible={isModalVisible}
+          onCancel={() => setIsModalVisible(false)}
+          footer={[
+            <Button key="cancel" onClick={() => setIsModalVisible(false)}>
+              Cancel
+            </Button>,
+            <Button key="save" type="primary" onClick={handleSave}>
+              Save
+            </Button>,
+          ]}
+        >
+          <div>
+            <label>Status:</label>
+            <Select
+              value={selectedMachine.status}
+              onChange={(value) => setSelectedMachine({ ...selectedMachine, status: value })}
+              style={{ width: '100%' }}
+            >
+              <Option value="Chạy">Chạy</Option>
+              <Option value="Chờ">Chờ</Option>
+              <Option value="Lỗi">Lỗi</Option>
+              <Option value="Tắt">Tắt</Option>
+            </Select>
+          </div>
+
+          <div>
+            <label>Shift:</label>
+            <Select
+              value={selectedMachine.shift}
+              onChange={(value) => setSelectedMachine({ ...selectedMachine, shift: value })}
+              style={{ width: '100%' }}
+            >
+              {shiftOptions.map((option) => (
+                <Option key={option.value} value={option.value}>
+                  {option.label}
+                </Option>
+              ))}
+            </Select>
+          </div>
+
+          <div>
+            <label>Employees:</label>
+            <Select
+              mode="multiple"
+              value={selectedMachine.employees}
+              onChange={(value) => setSelectedMachine({ ...selectedMachine, employees: value })}
+              style={{ width: '100%' }}
+            >
+              {employeeOptions.map((option) => (
+                <Option key={option.value} value={option.value}>
+                  {option.label}
+                </Option>
+              ))}
+            </Select>
+          </div>
+        </Modal>
+      )}
     </>
   );
 };

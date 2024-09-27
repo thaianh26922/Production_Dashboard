@@ -1,11 +1,18 @@
 import React, { useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
+import TitleChart from '../../TitleChart/TitleChart'; // Giả định bạn đã có sẵn thành phần này
 
 const ParetoTimeChart = ({ data, labels }) => {
-  const chartRef = useRef(null);
+  const chartRef = useRef(null); // Sử dụng ref để truy cập canvas
 
   useEffect(() => {
     const ctx = chartRef.current.getContext('2d');
+
+    // Kiểm tra dữ liệu đầu vào
+    if (!data || !labels || data.length === 0 || labels.length === 0) {
+      console.error("Dữ liệu hoặc nhãn trống");
+      return;
+    }
 
     // Tính toán phần trăm tích lũy (cumulative percentage)
     let total = data.reduce((acc, value) => acc + value, 0);
@@ -14,6 +21,13 @@ const ParetoTimeChart = ({ data, labels }) => {
       return (cumulativeSum / total) * 100;
     });
 
+    // Mảng màu cho từng thanh
+    const barColors = [
+      '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+      '#FF9F40', '#66FF66', '#FF6666', '#6699FF', '#FFCC99'
+    ];
+
+    // Tạo biểu đồ
     const chart = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -22,8 +36,8 @@ const ParetoTimeChart = ({ data, labels }) => {
           {
             label: 'Thời gian dừng máy (giờ)',
             data: data,
-            backgroundColor: 'rgba(75, 192, 192, 0.6)',
-            borderColor: 'rgba(75, 192, 192, 1)',
+            backgroundColor: barColors, // Mỗi bar có một màu
+            borderColor: barColors,
             borderWidth: 1,
             yAxisID: 'y',
           },
@@ -41,6 +55,11 @@ const ParetoTimeChart = ({ data, labels }) => {
       options: {
         responsive: true,
         scales: {
+          x: {
+            grid: {
+              display: false, // Ẩn lưới trên trục x
+            },
+          },
           y: {
             beginAtZero: true,
             position: 'left',
@@ -49,8 +68,11 @@ const ParetoTimeChart = ({ data, labels }) => {
                 return value + ' giờ'; // Đơn vị cho cột
               },
             },
+            grid: {
+              display: false, // Ẩn lưới trên trục y
+            },
             title: {
-              display: true,
+              display: false, // Hiển thị tiêu đề trục y
               text: 'Thời gian dừng máy (giờ)',
             },
           },
@@ -62,30 +84,53 @@ const ParetoTimeChart = ({ data, labels }) => {
                 return value + '%'; // Thêm ký hiệu "%" cho đường tích lũy
               },
             },
+            grid: {
+              display: false, // Ẩn lưới trên trục y1
+            },
             title: {
-              display: true,
+              display: false, // Hiển thị tiêu đề trục y1
               text: 'Tỷ lệ tích lũy (%)',
             },
           },
         },
         plugins: {
           title: {
-            display: true,
-            text: 'Thời gian dừng máy (Pareto)',
+            display: false,
+            text: 'Phân bố Thời gian dừng máy (Pareto)',
+          },
+          legend: {
+            display: false,
+            position: 'top', // Đặt legend ở phía trên
           },
           datalabels: {
-            display: false,  
+            display: false, // Ẩn nhãn dữ liệu
           },
         },
       },
     });
 
     return () => {
-      chart.destroy(); // Cleanup chart on component unmount
+      chart.destroy(); // Cleanup biểu đồ khi component bị unmount
     };
   }, [data, labels]);
 
-  return <canvas ref={chartRef} />;
+  // Hàm xử lý fullscreen và in (giả định đã có sẵn trong TitleChart)
+  const handleFullscreen = () => {
+    console.log("Fullscreen triggered");
+  };
+
+  const handlePrint = () => {
+    console.log("Print triggered");
+  };
+
+  return (
+    <div>
+    
+      <div>
+        <canvas ref={chartRef} />
+      </div>
+    </div>
+  );
 };
 
 export default ParetoTimeChart;

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
+import TitleChart from '../../TitleChart/TitleChart';
 
 const ParetoFrequencyChart = ({ data, labels }) => {
   const chartRef = useRef(null);
@@ -14,26 +15,32 @@ const ParetoFrequencyChart = ({ data, labels }) => {
       return (cumulativeSum / total) * 100;
     });
 
+    // Mảng màu sắc cho mỗi thanh bar
+    const barColors = [
+      '#410278', '#186e15', '#FFCE56', '#4BC0C0', '#9966FF',
+      '#FF9F40', '#66FF66', '#FF6666', '#6699FF', '#FFCC99'
+    ];
+
     const chart = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: labels, // Nhãn của các cột
         datasets: [
           {
-            label: 'Số lần dừng máy',
+            label: '', // Ẩn label của các bar
             data: data,
-            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-            borderColor: 'rgba(54, 162, 235, 1)',
+            backgroundColor: barColors, // Mỗi bar có một màu riêng
+            borderColor: barColors, // Màu viền của các thanh cũng theo từng màu
             borderWidth: 1,
             yAxisID: 'y',
           },
           {
-            label: 'Tỷ lệ tích lũy (%)',
+            label: '', // Ẩn label của đường tích lũy
             data: cumulativeData,
             type: 'line',
             fill: false,
             borderColor: 'rgba(255, 99, 132, 1)',
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            backgroundColor: 'rgba(255, 99, 132, 1)',
             yAxisID: 'y1',
           },
         ],
@@ -41,6 +48,11 @@ const ParetoFrequencyChart = ({ data, labels }) => {
       options: {
         responsive: true,
         scales: {
+          x: {
+            grid: {
+              display: false, // Ẩn lưới trục x
+            },
+          },
           y: {
             beginAtZero: true,
             position: 'left',
@@ -49,8 +61,11 @@ const ParetoFrequencyChart = ({ data, labels }) => {
                 return value + ' lần'; // Đơn vị cho cột
               },
             },
+            grid: {
+              display: false, // Ẩn lưới trục y
+            },
             title: {
-              display: true,
+              display: false,
               text: 'Số lần dừng máy',
             },
           },
@@ -62,19 +77,25 @@ const ParetoFrequencyChart = ({ data, labels }) => {
                 return value + '%'; // Thêm ký hiệu "%" cho đường tích lũy
               },
             },
+            grid: {
+              display: false, // Ẩn lưới trục y1
+            },
             title: {
-              display: true,
+              display: false,
               text: 'Tỷ lệ tích lũy (%)',
             },
           },
         },
         plugins: {
           title: {
-            display: true,
+            display: false,
             text: 'Tần suất dừng máy (Pareto)',
           },
+          legend: {
+            display: false, // Ẩn legend
+          },
           datalabels: {
-            display: false,  
+            display: false, // Ẩn nhãn dữ liệu
           },
         },
       },
@@ -84,8 +105,22 @@ const ParetoFrequencyChart = ({ data, labels }) => {
       chart.destroy(); // Cleanup chart on component unmount
     };
   }, [data, labels]);
+  const handleFullscreen = () => {
+    console.log("Fullscreen triggered");
+  };
 
-  return <canvas ref={chartRef} />;
+  const handlePrint = () => {
+    console.log("Print triggered");
+  };
+
+  return   (
+    <div>
+      
+      <div>
+        <canvas ref={chartRef} />
+      </div>
+    </div>
+  );
 };
 
 export default ParetoFrequencyChart;

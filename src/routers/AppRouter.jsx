@@ -24,6 +24,7 @@ import DeviceManagement from '../pages/Equiment/Management/DeviceManagement';
 import MachineWorkScheduleList from '../pages/Equiment/Management/MachineWorkScheduleList';
 import DeviceAnalysis from '../pages/Equiment/Management/Analysis/DeviceAnalysis';
 import ErrorReportCatalog from '../pages/ErrorReportCatalog/ErrorReportCatalog';
+import DeviceReport from '../pages/Equiment/Report/DeviceReport';
 
 const AppRouter = () => {
   return (
@@ -43,7 +44,7 @@ const AppRouter = () => {
           {/* QCS Routes */}
         {/* <Route path="/QCS/overview" element={<MainLayout><QualityOverView /></MainLayout>} /> */}
         <Route path="/QCS/analysis" element={<MainLayout><DeviceAnalysis /></MainLayout>} />
-        <Route path="/QCS/reports" element={<MainLayout><MachineReport/></MainLayout>} />
+        <Route path="/QCS/reports" element={<MainLayout><DeviceReport /></MainLayout>} />
         <Route path="/QCS/issue" element={<MainLayout><ErrorReportCatalog /></MainLayout>} />
 
 
