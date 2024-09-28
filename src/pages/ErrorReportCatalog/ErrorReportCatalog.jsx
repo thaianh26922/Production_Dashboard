@@ -8,24 +8,27 @@ import AddButton from '../../Components/Button/AddButton';
 import ExportExcelButton from '../../Components/Button/ExportExcelButton';
 import * as yup from 'yup';
 import { format } from 'date-fns';
+import { devicesData } from '../../data/Machine/machineData'; // Nhập dữ liệu từ file data
 
 const ErrorReportCatalog = () => {
   const [errorReports, setErrorReports] = useState(() => {
-    // Lấy dữ liệu từ LocalStorage khi component khởi tạo
     const savedReports = localStorage.getItem('errorReports');
     return savedReports ? JSON.parse(savedReports) : [];
   });
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedReport, setSelectedReport] = useState(null);
   const [exportStartDate, setExportStartDate] = useState(new Date());
   const [exportEndDate, setExportEndDate] = useState(new Date());
+  const [deviceSuggestions, setDeviceSuggestions] = useState(devicesData); // Danh sách mã thiết bị gợi ý
 
   // Cập nhật LocalStorage mỗi khi `errorReports` thay đổi
   useEffect(() => {
     localStorage.setItem('errorReports', JSON.stringify(errorReports));
   }, [errorReports]);
 
+  // Hàm lưu báo cáo lỗi
   const handleSave = (data) => {
     if (selectedReport) {
       const updatedReports = errorReports.map((report) =>
@@ -42,14 +45,24 @@ const ErrorReportCatalog = () => {
     setSelectedReport(null);
   };
 
+  // Hàm xóa báo cáo lỗi
   const handleDelete = (id) => {
     const updatedReports = errorReports.filter((report) => report.id !== id);
     setErrorReports(updatedReports);
     toast.success('Xóa báo cáo lỗi thành công!');
   };
 
-  const handleSearch = (query) => {
+  // Hàm tìm kiếm mã thiết bị
+  const handleDeviceSearch = (query) => {
     setSearchQuery(query);
+
+    // Lọc danh sách mã thiết bị dựa trên từ khóa nhập vào
+    const suggestions = devicesData.filter((device) =>
+      device.machineCode.toLowerCase().includes(query.toLowerCase()) ||
+      device.machineName.toLowerCase().includes(query.toLowerCase())
+    );
+
+    setDeviceSuggestions(suggestions); // Cập nhật danh sách thiết bị gợi ý
   };
 
   const filteredReports = errorReports.filter(
@@ -68,7 +81,7 @@ const ErrorReportCatalog = () => {
     <div className="p-4 bg-white shadow-md rounded-md">
       {/* Các nút tìm kiếm, thêm mới và xuất Excel */}
       <div className="flex items-center gap-2 mb-4">
-        <SearchButton placeholder="Tìm kiếm mã lỗi, mã thiết bị..." onSearch={handleSearch} />
+        <SearchButton placeholder="Tìm kiếm mã lỗi, mã thiết bị..." onSearch={(q) => setSearchQuery(q)} />
         <AddButton onClick={() => setIsModalOpen(true)} />
 
         <div className="flex-grow"></div>
@@ -150,13 +163,35 @@ const ErrorReportCatalog = () => {
         onSave={handleSave}
         formFields={[
           { name: 'errorCode', label: 'Mã Lỗi', type: 'text', validation: yup.string().required('Mã Lỗi là bắt buộc') },
-          { name: 'deviceCode', label: 'Mã Thiết Bị', type: 'text', validation: yup.string().required('Mã Thiết Bị là bắt buộc') },
+          {
+            name: 'deviceCode',
+            label: 'Mã Thiết Bị',
+            type: 'text',
+            validation: yup.string().required('Mã Thiết Bị là bắt buộc'),
+            renderInput: (props) => (
+              <>
+                <input
+                  {...props}
+                  className="p-2 border rounded w-full"
+                  placeholder="Chọn mã thiết bị..."
+                  onChange={(e) => handleDeviceSearch(e.target.value)} // Gọi hàm tìm kiếm
+                  list="deviceCodeList"
+                />
+                <datalist id="deviceCodeList">
+                  {deviceSuggestions.map((device) => (
+                    <option key={device.machineCode} value={device.machineCode}>
+                      {device.machineName}
+                    </option>
+                  ))}
+                </datalist>
+              </>
+            ),
+          },
           { name: 'errorType', label: 'Loại Lỗi', type: 'text', validation: yup.string().required('Loại Lỗi là bắt buộc') },
           { name: 'errorName', label: 'Tên Lỗi', type: 'text', validation: yup.string().required('Tên Lỗi là bắt buộc') },
           { name: 'startTime', label: 'Thời Gian Bắt Đầu', type: 'time', validation: yup.string().required('Thời Gian Bắt Đầu là bắt buộc') },
           { name: 'endTime', label: 'Thời Gian Kết Thúc', type: 'time', validation: yup.string().required('Thời Gian Kết Thúc là bắt buộc') },
-          { name: 'productionDate', label: 'Ngày Sản Xuất', type: 'date', validation: yup.date().required('Ngày Sản Xuất là bắt buộc') },
-          { name: 'createdDate', label: 'Ngày Tạo', type: 'date', validation: yup.date().required('Ngày Tạo là bắt buộc') },
+          { name: 'createdDate', label: 'Ngày Lỗi', type: 'date', validation: yup.date().required('Ngày Tạo là bắt buộc') },
         ]}
         contentLabel={selectedReport ? 'Chỉnh sửa Báo cáo Lỗi' : 'Thêm mới Báo cáo Lỗi'}
         initialData={selectedReport}

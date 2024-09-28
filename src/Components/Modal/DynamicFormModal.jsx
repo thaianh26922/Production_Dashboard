@@ -50,7 +50,7 @@ const DynamicFormModal = ({ isOpen, onClose, onSave, formFields, contentLabel, i
       isOpen={isOpen}
       onRequestClose={onClose}
       contentLabel={contentLabel}
-      className="max-w-3xl mx-auto mt-26 p-6 bg-white rounded-md shadow-lg"
+      className="max-w-3xl mx-auto mt-32 p-6 bg-white rounded-md shadow-lg"
       overlayClassName="overlay fixed inset-0 bg-black bg-opacity-50 z-50"
     >
       <h2 className="text-2xl font-bold mb-6 text-gray-800">{contentLabel}</h2>

@@ -12,9 +12,12 @@ export const qualityItems = [
     
 ];
 
-export const equipmentItems = [
-    { name: 'Thiết bị', link: '/equipment/devivce' },
-    { name: 'Lịch làm việc', link: '/equipment/schedule' },
+export const imprtDataItems = [
+    { name: 'Thông tin thiết bị', link: '/importdata/devivce' },
+    { name: 'Lịch làm việc', link: '/importdata/schedule' },
+    { name: 'Nguyên nhân dừng máy', link: '/importdata/issue' },
+    { name: 'Ca làm việc', link: '/importdata/shift' },
+    { name: 'Nhân viên', link: '/importdata/employee' },
     
     // { name: 'Bảo dưỡng', link: '/equipment/maintenance' },
 ];
@@ -23,7 +26,7 @@ export const QCStItems = [
     // { name: 'Tổng quan', link: '/QCS/overview' },
     { name: 'Phân Tích', link: '/QCS/analysis' },
     { name: 'Báo cáo ', link: '/QCS/reports' },
-    { name: 'Nhập dữ liệu lỗi ', link: '/QCS/issue' },
+   
     // { name: 'Bảo dưỡng', link: '/equipment/maintenance' },
 ];
 

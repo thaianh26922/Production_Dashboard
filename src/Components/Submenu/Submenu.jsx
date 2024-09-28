@@ -49,7 +49,7 @@ const Submenu = ({ title, items, isCollapsed, mainLink, setIsCollapsed }) => {
           <Link
             key={index}
             to={item.link}
-            className="block py-1 px-6 text-gray-500 hover:text-black"
+            className="block py-1 px-1 ml-6 text-gray-500 hover:text-black"
           >
             {item.name}
           </Link>

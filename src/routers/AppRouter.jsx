@@ -25,6 +25,8 @@ import MachineWorkScheduleList from '../pages/Equiment/Management/MachineWorkSch
 import DeviceAnalysis from '../pages/Equiment/Management/Analysis/DeviceAnalysis';
 import ErrorReportCatalog from '../pages/ErrorReportCatalog/ErrorReportCatalog';
 import DeviceReport from '../pages/Equiment/Report/DeviceReport';
+import WorkShiftCatalog from '../Components/Shifr/WorkShiftCatalog';
+import EmployeeCatalog from '../Components/Equiment/Employee/EmployeeCatalog';
 
 const AppRouter = () => {
   return (
@@ -38,8 +40,11 @@ const AppRouter = () => {
         <Route path="/production/reports" element={<MainLayout><ProductionAnalysisPage /></MainLayout>} />
         <Route path="/production/schedule" element={<MainLayout><ProductionPlanCatalog /></MainLayout>} /> */}
         {/* Equipment Routes */}
-        <Route path="/equipment/devivce" element={<MainLayout><DeviceManagement /></MainLayout>} />
-        <Route path="/equipment/schedule" element={<MainLayout><MachineWorkScheduleList /></MainLayout>} />
+        <Route path="/importdata/devivce" element={<MainLayout><DeviceManagement /></MainLayout>} />
+        <Route path="/importdata/schedule" element={<MainLayout><MachineWorkScheduleList /></MainLayout>} />
+        <Route path="/importdata/issue" element={<MainLayout><ErrorReportCatalog /></MainLayout>} />
+        <Route path="/importdata/shift" element={<MainLayout><WorkShiftCatalog /></MainLayout>} />
+        <Route path="/importdata/employee" element={<MainLayout><EmployeeCatalog /></MainLayout>} />
 
           {/* QCS Routes */}
         {/* <Route path="/QCS/overview" element={<MainLayout><QualityOverView /></MainLayout>} /> */}

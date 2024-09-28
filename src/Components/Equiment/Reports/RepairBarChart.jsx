@@ -5,23 +5,27 @@ const RepairBarChart = ({ data }) => {
   const barChartOptions = {
     responsive: true,
     scales: {
+      x: {
+        stacked: true, // Enable stacked bars for the x-axis
+      },
       y: {
         beginAtZero: true,
+        stacked: true, // Enable stacked bars for the y-axis
         ticks: {
           callback: function(value) {
-            return value ; // Hiển thị đơn vị phút trên trục y
+            return value + ' min'; // Display unit 'min' on the y-axis
           },
         },
       },
     },
     plugins: {
-        datalabels: {
-          display: false,  // Disable datalabels here
-        },
-        legend: {
-          display: false,
-        },
+      datalabels: {
+        display: false,  // Disable datalabels here
       },
+      legend: {
+        display: true, // You can enable/disable based on your preference
+      },
+    },
   };
 
   return (

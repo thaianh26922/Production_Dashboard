@@ -6,41 +6,63 @@ import DynamicFormModal from '../../../Components/Modal/DynamicFormModal';
 import AddButton from '../../../Components/Button/AddButton';
 import * as yup from 'yup';
 
+// Import dữ liệu từ file data.js
+import { areasData, devicesData } from '../../../data/Machine/machineData';  // Điều chỉnh đường dẫn nếu cần
+
 const DeviceManagement = () => {
-  const [areas, setAreas] = useState(() => {
-    const savedAreas = localStorage.getItem('areas');
-    return savedAreas ? JSON.parse(savedAreas) : [];
-  });
-  const [devices, setDevices] = useState(() => {
-    const savedDevices = localStorage.getItem('devices');
-    return savedDevices ? JSON.parse(savedDevices) : [];
-  });
+  const [areas, setAreas] = useState([]);
+  const [devices, setDevices] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedArea, setSelectedArea] = useState('All');
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [modalType, setModalType] = useState('');
+  const [editingArea, setEditingArea] = useState(null);
 
-  // Lưu dữ liệu vào LocalStorage mỗi khi areas hoặc devices thay đổi
+  // Giả lập fetching data từ data.js
   useEffect(() => {
-    localStorage.setItem('areas', JSON.stringify(areas));
-  }, [areas]);
+    const fetchData = () => {
+      setIsLoading(true);
 
-  useEffect(() => {
-    localStorage.setItem('devices', JSON.stringify(devices));
-  }, [devices]);
+      // Giả lập quá trình fetching từ file data.js
+      setTimeout(() => {
+        setAreas(areasData);
+        setDevices(devicesData);
+        setIsLoading(false);
+      }, 1000);  // Giả lập thời gian delay để fetching
+    };
+
+    fetchData();
+  }, []);
 
   // Lưu khu vực mới hoặc cập nhật máy
   const handleSave = (data) => {
     if (modalType === 'area') {
-      // Kiểm tra khu vực trùng tên
-      const isDuplicateArea = areas.some((area) => area.areaName.toLowerCase() === data.areaName.toLowerCase());
-      if (isDuplicateArea) {
-        toast.error('Khu vực này đã tồn tại!');
-      } else {
-        // Thêm khu vực mới và sắp xếp theo thứ tự alphabet
-        const updatedAreas = [...areas, { ...data }].sort((a, b) => a.areaName.localeCompare(b.areaName));
+      if (editingArea) {
+        // Cập nhật khu vực
+        const updatedAreas = areas.map((area) =>
+          area.areaName === editingArea.areaName ? { ...area, ...data } : area
+        );
         setAreas(updatedAreas);
-        toast.success('Thêm khu vực thành công!');
+
+        // Cập nhật tên khu vực cho các thiết bị liên quan
+        const updatedDevices = devices.map((device) =>
+          device.area === editingArea.areaName ? { ...device, area: data.areaName } : device
+        );
+        setDevices(updatedDevices);
+
+        toast.success('Cập nhật khu vực và các thiết bị liên quan thành công!');
+      } else {
+        // Kiểm tra khu vực trùng tên
+        const isDuplicateArea = areas.some((area) => area.areaName.toLowerCase() === data.areaName.toLowerCase());
+        if (isDuplicateArea) {
+          toast.error('Khu vực này đã tồn tại!');
+        } else {
+          // Thêm khu vực mới và sắp xếp theo thứ tự alphabet
+          const updatedAreas = [...areas, { ...data }].sort((a, b) => a.areaName.localeCompare(b.areaName));
+          setAreas(updatedAreas);
+          toast.success('Thêm khu vực thành công!');
+        }
       }
     } else {
       if (selectedDevice) {
@@ -57,14 +79,32 @@ const DeviceManagement = () => {
     }
     setIsModalOpen(false);
     setSelectedDevice(null);
+    setEditingArea(null);
   };
 
   // Xóa máy
-  const handleDelete = (id) => {
+  const handleDeleteDevice = (id) => {
     const updatedDevices = devices.filter((device) => device.id !== id);
     setDevices(updatedDevices);
     toast.success('Xóa thiết bị thành công!');
   };
+
+  // Xóa khu vực và các thiết bị liên quan
+  const handleDeleteArea = (areaName) => {
+    // Xóa khu vực
+    const updatedAreas = areas.filter((area) => area.areaName !== areaName);
+    setAreas(updatedAreas);
+
+    // Xóa các thiết bị liên quan đến khu vực đó
+    const updatedDevices = devices.filter((device) => device.area !== areaName);
+    setDevices(updatedDevices);
+
+    toast.success('Xóa khu vực và các thiết bị liên quan thành công!');
+  };
+
+  if (isLoading) {
+    return <div>Đang tải dữ liệu...</div>; // Hiển thị trong lúc chờ dữ liệu load
+  }
 
   return (
     <div className="p-4 bg-white shadow-md rounded-md">
@@ -72,15 +112,43 @@ const DeviceManagement = () => {
       <div className="grid grid-cols-2 gap-4">
         <div className="mb-4">
           <h2 className="text-xl font-bold mb-2">Quản lý khu vực</h2>
-          <AddButton onClick={() => { setIsModalOpen(true); setModalType('area'); }} />
-          <ul className="mt-2">
+          <AddButton
+            onClick={() => {
+              setIsModalOpen(true);
+              setModalType('area');
+              setEditingArea(null); // Reset editing area
+            }}
+          />
+          <ul className="mt-2 ">
             {areas.map((area, index) => (
               <li
                 key={index}
-                className={`py-2 px-4 bg-gray-100 rounded-md mb-2 cursor-pointer ${selectedArea === area.areaName ? 'bg-blue-200' : ''}`}
+                className={`py-2 px-4 bg-gray-100 rounded-md mb-2 cursor-pointer flex justify-between items-center hover:bg-slate-200 ${selectedArea === area.areaName ? 'bg-blue-200' : ''}`}
                 onClick={() => setSelectedArea(area.areaName)}
               >
-                {area.areaName}
+                <span className="">{area.areaName}</span>
+                <div>
+                  <button
+                    className="mr-2 text-blue-500 hover:text-blue-700 text-sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingArea(area);
+                      setIsModalOpen(true);
+                      setModalType('area');
+                    }}
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
+                    className="text-red-500 hover:text-red-700 text-sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteArea(area.areaName);
+                    }}
+                  >
+                    <FaTrash />
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
@@ -118,6 +186,7 @@ const DeviceManagement = () => {
             <th className="border px-4 py-2 text-xs">Tên Máy</th>
             <th className="border px-4 py-2 text-xs">Model</th>
             <th className="border px-4 py-2 text-xs">Thông số kỹ thuật</th>
+            <th className="border px-4 py-2 text-xs">Ngày nhập</th>
             <th className="border px-4 py-2 text-xs">Thao Tác</th>
           </tr>
         </thead>
@@ -132,6 +201,7 @@ const DeviceManagement = () => {
                 <td className="border px-4 py-2 text-sm text-center">{device.machineName}</td>
                 <td className="border px-4 py-2 text-sm text-center">{device.model}</td>
                 <td className="border px-4 py-2 text-sm text-center">{device.specs}</td>
+                <td className="border px-4 py-2 text-sm text-center">{device.entrydate}</td>
                 <td className="py-2 px-2 text-center border">
                   <button
                     className="mr-2 text-blue-500 hover:text-blue-700"
@@ -141,11 +211,11 @@ const DeviceManagement = () => {
                       setModalType('device');
                     }}
                   >
-                    <FaEdit />
+                      <FaEdit />
                   </button>
                   <button
-                    className="text-red-500 hover:text-red-700"
-                    onClick={() => handleDelete(device.id)}
+                    className="text-red-500 hover:text-red-700 text-sm"
+                    onClick={() => handleDeleteDevice(device.id)}
                   >
                     <FaTrash />
                   </button>
@@ -161,6 +231,7 @@ const DeviceManagement = () => {
         onClose={() => {
           setIsModalOpen(false);
           setSelectedDevice(null);
+          setEditingArea(null);
         }}
         onSave={handleSave}
         formFields={
@@ -173,10 +244,11 @@ const DeviceManagement = () => {
                 { name: 'machineName', label: 'Tên Máy', type: 'text', validation: yup.string().required('Tên Máy là bắt buộc') },
                 { name: 'model', label: 'Model', type: 'text', validation: yup.string().required('Model là bắt buộc') },
                 { name: 'specs', label: 'Thông số kỹ thuật', type: 'text', validation: yup.string().required('Thông số kỹ thuật là bắt buộc') },
+                { name: 'entrydate', label: 'Ngày nhập', type: 'date', validation: yup.string().required('Ngày nhập là bắt buộc') },
               ]
         }
         contentLabel={modalType === 'area' ? 'Thêm Khu vực' : selectedDevice ? 'Chỉnh sửa Thiết bị' : 'Thêm mới Thiết bị'}
-        initialData={selectedDevice}
+        initialData={modalType === 'area' ? editingArea : selectedDevice}
       />
 
       <ToastContainer />
