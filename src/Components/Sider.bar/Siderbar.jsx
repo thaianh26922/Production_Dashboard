@@ -1,6 +1,6 @@
   import React, { useContext } from 'react';
   import { Link, useNavigate } from 'react-router-dom';
-  import { FiHome, FiBarChart2, FiGrid, FiClipboard, FiDatabase, FiHeadphones, FiSettings, FiLogOut, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+  import { FiHome, FiBarChart2, FiGrid, FiClipboard, FiDatabase, FiHeadphones, FiSettings,FiCalendar, FiLogOut, FiChevronLeft,FiFolder, FiChevronRight,FiPercent} from 'react-icons/fi';
   import Submenu from '../Submenu/Submenu';
   import { AuthContext } from '../../context/AuthContext';
   import { productionItems, qualityItems,  supportItems, settingItems, inventoryItems, imprtDataItems,adminItems, QCStItems } from '../../libs/menuItems';
@@ -69,14 +69,24 @@
               setIsCollapsed={setIsCollapsed}
             />
     
-            <Submenu
-              title={<><FiBarChart2 className="mr-4 text-lg text-gray-500" />{!isCollapsed && <span className="text-gray-500 hover:text-black">Hiệu Suất Tổng Thể</span>}</>}
-              items={QCStItems}
-              mainLink="/QCS/analysis"
-              isCollapsed={isCollapsed}
-              onSubmenuClick={handleSubmenuClick}
-              setIsCollapsed={setIsCollapsed}
-            />
+            {/* Tổng Quan */}
+            
+            <Link to="/QCS/analysis" className="flex items-center text-gray-700 hover:text-black">
+              <FiPercent className="mr-4 text-lg text-gray-500" />
+              {!isCollapsed && <span className="text-gray-500 hover:text-black">Tỷ lệ máy chạy</span>}
+            </Link>
+            <Link to="/importdata/schedule" className="flex items-center text-gray-700 hover:text-black">
+              <FiCalendar className="mr-4 text-lg text-gray-500" />
+              {!isCollapsed && <span className="text-gray-500 hover:text-black">Nhiệm vụ sản xuất</span>}
+            </Link>
+            <Link to="/QCS/analysis" className="flex items-center text-gray-700 hover:text-black">
+              <FiBarChart2 className="mr-4 text-lg text-gray-500" />
+              {!isCollapsed && <span className="text-gray-500 hover:text-black">Phân tích</span>}
+            </Link>
+            <Link to="/QCS/reports" className="flex items-center text-gray-700 hover:text-black">
+              <FiFolder className="mr-4 text-lg text-gray-500" />
+              {!isCollapsed && <span className="text-gray-500 hover:text-black">Báo cáo</span>}
+            </Link>
     
             {userRole === 'Admin' && (
               <Submenu

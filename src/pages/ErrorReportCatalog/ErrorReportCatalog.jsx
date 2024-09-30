@@ -104,8 +104,8 @@ const ErrorReportCatalog = () => {
             <th className="border px-4 py-2 text-xs">STT</th>
             <th className="border px-4 py-2 text-xs">Mã nguyên nhân</th>
             <th className="border px-4 py-2 text-xs">Tên nguyên nhân</th>
-            <th className="border px-4 py-2 text-xs">Mã Thiết Bị</th>
-            <th className="border px-4 py-2 text-xs">Loại nguyên nhân</th>
+            <th className="border px-4 py-2 text-xs">Thiết Bị</th>
+         
             <th className="border px-4 py-2 text-xs">Thao Tác</th>
           </tr>
         </thead>
@@ -150,10 +150,12 @@ const ErrorReportCatalog = () => {
         }}
         onSave={handleSave}
         formFields={[
-          { name: 'errorCode', label: 'Mã Lỗi', type: 'text', validation: yup.string().required('Mã Lỗi là bắt buộc') },
+          { name: 'errorCode', label: 'Mã Nguyên Nhân', type: 'text', validation: yup.string().required('Mã Lỗi là bắt buộc') },
+          { name: 'errorName', label: 'Tên Nguyên Nhân', type: 'text', validation: yup.string().required('Tên Lỗi là bắt buộc') },
+          
           {
             name: 'deviceCode',
-            label: 'Mã Thiết Bị',
+            label: 'Thiết Bị',
             type: 'text',
             validation: yup.string().required('Mã Thiết Bị là bắt buộc'),
             renderInput: (props) => (
@@ -175,11 +177,7 @@ const ErrorReportCatalog = () => {
               </>
             ),
           },
-          { name: 'errorType', label: 'Loại Lỗi', type: 'text', validation: yup.string().required('Loại Lỗi là bắt buộc') },
-          { name: 'errorName', label: 'Tên Lỗi', type: 'text', validation: yup.string().required('Tên Lỗi là bắt buộc') },
-          { name: 'startTime', label: 'Thời Gian Bắt Đầu', type: 'time', validation: yup.string().required('Thời Gian Bắt Đầu là bắt buộc') },
-          { name: 'endTime', label: 'Thời Gian Kết Thúc', type: 'time', validation: yup.string().required('Thời Gian Kết Thúc là bắt buộc') },
-          { name: 'createdDate', label: 'Ngày Lỗi', type: 'date', validation: yup.date().required('Ngày Tạo là bắt buộc') },
+         
         ]}
         contentLabel={selectedReport ? 'Chỉnh sửa Báo cáo Lỗi' : 'Thêm mới Báo cáo Lỗi'}
         initialData={selectedReport}

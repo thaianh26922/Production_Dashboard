@@ -13,7 +13,7 @@ export const devicesData = [
     model: `CNC Model ${i + 1}`,
     specs: `Thông số kỹ thuật CNC ${i + 1}`,
     entrydate: `2023-01-${String(i + 1).padStart(2, '0')}`,
-    area: 'Line 01',
+    area: 'Khu Vực Tiện',
   })),
   // 18 máy PHAY cho Line 02
   ...Array.from({ length: 18 }, (_, i) => ({
@@ -23,6 +23,6 @@ export const devicesData = [
     model: `PHAY Model ${i + 1}`,
     specs: `Thông số kỹ thuật PHAY ${i + 1}`,
     entrydate: `2023-02-${String(i + 1).padStart(2, '0')}`,
-    area: 'Line 02',
+    area: 'Khu Vực Phay',
   })),
 ];

@@ -13,8 +13,8 @@ export const qualityItems = [
 ];
 
 export const imprtDataItems = [
+    { name: 'Khu vực', link: '/importdata/areas' },
     { name: 'Thông tin thiết bị', link: '/importdata/devivce' },
-    { name: 'Lịch làm việc', link: '/importdata/schedule' },
     { name: 'Nguyên nhân dừng máy', link: '/importdata/issue' },
     { name: 'Ca làm việc', link: '/importdata/shift' },
     { name: 'Nhân viên', link: '/importdata/employee' },

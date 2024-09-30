@@ -40,7 +40,7 @@ const StackedBarChart = () => {
     indexAxis: 'y', // Đổi hướng biểu đồ, trục Y là ngày
     plugins: {
         legends: {
-            display:true,
+            display: true,
             postion: 'bottom'
         },
       tooltip: {
@@ -61,6 +61,9 @@ const StackedBarChart = () => {
       },
     },
     responsive: true,
+    datasets :{
+      display : false,
+    },
     scales: {
       x: {
         stacked: true,

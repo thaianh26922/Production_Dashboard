@@ -116,40 +116,40 @@ const DeviceAnalysis = () => {
       
       {/* Lựa chọn loại máy và chọn máy cụ thể */}
       <div className="flex justify-between items-center mb-4">
-      <Breadcrumb />
-        <div className="flex items-center space-x-4">
-          {/* Lựa chọn loại máy CNC hoặc PHAY */}
-          <Select
-            value={selectedMachineType}
-            onChange={handleMachineTypeSelect}
-            placeholder="Chọn loại máy"
-            style={{ width: 200 }} // Sử dụng style của Ant Design
-          >
-            <Option value="CNC">Tổ Tiện</Option>
-            <Option value="PHAY">Tổ Phay</Option>
-          </Select>
+        <Breadcrumb />
+          <div className="flex items-center space-x-4">
+            {/* Lựa chọn loại máy CNC hoặc PHAY */}
+            <Select
+              value={selectedMachineType}
+              onChange={handleMachineTypeSelect}
+              placeholder="Chọn loại máy"
+              style={{ width: 200 }} // Sử dụng style của Ant Design
+            >
+              <Option value="CNC">Tổ Tiện</Option>
+              <Option value="PHAY">Tổ Phay</Option>
+            </Select>
 
-          {/* Lựa chọn máy cụ thể */}
-          <Select
-            value={selectedMachine}
-            onChange={handleMachineSelect}
-            placeholder={`Chọn máy ${selectedMachineType}`}
-            style={{ width: 200 }}
-            disabled={!selectedMachineType} // Vô hiệu hóa nếu chưa chọn loại máy
-          >
-            {(selectedMachineType === 'CNC' ? cncMachines : phayMachines).map(machine => (
-              <Option key={machine.value} value={machine.value}>
-                {machine.label}
-              </Option>
-            ))}
-          </Select>
+            {/* Lựa chọn máy cụ thể */}
+            <Select
+              value={selectedMachine}
+              onChange={handleMachineSelect}
+              placeholder={`Chọn máy ${selectedMachineType}`}
+              style={{ width: 200 }}
+              disabled={!selectedMachineType} // Vô hiệu hóa nếu chưa chọn loại máy
+            >
+              {(selectedMachineType === 'CNC' ? cncMachines : phayMachines).map(machine => (
+                <Option key={machine.value} value={machine.value}>
+                  {machine.label}
+                </Option>
+              ))}
+            </Select>
 
-          {/* Chọn ngày */}
-          <Space direction="vertical" size={12}>
-            <RangePicker onChange={handleDateChange} />
-          </Space>
+            {/* Chọn ngày */}
+            <Space direction="vertical" size={12}>
+              <RangePicker onChange={handleDateChange} />
+            </Space>
+          </div>
         </div>
-      </div>
 
       {/* Hiển thị nội dung dựa trên loại máy được chọn */}
       {selectedMachineType === 'CNC' && (

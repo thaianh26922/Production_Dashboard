@@ -27,6 +27,7 @@ import ErrorReportCatalog from '../pages/ErrorReportCatalog/ErrorReportCatalog';
 import DeviceReport from '../pages/Equiment/Report/DeviceReport';
 import WorkShiftCatalog from '../Components/Shifr/WorkShiftCatalog';
 import EmployeeCatalog from '../Components/Equiment/Employee/EmployeeCatalog';
+import AreasManagement from '../pages/Equiment/Management/AreasManagement';
 
 const AppRouter = () => {
   return (
@@ -40,6 +41,7 @@ const AppRouter = () => {
         <Route path="/production/reports" element={<MainLayout><ProductionAnalysisPage /></MainLayout>} />
         <Route path="/production/schedule" element={<MainLayout><ProductionPlanCatalog /></MainLayout>} /> */}
         {/* Equipment Routes */}
+        <Route path="/importdata/areas" element={<MainLayout><AreasManagement /></MainLayout>} />
         <Route path="/importdata/devivce" element={<MainLayout><DeviceManagement /></MainLayout>} />
         <Route path="/importdata/schedule" element={<MainLayout><MachineWorkScheduleList /></MainLayout>} />
         <Route path="/importdata/issue" element={<MainLayout><ErrorReportCatalog /></MainLayout>} />

@@ -1,254 +1,201 @@
 import React, { useState, useEffect } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
+import { Button, Form, Spin } from 'antd';
+import AddButton from '../../../Components/Button/AddButton';
+import ExportExcelButton from '../../../Components/Button/ExportExcelButton';
+import DynamicModal from '../../../Components/Shifr/DynamicModal';
+import SearchButton from '../../../Components/Button/SearchButton';
+import FormSample from '../../../Components/Button/FormSample';
+import ImportButton from '../../../Components/Button/ImportButton';
+import * as XLSX from 'xlsx';
+import moment from 'moment';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import DynamicFormModal from '../../../Components/Modal/DynamicFormModal';
-import AddButton from '../../../Components/Button/AddButton';
-import * as yup from 'yup';
 
-// Import dữ liệu từ file data.js
-import { areasData, devicesData } from '../../../data/Machine/machineData';  // Điều chỉnh đường dẫn nếu cần
+// Import sample template and data
+import sampleTemplate from '../../../assets/form/Thiết bị.xlsx';  
+import { areasData, devicesData } from '../../../data/Machine/machineData'; // Import the datasets
 
 const DeviceManagement = () => {
-  const [areas, setAreas] = useState([]);
   const [devices, setDevices] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [filteredDevices, setFilteredDevices] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedArea, setSelectedArea] = useState('All');
   const [selectedDevice, setSelectedDevice] = useState(null);
-  const [modalType, setModalType] = useState('');
-  const [editingArea, setEditingArea] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true); // Loading state
+  const [form] = Form.useForm();
 
-  // Giả lập fetching data từ data.js
+  // Fetch data with loading effect
   useEffect(() => {
-    const fetchData = () => {
-      setIsLoading(true);
-
-      // Giả lập quá trình fetching từ file data.js
-      setTimeout(() => {
-        setAreas(areasData);
-        setDevices(devicesData);
-        setIsLoading(false);
-      }, 1000);  // Giả lập thời gian delay để fetching
-    };
-
-    fetchData();
+    setLoading(true);
+    // Simulate data fetch delay
+    setTimeout(() => {
+      setDevices(devicesData); // Load devices from data.js
+      setFilteredDevices(devicesData); // Initially set filteredDevices to full devices list
+      setLoading(false); // Stop loading after data is loaded
+    }, 2000); // Simulate a 2-second data fetch
   }, []);
 
-  // Lưu khu vực mới hoặc cập nhật máy
-  const handleSave = (data) => {
-    if (modalType === 'area') {
-      if (editingArea) {
-        // Cập nhật khu vực
-        const updatedAreas = areas.map((area) =>
-          area.areaName === editingArea.areaName ? { ...area, ...data } : area
-        );
-        setAreas(updatedAreas);
+  // Handle search input change
+  const handleSearch = (query) => {
+    setSearchQuery(query);
 
-        // Cập nhật tên khu vực cho các thiết bị liên quan
-        const updatedDevices = devices.map((device) =>
-          device.area === editingArea.areaName ? { ...device, area: data.areaName } : device
-        );
-        setDevices(updatedDevices);
-
-        toast.success('Cập nhật khu vực và các thiết bị liên quan thành công!');
-      } else {
-        // Kiểm tra khu vực trùng tên
-        const isDuplicateArea = areas.some((area) => area.areaName.toLowerCase() === data.areaName.toLowerCase());
-        if (isDuplicateArea) {
-          toast.error('Khu vực này đã tồn tại!');
-        } else {
-          // Thêm khu vực mới và sắp xếp theo thứ tự alphabet
-          const updatedAreas = [...areas, { ...data }].sort((a, b) => a.areaName.localeCompare(b.areaName));
-          setAreas(updatedAreas);
-          toast.success('Thêm khu vực thành công!');
-        }
-      }
-    } else {
-      if (selectedDevice) {
-        const updatedDevices = devices.map((device) =>
-          device.id === selectedDevice.id ? { ...selectedDevice, ...data } : device
-        );
-        setDevices(updatedDevices);
-        toast.success('Cập nhật thiết bị thành công!');
-      } else {
-        const newDevice = { ...data, id: devices.length + 1, area: selectedArea };
-        setDevices([...devices, newDevice]);
-        toast.success('Thêm thiết bị thành công!');
-      }
-    }
-    setIsModalOpen(false);
-    setSelectedDevice(null);
-    setEditingArea(null);
+    // Filter the devices based on search query (search in machineCode, machineName, area)
+    const filtered = devices.filter((device) =>
+      device.machineCode.toLowerCase().includes(query.toLowerCase()) ||
+      device.machineName.toLowerCase().includes(query.toLowerCase()) ||
+      device.area.toLowerCase().includes(query.toLowerCase())
+    );
+    
+    setFilteredDevices(filtered);
   };
 
-  // Xóa máy
-  const handleDeleteDevice = (id) => {
+  const handleSave = (values) => {
+    const deviceData = {
+      ...values,
+      id: selectedDevice ? selectedDevice.id : devices.length + 1,
+      purchaseDate: values.purchaseDate ? values.purchaseDate.format('YYYY-MM-DD') : null,
+    };
+
+    if (selectedDevice) {
+      const updatedDevices = devices.map((device) =>
+        device.id === selectedDevice.id ? { ...device, ...deviceData } : device
+      );
+      setDevices(updatedDevices);
+      setFilteredDevices(updatedDevices); // Update filtered devices after save
+      toast.success('Cập nhật thiết bị thành công!');
+    } else {
+      const newDevices = [...devices, deviceData];
+      setDevices(newDevices);
+      setFilteredDevices(newDevices); // Update filtered devices after adding a new one
+      toast.success('Thêm thiết bị thành công!');
+    }
+
+    setIsModalOpen(false);
+    setSelectedDevice(null);
+    form.resetFields();
+  };
+
+  const handleDelete = (id) => {
     const updatedDevices = devices.filter((device) => device.id !== id);
     setDevices(updatedDevices);
+    setFilteredDevices(updatedDevices); // Update filtered devices after delete
     toast.success('Xóa thiết bị thành công!');
   };
 
-  // Xóa khu vực và các thiết bị liên quan
-  const handleDeleteArea = (areaName) => {
-    // Xóa khu vực
-    const updatedAreas = areas.filter((area) => area.areaName !== areaName);
-    setAreas(updatedAreas);
-
-    // Xóa các thiết bị liên quan đến khu vực đó
-    const updatedDevices = devices.filter((device) => device.area !== areaName);
-    setDevices(updatedDevices);
-
-    toast.success('Xóa khu vực và các thiết bị liên quan thành công!');
-  };
-
-  if (isLoading) {
-    return <div>Đang tải dữ liệu...</div>; // Hiển thị trong lúc chờ dữ liệu load
-  }
-
   return (
     <div className="p-4 bg-white shadow-md rounded-md">
-      {/* Quản lý khu vực */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="mb-4">
-          <h2 className="text-xl font-bold mb-2">Quản lý khu vực</h2>
-          <AddButton
-            onClick={() => {
-              setIsModalOpen(true);
-              setModalType('area');
-              setEditingArea(null); // Reset editing area
-            }}
-          />
-          <ul className="mt-2 ">
-            {areas.map((area, index) => (
-              <li
-                key={index}
-                className={`py-2 px-4 bg-gray-100 rounded-md mb-2 cursor-pointer flex justify-between items-center hover:bg-slate-200 ${selectedArea === area.areaName ? 'bg-blue-200' : ''}`}
-                onClick={() => setSelectedArea(area.areaName)}
-              >
-                <span className="">{area.areaName}</span>
-                <div>
-                  <button
-                    className="mr-2 text-blue-500 hover:text-blue-700 text-sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEditingArea(area);
-                      setIsModalOpen(true);
-                      setModalType('area');
-                    }}
-                  >
-                    <FaEdit />
-                  </button>
-                  <button
-                    className="text-red-500 hover:text-red-700 text-sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteArea(area.areaName);
-                    }}
-                  >
-                    <FaTrash />
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Quản lý thiết bị */}
-        <div className="mb-4">
-          <h2 className="text-xl font-bold mb-2">Quản lý thiết bị</h2>
-
-          {/* Chọn khu vực */}
-          <select
-            className="mb-4 p-2 border rounded"
-            value={selectedArea}
-            onChange={(e) => setSelectedArea(e.target.value)}
-          >
-            <option value="All">Tất cả khu vực</option>
-            {areas.map((area, index) => (
-              <option key={index} value={area.areaName}>
-                {area.areaName}
-              </option>
-            ))}
-          </select>
-
-          <AddButton onClick={() => { setIsModalOpen(true); setModalType('device'); }} disabled={selectedArea === 'All'} />
+      <div className="flex items-center gap-2 mb-4">
+        {/* Search button for search functionality */}
+        <SearchButton
+          placeholder="Tìm kiếm mã thiết bị, tên thiết bị, khu vực..."
+          onSearch={(q) => handleSearch(q)}
+        />
+        <div className="flex items-center gap-2 ml-auto">
+          <AddButton onClick={() => setIsModalOpen(true)} />
+          <FormSample href={sampleTemplate} label="Tải Form Mẫu" />
+          <ImportButton />
+          <ExportExcelButton data={devices} fileName="DanhSachThietBi.xlsx" />
         </div>
       </div>
 
-      {/* Bảng thiết bị */}
-      <table className="min-w-full bg-white border border-gray-200 mt-4">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border px-4 py-2 text-xs">STT</th>
-            <th className="border px-4 py-2 text-xs">Mã Thiết Bị</th>
-            <th className="border px-4 py-2 text-xs">Tên thiết bị</th>
-            <th className="border px-4 py-2 text-xs">Khu vực sản xuất</th>
-            <th className="border px-4 py-2 text-xs">Model thiết bị</th>
-            <th className="border px-4 py-2 text-xs">Thông số kỹ thuật</th>
-            <th className="border px-4 py-2 text-xs">Ngày mua</th>
-            <th className="border px-4 py-2 text-xs">Thao Tác</th>
-          </tr>
-        </thead>
-        <tbody>
-          {devices
-            .filter((device) => selectedArea === 'All' || device.area === selectedArea)
-            .map((device, index) => (
+      {/* Show loading spinner while fetching data */}
+      {loading ? (
+        <div className="text-center">
+          <Spin size="large" />
+          <p>Đang tải dữ liệu...</p>
+        </div>
+      ) : (
+        <table className="min-w-full bg-white border border-gray-200">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border px-4 py-2 text-xs">STT</th>
+              <th className="border px-4 py-2 text-xs">Mã Thiết Bị</th>
+              <th className="border px-4 py-2 text-xs">Tên Thiết Bị</th>
+              <th className="border px-4 py-2 text-xs">Khu Vực</th>
+              <th className="border px-4 py-2 text-xs">Model</th>
+              <th className="border px-4 py-2 text-xs">Thông Số Kỹ Thuật</th>
+              <th className="border px-4 py-2 text-xs">Ngày Mua</th>
+              <th className="border px-4 py-2 text-xs">Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredDevices.map((device, index) => (
               <tr key={device.id} className="hover:bg-gray-50">
                 <td className="border px-4 py-2 text-sm text-center">{index + 1}</td>
-                <td className="border px-4 py-2 text-sm text-center">{device.area}</td>
                 <td className="border px-4 py-2 text-sm text-center">{device.machineCode}</td>
                 <td className="border px-4 py-2 text-sm text-center">{device.machineName}</td>
+                <td className="border px-4 py-2 text-sm text-center">{device.area}</td>
                 <td className="border px-4 py-2 text-sm text-center">{device.model}</td>
                 <td className="border px-4 py-2 text-sm text-center">{device.specs}</td>
                 <td className="border px-4 py-2 text-sm text-center">{device.entrydate}</td>
                 <td className="py-2 px-2 text-center border">
                   <button
                     className="mr-2 text-blue-500 hover:text-blue-700"
-                    onClick={() => {
-                      setSelectedDevice(device);
-                      setIsModalOpen(true);
-                      setModalType('device');
-                    }}
+                    onClick={() => setIsModalOpen(true)}
                   >
-                      <FaEdit />
+                    <FaEdit />
                   </button>
                   <button
-                    className="text-red-500 hover:text-red-700 text-sm"
-                    onClick={() => handleDeleteDevice(device.id)}
+                    className="text-red-500 hover:text-red-700"
+                    onClick={() => handleDelete(device.id)}
                   >
                     <FaTrash />
                   </button>
                 </td>
               </tr>
             ))}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      )}
 
-      {/* Modal Thêm Khu vực và Thiết bị */}
-      <DynamicFormModal
-        isOpen={isModalOpen}
-        onClose={() => {
+      <DynamicModal
+        open={isModalOpen}
+        onCancel={() => {
           setIsModalOpen(false);
-          setSelectedDevice(null);
-          setEditingArea(null);
+          form.resetFields();
         }}
-        onSave={handleSave}
-        formFields={
-          modalType === 'area'
-            ? [
-                { name: 'areaName', label: 'Tên Khu Vực', type: 'text', validation: yup.string().required('Tên Khu Vực là bắt buộc') },
-              ]
-            : [
-                { name: 'machineCode', label: 'Mã Máy', type: 'text', validation: yup.string().required('Mã Máy là bắt buộc') },
-                { name: 'machineName', label: 'Tên Máy', type: 'text', validation: yup.string().required('Tên Máy là bắt buộc') },
-                { name: 'model', label: 'Model', type: 'text', validation: yup.string().required('Model là bắt buộc') },
-                { name: 'specs', label: 'Thông số kỹ thuật', type: 'text', validation: yup.string().required('Thông số kỹ thuật là bắt buộc') },
-                { name: 'entrydate', label: 'Ngày nhập', type: 'date', validation: yup.string().required('Ngày nhập là bắt buộc') },
-              ]
-        }
-        contentLabel={modalType === 'area' ? 'Thêm Khu vực' : selectedDevice ? 'Chỉnh sửa Thiết bị' : 'Thêm mới Thiết bị'}
-        initialData={modalType === 'area' ? editingArea : selectedDevice}
+        onOk={handleSave}
+        form={form}
+        title={selectedDevice ? 'Chỉnh sửa Thiết Bị' : 'Thêm mới Thiết Bị'}
+        fields={[
+          {
+            name: 'deviceCode',
+            label: 'Mã Thiết Bị',
+            type: 'input',
+            rules: [{ required: true, message: 'Mã Thiết Bị là bắt buộc' }]
+          },
+          {
+            name: 'deviceName',
+            label: 'Tên Thiết Bị',
+            type: 'input',
+            rules: [{ required: true, message: 'Tên Thiết Bị là bắt buộc' }]
+          },
+          {
+            name: 'area',
+            label: 'Khu Vực',
+            type: 'input',
+            rules: [{ required: true, message: 'Khu Vực là bắt buộc' }]
+          },
+          {
+            name: 'model',
+            label: 'Model',
+            type: 'input',
+            rules: [{ required: true, message: 'Model là bắt buộc' }]
+          },
+          {
+            name: 'specs',
+            label: 'Thông Số Kỹ Thuật',
+            type: 'input',
+            rules: [{ required: true, message: 'Thông Số Kỹ Thuật là bắt buộc' }]
+          },
+          {
+            name: 'purchaseDate',
+            label: 'Ngày Mua',
+            type: 'datePicker',
+            rules: [{ required: true, message: 'Ngày Mua là bắt buộc' }]
+          }
+        ]}
       />
 
       <ToastContainer />
