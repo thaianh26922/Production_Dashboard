@@ -30,8 +30,10 @@ const TimelineChart = ({ selectedDate }) => {
 
   useEffect(() => {
     if (selectedDate && selectedDate.length === 2) {
-      const startDate = selectedDate[0].valueOf(); // Chuyển đổi ngày bắt đầu sang timestamp
-      const endDate = selectedDate[1].valueOf();   // Chuyển đổi ngày kết thúc sang timestamp
+      // Sắp xếp lại nếu startDate lớn hơn endDate
+      const startDate = Math.min(selectedDate[0].valueOf(), selectedDate[1].valueOf());
+      const endDate = Math.max(selectedDate[0].valueOf(), selectedDate[1].valueOf());
+      
       fetchData(startDate, endDate); // Gọi API để lấy dữ liệu
     }
   }, [selectedDate]); // Chỉ gọi lại khi selectedDate thay đổi
@@ -104,7 +106,10 @@ const TimelineChart = ({ selectedDate }) => {
       .append('rect')
       .attr('x', d => xScale(timeParse(d.startTime)) + 1)
       .attr('y', d => yScale(d.date))
-      .attr('width', d => xScale(timeParse(d.endTime)) - xScale(timeParse(d.startTime)))
+      .attr('width', d => {
+        const width = xScale(timeParse(d.endTime)) - xScale(timeParse(d.startTime));
+        return width > 0 ? width : 0; // Đảm bảo không có giá trị âm
+      })
       .attr('height', yScale.bandwidth() / 2)
       .attr('fill', d => colorScale(d.status))
       .append('title')
@@ -136,6 +141,7 @@ const TimelineChart = ({ selectedDate }) => {
       .text(d => d)
       .style('font-size', '12px')
       .style('text-anchor', 'start');
+
   }, [data]); // Cập nhật khi dữ liệu thay đổi
 
   if (loading) return <p>Loading...</p>;
