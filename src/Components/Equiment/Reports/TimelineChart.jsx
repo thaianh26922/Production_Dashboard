@@ -42,7 +42,7 @@ const TimelineChart = ({ selectedDate }) => {
     const svg = d3.select(svgRef.current);
     const width = 800;
     const height = 450;
-    const margin = { top: 20, right: 35, bottom: 50, left: 35 };
+    const margin = { top: 20, right: 35, bottom: 50, left: 50 };
 
     // Xử lý dữ liệu nhận được từ API
     const processedData = data.map(d => ({
@@ -64,7 +64,7 @@ const TimelineChart = ({ selectedDate }) => {
     // X scale for time (00:00 - 24:00)
     const xScale = d3
       .scaleTime()
-      .domain([timeParse('00:00'), timeParse('24:00')])
+      .domain([timeParse('00:00'), timeParse('23:59')]) // Fix time domain
       .range([margin.left, width - margin.right]);
 
     // Y scale for dates (filtered by selectedDate)
@@ -84,8 +84,11 @@ const TimelineChart = ({ selectedDate }) => {
     // Add X axis (Time)
     svg
       .append('g')
-      .attr('transform', `translate(0,${height - margin.bottom - 40})`)
-      .call(d3.axisBottom(xScale).ticks(d3.timeHour.every(2)).tickFormat(timeFormat));
+      .attr('transform', `translate(0,${height - margin.bottom - 40})`) // Ensure correct translation
+      .call(d3.axisBottom(xScale).ticks(d3.timeHour.every(2)).tickFormat(timeFormat))
+      .selectAll("text") // Rotate X axis text to avoid overlap
+      .attr("transform", "translate(-10,0)rotate(-45)")
+      .style("text-anchor", "end");
 
     // Add Y axis (Dates filtered by selectedDate)
     svg
@@ -116,30 +119,30 @@ const TimelineChart = ({ selectedDate }) => {
       .enter()
       .append('g')
       .attr('class', 'legend')
-      .attr('transform', (d, i) => `translate(${margin.left + i * 150},${height - margin.bottom})`);
+      .attr('transform', (d, i) => `translate(${margin.left + i * 100},${height - margin.bottom + 20})`);
 
     legend
       .append('rect')
-      .attr('x', 2)
+      .attr('x', 0)
       .attr('y', 0)
       .attr('width', 18)
-      .attr('height', 5)
+      .attr('height', 18)
       .style('fill', d => colorScale(d));
 
     legend
       .append('text')
-      .attr('x', 30)
-      .attr('y', 8)
+      .attr('x', 25)
+      .attr('y', 13)
       .text(d => d)
-      .style('text-anchor', 'start')
-      .style('font-size', '12px');
+      .style('font-size', '12px')
+      .style('text-anchor', 'start');
   }, [data]); // Cập nhật khi dữ liệu thay đổi
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
   if (data.length === 0) return <p>No data available for the selected date range.</p>;
 
-  return <svg ref={svgRef}></svg>;
+  return <svg ref={svgRef} width={800} height={450}></svg>; // Set width and height directly on SVG
 };
 
 export default TimelineChart;
