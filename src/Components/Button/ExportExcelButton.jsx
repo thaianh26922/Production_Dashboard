@@ -17,10 +17,10 @@ const ExportExcelButton = ({ data, parentComponentName }) => {
   return (
     <div className="flex justify-end">
       <button
-        className="bg-yellow-500 text-white px-3 py-2 rounded-md text-sm"
+        className="bg-green-400 text-sm text-white px-3 py-2 rounded-md flex items-center hover:bg-green-700 transition-colors"
         onClick={handleExportExcel}
       >
-        Xuất Excel
+        Xuất Dữ Liệu
       </button>
     </div>
   );

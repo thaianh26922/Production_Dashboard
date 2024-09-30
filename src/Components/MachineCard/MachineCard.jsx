@@ -89,11 +89,11 @@ const MachineCard = ({ machine }) => {
       </div>
 
       {/* 3. Time Labels Section */}
-      <div className="flex justify-between bg-white text-black ">
-        <span className="text-md ">
+      <div className="flex justify-between bg-white text-black px-2 ">
+        <span className="text-sm">
           Total Run: {machine.totalTimeToday} giờ
         </span>
-        <span className={`text-md ${timeChangeColor}`}>
+        <span className={`text-sm ${timeChangeColor} -ml-1 `}>
           {timeChangeIcon} {Math.abs(timeChangePercent).toFixed(2)}% hôm qua
         </span>
       </div>

@@ -9,6 +9,8 @@ import ExportExcelButton from '../../Components/Button/ExportExcelButton';
 import * as yup from 'yup';
 import { format } from 'date-fns';
 import { devicesData } from '../../data/Machine/machineData'; // Nhập dữ liệu từ file data
+import FormSample from '../../Components/Button/FormSample';
+import ImportButton from '../../Components/Button/ImportButton';
 
 const ErrorReportCatalog = () => {
   const [errorReports, setErrorReports] = useState(() => {
@@ -82,23 +84,15 @@ const ErrorReportCatalog = () => {
       {/* Các nút tìm kiếm, thêm mới và xuất Excel */}
       <div className="flex items-center gap-2 mb-4">
         <SearchButton placeholder="Tìm kiếm mã lỗi, mã thiết bị..." onSearch={(q) => setSearchQuery(q)} />
-        <AddButton onClick={() => setIsModalOpen(true)} />
+        
 
-        <div className="flex-grow"></div>
+        
 
         <div className="flex items-center gap-2 ml-auto">
-          <input
-            type="date"
-            value={format(exportStartDate, 'yyyy-MM-dd')}
-            onChange={(e) => setExportStartDate(new Date(e.target.value))}
-            className="p-2 border rounded"
-          />
-          <input
-            type="date"
-            value={format(exportEndDate, 'yyyy-MM-dd')}
-            onChange={(e) => setExportEndDate(new Date(e.target.value))}
-            className="p-2 border rounded"
-          />
+        <div className="flex-grow"> <AddButton onClick={() => setIsModalOpen(true)} /></div>
+        <div className="flex-grow"> <FormSample onClick={() => setIsModalOpen(false)} /></div>
+        <div className="flex-grow"> <ImportButton onClick={() => setIsModalOpen(false)} /></div>
+          
           <ExportExcelButton data={filteredExportReports} fileName="Báo cáo lỗi.xlsx" />
         </div>
       </div>
@@ -108,13 +102,10 @@ const ErrorReportCatalog = () => {
         <thead>
           <tr className="bg-gray-100">
             <th className="border px-4 py-2 text-xs">STT</th>
-            <th className="border px-4 py-2 text-xs">Mã Lỗi</th>
+            <th className="border px-4 py-2 text-xs">Mã nguyên nhân</th>
+            <th className="border px-4 py-2 text-xs">Tên nguyên nhân</th>
             <th className="border px-4 py-2 text-xs">Mã Thiết Bị</th>
-            <th className="border px-4 py-2 text-xs">Loại Lỗi</th>
-            <th className="border px-4 py-2 text-xs">Tên Lỗi</th>
-            <th className="border px-4 py-2 text-xs">Thời Gian Bắt Đầu</th>
-            <th className="border px-4 py-2 text-xs">Thời Gian Kết Thúc</th>
-            <th className="border px-4 py-2 text-xs">Ngày Tạo</th>
+            <th className="border px-4 py-2 text-xs">Loại nguyên nhân</th>
             <th className="border px-4 py-2 text-xs">Thao Tác</th>
           </tr>
         </thead>
@@ -123,14 +114,11 @@ const ErrorReportCatalog = () => {
             <tr key={report.id} className="hover:bg-gray-50">
               <td className="border px-4 py-2 text-sm text-center">{index + 1}</td>
               <td className="border px-4 py-2 text-sm text-center">{report.errorCode}</td>
+              <td className="border px-4 py-2 text-sm text-center">{report.errorName}</td>
               <td className="border px-4 py-2 text-sm text-center">{report.deviceCode}</td>
               <td className="border px-4 py-2 text-sm text-center">{report.errorType}</td>
-              <td className="border px-4 py-2 text-sm text-center">{report.errorName}</td>
-              <td className="border px-4 py-2 text-sm text-center">{report.startTime}</td>
-              <td className="border px-4 py-2 text-sm text-center">{report.endTime}</td>
-              <td className="border px-4 py-2 text-sm text-center">
-                {format(new Date(report.createdDate), 'dd/MM/yyyy')}
-              </td>
+            
+              
               <td className="py-2 px-2 text-center border">
                 <button
                   className="mr-2 text-blue-500 hover:text-blue-700"

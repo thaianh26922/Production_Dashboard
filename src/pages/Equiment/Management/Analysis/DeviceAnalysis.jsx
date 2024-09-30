@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Select, DatePicker, Space } from 'antd'; 
+import { Select, DatePicker, Space,Radio, Tabs } from 'antd'; 
 import moment from 'moment';  // Sử dụng để so sánh ngày và sinh dữ liệu
 import DeviceTable from '../../../../Components/Equiment/Analysis/DeviceTable'; // Đường dẫn tới file DeviceTable
 import DowntimePieChart from '../../../../Components/Equiment/Analysis/DowntimePieChart'; // Đường dẫn tới biểu đồ Downtime
@@ -71,9 +71,11 @@ const DeviceAnalysis = () => {
       randomData.push({
         startTime: randomStartTime.format('YYYY-MM-DD HH:mm'),
         endTime: randomEndTime.format('YYYY-MM-DD HH:mm'),
-        workTime: '8h',
+        workTime: `${Math.floor(Math.random() * 8)}h`,
+        planeTime: `${Math.floor(Math.random() * 8)}h`,
         runTime: `${Math.floor(Math.random() * 8)}h`,
-        stopTime: `${Math.floor(Math.random() * 2)}h`,
+        downTime: `${Math.floor(Math.random() * 2)}h`,
+        offTime: `${Math.floor(Math.random() * 2)}h`,
         maintenanceTime: `${Math.floor(Math.random() * 60)} phút`,
         runRate: `${Math.floor(Math.random() * 100)}%`,
       });
@@ -123,8 +125,8 @@ const DeviceAnalysis = () => {
             placeholder="Chọn loại máy"
             style={{ width: 200 }} // Sử dụng style của Ant Design
           >
-            <Option value="CNC">Máy CNC</Option>
-            <Option value="PHAY">Máy PHAY</Option>
+            <Option value="CNC">Tổ Tiện</Option>
+            <Option value="PHAY">Tổ Phay</Option>
           </Select>
 
           {/* Lựa chọn máy cụ thể */}
@@ -153,19 +155,20 @@ const DeviceAnalysis = () => {
       {selectedMachineType === 'CNC' && (
         <>
           {/* Hiển thị biểu đồ giữ nguyên dữ liệu cho Máy CNC */}
-          <div className="grid grid-cols-5 gap-2 mt-4">
+          <div className="grid grid-cols-5 gap-2 mt-4"> 
+            
             <div className="col-span-1 bg-white p-3">
-              <h4>Downtime Pie Chart - Máy CNC</h4>
+              <h4  className="mb-4">Downtime Pie Chart - Máy CNC</h4>
               <DowntimePieChart data={downtimeChartData} />
             </div>
 
             <div className="col-span-2 bg-white p-3">
-              <h4>Pareto Time Chart - Máy CNC</h4>
+              <h4 className="mb-4">Pareto Time Chart - Máy CNC</h4>
               <ParetoTimeChart data={paretoDataTime.values} labels={paretoDataTime.labels} />
             </div>
 
             <div className="col-span-2 bg-white p-3">
-              <h4>Pareto Frequency Chart - Máy CNC</h4>
+              <h4 className="mb-4">Pareto Frequency Chart - Máy CNC</h4>
               <ParetoFrequencyChart data={paretoDataFrequency.values} labels={paretoDataFrequency.labels} />
             </div>
           </div>

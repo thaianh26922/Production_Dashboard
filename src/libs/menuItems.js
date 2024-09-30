@@ -24,6 +24,7 @@ export const imprtDataItems = [
 
 export const QCStItems = [
     // { name: 'Tổng quan', link: '/QCS/overview' },
+    { name: 'Tỷ lệ máy chạy', link: '/QCS/availablerate' },
     { name: 'Phân Tích', link: '/QCS/analysis' },
     { name: 'Báo cáo ', link: '/QCS/reports' },
    

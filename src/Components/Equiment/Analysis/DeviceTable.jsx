@@ -8,7 +8,7 @@ const DeviceTable = ({ downtimeData, productionData }) => {
 
   return (
     <div>
-      <h3>Thông kê Downtime</h3>
+      <h3 className="mt-6 font-semibold">Thông kê Downtime</h3>
       <table className="min-w-full bg-white border border-gray-200 mt-4">
         <thead>
           <tr className="bg-gray-100">
@@ -36,18 +36,20 @@ const DeviceTable = ({ downtimeData, productionData }) => {
         </tbody>
       </table>
 
-      <h3 className="mt-6">Thông kê sản xuất</h3>
+      <h3 className="mt-6 font-semibold">Thông kê sản xuất</h3>
       <table className="min-w-full bg-white border border-gray-200 mt-4">
         <thead>
           <tr className="bg-gray-100">
             <th className="border px-4 py-2 text-xs">STT</th>
             <th className="border px-4 py-2 text-xs">Ngày</th>
-            <th className="border px-4 py-2 text-xs">Tg bắt đầu</th>
-            <th className="border px-4 py-2 text-xs">Tg kết thúc</th>
-            <th className="border px-4 py-2 text-xs">Tg công việc</th>
-            <th className="border px-4 py-2 text-xs">Tg chạy</th>
-            <th className="border px-4 py-2 text-xs">Tg dừng</th>
-            <th className="border px-4 py-2 text-xs">Tg bảo trì</th>
+            <th className="border px-4 py-2 text-xs">Thời gian bắt đầu</th>
+            <th className="border px-4 py-2 text-xs">Thời gian thúc</th>
+            <th className="border px-4 py-2 text-xs">Thời gian công việc</th>
+            <th className="border px-4 py-2 text-xs">Thời gian chạy theo kế hoạch</th>
+            <th className="border px-4 py-2 text-xs">Thời gian chạy thực tế </th>
+            <th className="border px-4 py-2 text-xs">Thời gian chờ</th>
+            <th className="border px-4 py-2 text-xs">Thời gian tắt máy</th>
+            <th className="border px-4 py-2 text-xs">Thời gian bảo trì</th>
             <th className="border px-4 py-2 text-xs">Tỉ lệ chạy</th>
           </tr>
         </thead>
@@ -59,8 +61,10 @@ const DeviceTable = ({ downtimeData, productionData }) => {
               <td className="border px-4 py-2">{item.startTime}</td>
               <td className="border px-4 py-2">{item.endTime}</td>
               <td className="border px-4 py-2">{item.workTime}</td>
+              <td className="border px-4 py-2">{item.planeTime}</td>
               <td className="border px-4 py-2">{item.runTime}</td>
-              <td className="border px-4 py-2">{item.stopTime}</td>
+              <td className="border px-4 py-2">{item.downTime}</td>
+              <td className="border px-4 py-2">{item.offTime}</td>
               <td className="border px-4 py-2">{item.maintenanceTime}</td>
               <td className="border px-4 py-2">{item.runRate}</td>
             </tr>

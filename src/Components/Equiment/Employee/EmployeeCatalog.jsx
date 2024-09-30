@@ -7,6 +7,8 @@ import SearchButton from '../../Button/SearchButton';
 import AddButton from '../../Button/AddButton';
 import ExportExcelButton from '../../Button/ExportExcelButton';
 import * as yup from 'yup';
+import FormSample from '../../Button/FormSample';
+import ImportButton from '../../Button/ImportButton';
 
 const EmployeeCatalog = () => {
   const [employees, setEmployees] = useState(() => {
@@ -63,9 +65,12 @@ const EmployeeCatalog = () => {
       {/* Các nút tìm kiếm, thêm mới và xuất Excel */}
       <div className="flex items-center gap-2 mb-4">
         <SearchButton placeholder="Tìm kiếm mã nhân viên, tên nhân viên..." onSearch={(q) => setSearchQuery(q)} />
-        <AddButton onClick={() => setIsModalOpen(true)} />
+       
 
         <div className="flex-grow"></div>
+        <AddButton onClick={() => setIsModalOpen(true)} />
+        <FormSample onClick={() => setIsModalOpen(false)} />
+        <ImportButton onClick={() => setIsModalOpen(false)} />
 
         <ExportExcelButton data={filteredEmployees} fileName="DanhSachNhanVien.xlsx" />
       </div>

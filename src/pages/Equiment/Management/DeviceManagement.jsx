@@ -181,12 +181,12 @@ const DeviceManagement = () => {
         <thead>
           <tr className="bg-gray-100">
             <th className="border px-4 py-2 text-xs">STT</th>
-            <th className="border px-4 py-2 text-xs">Khu vực</th>
-            <th className="border px-4 py-2 text-xs">Mã Máy</th>
-            <th className="border px-4 py-2 text-xs">Tên Máy</th>
-            <th className="border px-4 py-2 text-xs">Model</th>
+            <th className="border px-4 py-2 text-xs">Mã Thiết Bị</th>
+            <th className="border px-4 py-2 text-xs">Tên thiết bị</th>
+            <th className="border px-4 py-2 text-xs">Khu vực sản xuất</th>
+            <th className="border px-4 py-2 text-xs">Model thiết bị</th>
             <th className="border px-4 py-2 text-xs">Thông số kỹ thuật</th>
-            <th className="border px-4 py-2 text-xs">Ngày nhập</th>
+            <th className="border px-4 py-2 text-xs">Ngày mua</th>
             <th className="border px-4 py-2 text-xs">Thao Tác</th>
           </tr>
         </thead>

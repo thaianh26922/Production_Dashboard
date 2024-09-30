@@ -7,6 +7,7 @@ import RuntimeTrendChart from '../../../Components/Equiment/Reports/RuntimeTrend
 import RepairBarChart from '../../../Components/Equiment/Reports/RepairBarChart'; // Import RepairBarChart
 import StackedBarChart from '../../../Components/Equiment/Reports/StackedBarChart';
 import TimelineChart from '../../../Components/Equiment/Reports/TimelineChart';
+import Timeline24hChart from '../../../Components/Equiment/Reports/Timeline24hChart';
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -104,7 +105,7 @@ function DeviceReport() {
         </div>
       </div>
 
-<div className="grid grid-cols-10 gap-2 p-3">
+ <div className="grid grid-cols-12 gap-2 p-1">
     {/* Hàng 1: 4 biểu đồ (2 hàng, 2 cột) */}
    
         <div className="bg-white rounded-lg p-4 shadow-md col-span-2 ">
@@ -141,7 +142,7 @@ function DeviceReport() {
             </div>
         </div>
 
-        <div className="bg-white rounded-lg p-4 shadow-md col-span-3">
+        <div className="bg-white rounded-lg p-4 shadow-md col-span-5">
             <TitleChart
                 title="Thời gian dừng sửa chữa"
                 timeWindow="Last 24 hours"
@@ -149,13 +150,13 @@ function DeviceReport() {
                 onPrint={handlePrint}
             />
             <div className="w-full h-full mt-8 ml-2">
-                <RepairBarChart data={repairDowntimeBarData} />
+                <Timeline24hChart />
             </div>
         </div>
     </div>
 
         {/* Hàng 2: Nội dung AA */}
-            <div className="grid grid-cols-2 gap-2 p-3">
+            <div className="grid grid-cols-2 gap-2 p-1">
             
                 <div className="bg-white p-3 col-span-1 rounded-lg">
                 <TitleChart
