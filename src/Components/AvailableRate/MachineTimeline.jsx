@@ -2,41 +2,36 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import moment from 'moment';
 
-const TimelineChart = ({ selectedDate }) => {
-  const fixedHeight = 450; 
+const MachineTimeline = () => {
+  const fixedHeight = 150; 
   const svgRef = useRef();
   const wrapperRef = useRef();
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 450 });
 
-  const fetchData = async (startDate, endDate) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(
-        `https://back-end-production.onrender.com/api/device-status/543ff470-54c6-11ef-8dd4-b74d24d26b24?startDate=${startDate}&endDate=${endDate}`
-      );
-      if (!response.ok) {
-        throw new Error('Failed to fetch data from API');
-      }
-      const result = await response.json();
-      setData(result.statuses);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
+  // Hàm tạo dữ liệu giả lập cho 24 giờ
+  const generateSimulatedData = () => {
+    const simulatedData = [];
+    let currentTime = moment().startOf('day'); // Bắt đầu từ 00:00 của ngày hiện tại
+
+    // Tạo các khoảng thời gian xen kẽ giữa "Chạy" và "Dừng" mỗi 1 giờ
+    for (let i = 0; i < 24; i++) {
+      const status = i % 2 === 0 ? '1' : '0'; // Xen kẽ trạng thái "Chạy" (1) và "Dừng" (0)
+      simulatedData.push({
+        ts: currentTime.valueOf(),
+        value: status,
+      });
+      currentTime = currentTime.add(1, 'hour'); // Tăng thêm 1 giờ
     }
+
+    return simulatedData;
   };
 
   useEffect(() => {
-    if (selectedDate && selectedDate.length === 2) {
-      const startDate = Math.min(selectedDate[0].valueOf(), selectedDate[1].valueOf());
-      const endDate = Math.max(selectedDate[0].valueOf(), selectedDate[1].valueOf());
-      fetchData(startDate, endDate);
-    }
-  }, [selectedDate]);
+    // Sử dụng dữ liệu giả lập 24 giờ
+    const simulatedData = generateSimulatedData();
+    setData(simulatedData);
+  }, []);
 
   useEffect(() => {
     if (!data || data.length === 0) return;
@@ -48,7 +43,7 @@ const TimelineChart = ({ selectedDate }) => {
     const processedData = data.map(d => ({
       date: moment(d.ts).format('YYYY-MM-DD'),
       startTime: moment(d.ts).format('HH:mm'),
-      endTime: moment(d.ts + 3600000).format('HH:mm'),
+      endTime: moment(d.ts + 3600000).format('HH:mm'), // Mỗi trạng thái kéo dài 1 giờ
       status: d.value === '1' ? 'Chạy' : 'Dừng',
     }));
 
@@ -68,7 +63,7 @@ const TimelineChart = ({ selectedDate }) => {
     const yScale = d3
       .scaleBand()
       .domain(uniqueDates.sort())
-      .range([height - margin.bottom - 40,margin.top ])
+      .range([height - margin.bottom - 40, margin.top])
       .padding(0.1);
 
     const colorScale = d3
@@ -100,7 +95,7 @@ const TimelineChart = ({ selectedDate }) => {
         const width = xScale(timeParse(d.endTime)) - xScale(timeParse(d.startTime));
         return width > 0 ? width : 0;
       })
-      .attr('height',Math.min(yScale.bandwidth() / 2, 20))
+      .attr('height', Math.min(yScale.bandwidth() / 2, 20))
       .attr('fill', d => colorScale(d.status))
       .append('title')
       .text(d => `${d.status}: ${d.startTime} - ${d.endTime}`);
@@ -113,22 +108,22 @@ const TimelineChart = ({ selectedDate }) => {
       .enter()
       .append('g')
       .attr('class', 'legend')
-      .attr('transform', (d, i) => `translate(${margin.left + i * 100},${height - margin.bottom + 20})`);
+      .attr('transform', (d, i) => `translate(${margin.left + i * 70},${height - margin.bottom + 15})`);
 
     legend
       .append('rect')
       .attr('x', 0)
-      .attr('y', 0)
-      .attr('width', 18)
-      .attr('height', 18)
+      .attr('y', -10)
+      .attr('width', 20)
+      .attr('height', 5)
       .style('fill', d => colorScale(d));
 
     legend
       .append('text')
       .attr('x', 25)
-      .attr('y', 13)
+      .attr('y', -5)
       .text(d => d)
-      .style('font-size', '12px')
+      .style('font-size', '10px')
       .style('text-anchor', 'start');
   }, [data, dimensions]);
 
@@ -146,15 +141,11 @@ const TimelineChart = ({ selectedDate }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
-  if (data.length === 0) return <p>No data available for the selected date range.</p>;
-
   return (
     <div ref={wrapperRef} style={{ width: '100%', height: '100%' }}>
-      <svg ref={svgRef} width={dimensions.width} height={dimensions.height}></svg>
+      <svg ref={svgRef} width={dimensions.width} height={fixedHeight}></svg>
     </div>
   );
 };
 
-export default TimelineChart;
+export default MachineTimeline;

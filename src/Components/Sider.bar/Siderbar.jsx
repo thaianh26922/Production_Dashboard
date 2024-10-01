@@ -71,7 +71,7 @@
     
             {/* Tổng Quan */}
             
-            <Link to="/QCS/analysis" className="flex items-center text-gray-700 hover:text-black">
+            <Link to="/QCS/available" className="flex items-center text-gray-700 hover:text-black">
               <FiPercent className="mr-4 text-lg text-gray-500" />
               {!isCollapsed && <span className="text-gray-500 hover:text-black">Tỷ lệ máy chạy</span>}
             </Link>

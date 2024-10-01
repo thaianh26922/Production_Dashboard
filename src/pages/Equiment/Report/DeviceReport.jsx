@@ -64,7 +64,7 @@ function DeviceReport() {
     datasets: [
       {
         label: "", // Nhãn cho biểu đồ
-        data: [1, 2, 1, 2], // Dữ liệu thời gian dừng sửa chữa
+        data: [1, 2, 1, 2,3,4,], // Dữ liệu thời gian dừng sửa chữa
         backgroundColor: [
           'rgba(5, 65, 151, 0.96)', // Màu cho cột đầu tiên
         ], // Mảng các màu cho từng cột
@@ -124,26 +124,26 @@ function DeviceReport() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-4 shadow-md col-span-3 ">
+        <div className="bg-white rounded-lg p-4 shadow-md col-span-4 ">
           <TitleChart
             title="Xu hướng máy chạy"
             timeWindow="Last 24 hours"
             onFullscreen={handleFullscreen}
             onPrint={handlePrint}
           />
-          <div className="w-full h-full mt-8 ml-2">
+          <div className="w-full h-full mt-1 ml-2 p-2">
             <RuntimeTrendChart data={runtimeTrendData} />
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-4 shadow-md col-span-5">
+        <div className="bg-white rounded-lg p-2 shadow-md col-span-4">
           <TitleChart
             title="Thời gian dừng sửa chữa"
             timeWindow="Last 24 hours"
             onFullscreen={handleFullscreen}
             onPrint={handlePrint}
           />
-          <div className="w-full h-full mt-8 ml-2">
+          <div className="w-full h-full mt-12 ml-2 px-3">
             <RepairBarChart data={repairDowntimeBarData} />
           </div>
         </div>
@@ -168,7 +168,7 @@ function DeviceReport() {
             onFullscreen={handleFullscreen}
             onPrint={handlePrint}
           />
-          <StackedBarChart />
+          <StackedBarChart selectedDate={selectedDate} />
         </div>
       </div>
     </>

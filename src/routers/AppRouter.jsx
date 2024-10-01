@@ -28,6 +28,7 @@ import DeviceReport from '../pages/Equiment/Report/DeviceReport';
 import WorkShiftCatalog from '../Components/Shifr/WorkShiftCatalog';
 import EmployeeCatalog from '../Components/Equiment/Employee/EmployeeCatalog';
 import AreasManagement from '../pages/Equiment/Management/AreasManagement';
+import AvailableRate from '../pages/Equiment/AvailableRate/AvailableRate';
 
 const AppRouter = () => {
   return (
@@ -53,6 +54,8 @@ const AppRouter = () => {
         <Route path="/QCS/analysis" element={<MainLayout><DeviceAnalysis /></MainLayout>} />
         <Route path="/QCS/reports" element={<MainLayout><DeviceReport /></MainLayout>} />
         <Route path="/QCS/issue" element={<MainLayout><ErrorReportCatalog /></MainLayout>} />
+
+        <Route path="/QCS/available" element={<MainLayout><AvailableRate /></MainLayout>} />
 
 
         {/* Equipment Routes
