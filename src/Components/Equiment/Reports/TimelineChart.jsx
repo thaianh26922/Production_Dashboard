@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 import moment from 'moment';
 
 const TimelineChart = ({ selectedDate }) => {
-  const fixedHeight = 450; 
+  
   const svgRef = useRef();
   const wrapperRef = useRef();
   const [data, setData] = useState([]);

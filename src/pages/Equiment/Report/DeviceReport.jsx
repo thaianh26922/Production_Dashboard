@@ -94,7 +94,7 @@ function DeviceReport() {
             ))}
           </Select>
           
-          <RangePicker onChange={handleDateChange} /> {/* Lắng nghe sự thay đổi ngày */}
+          <RangePicker onChange={handleDateChange} needConfirm /> {/* Lắng nghe sự thay đổi ngày */}
         </div>
       </div>
 

@@ -1,10 +1,12 @@
 import React from 'react';
 import AvailableCard from './AvailableCard'; // Import AvailableCard
 
-// Nhận danh sách các thẻ AvailableCard từ props
 function AvailableGrid({ machines, machineType }) {
   return (
-    <div className="grid grid-cols-4 gap-2">
+    <div
+      className="grid grid-cols-4 gap-2 overflow-y-auto"
+      style={{ maxHeight: 'calc(2 * 230px + 1rem)' }} // Giới hạn chiều cao (2 hàng + khoảng cách giữa)
+    >
       {machines.map((machine) => (
         <AvailableCard
           key={machine.value}

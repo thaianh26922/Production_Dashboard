@@ -3,11 +3,11 @@ import * as d3 from 'd3';
 import moment from 'moment';
 
 const MachineTimeline = () => {
-  const fixedHeight = 150; 
+  const fixedHeight = 150; // Đặt chiều cao cố định cho SVG
   const svgRef = useRef();
   const wrapperRef = useRef();
   const [data, setData] = useState([]);
-  const [dimensions, setDimensions] = useState({ width: 800, height: 450 });
+  const [dimensions, setDimensions] = useState({ width: 800, height: fixedHeight });
 
   // Hàm tạo dữ liệu giả lập cho 24 giờ
   const generateSimulatedData = () => {
@@ -38,69 +38,68 @@ const MachineTimeline = () => {
 
     const svg = d3.select(svgRef.current);
     const { width, height } = dimensions;
-    const margin = { top: 20, right: 35, bottom: 50, left: 50 };
+    const margin = { top: 20, right: 35, bottom: 80, left: 50 };
 
     const processedData = data.map(d => ({
-      date: moment(d.ts).format('YYYY-MM-DD'),
       startTime: moment(d.ts).format('HH:mm'),
       endTime: moment(d.ts + 3600000).format('HH:mm'), // Mỗi trạng thái kéo dài 1 giờ
       status: d.value === '1' ? 'Chạy' : 'Dừng',
     }));
 
-    svg.selectAll('*').remove();
+    svg.selectAll('*').remove(); // Xóa các phần tử cũ
 
     const timeParse = d3.timeParse('%H:%M');
     const timeFormat = d3.timeFormat('%H:%M');
-    const dateParse = d3.timeParse('%Y-%m-%d');
-    const dateFormat = d3.timeFormat('%d/%m');
 
     const xScale = d3
       .scaleTime()
       .domain([timeParse('00:00'), timeParse('23:59')])
       .range([margin.left, width - margin.right]);
 
-    const uniqueDates = [...new Set(processedData.map(d => d.date))];
-    const yScale = d3
-      .scaleBand()
-      .domain(uniqueDates.sort())
-      .range([height - margin.bottom - 40, margin.top])
-      .padding(0.1);
-
     const colorScale = d3
       .scaleOrdinal()
       .domain(['Chạy', 'Dừng'])
       .range(['#4bc0c0', '#ff6384']);
 
+    // Vẽ trục X
     svg
       .append('g')
-      .attr('transform', `translate(0,${height - margin.bottom - 40})`)
+      .attr('transform', `translate(0,${height - margin.bottom - 30})`)
       .call(d3.axisBottom(xScale).ticks(d3.timeHour.every(2)).tickFormat(timeFormat))
       .selectAll("text")
       .attr("transform", "translate(-10,0)rotate(-45)")
       .style("text-anchor", "end");
 
-    svg
-      .append('g')
-      .attr('transform', `translate(${margin.left},0)`)
-      .call(d3.axisLeft(yScale).tickFormat(d => dateFormat(dateParse(d))));
+    // Không vẽ trục Y, chỉ vẽ các thanh trên trục X
 
+    // Vẽ các thanh ngang trên trục X
     svg
       .selectAll('rect')
       .data(processedData)
       .enter()
       .append('rect')
       .attr('x', d => xScale(timeParse(d.startTime)) + 1)
-      .attr('y', d => yScale(d.date))
+      .attr('y', height - margin.bottom - 60) // Đặt thanh ngang gần cuối SVG
       .attr('width', d => {
         const width = xScale(timeParse(d.endTime)) - xScale(timeParse(d.startTime));
         return width > 0 ? width : 0;
       })
-      .attr('height', Math.min(yScale.bandwidth() / 2, 20))
+      .attr('height', 30) // Đặt chiều cao của thanh
       .attr('fill', d => colorScale(d.status))
       .append('title')
       .text(d => `${d.status}: ${d.startTime} - ${d.endTime}`);
 
-    const legendData = ['Chạy', 'Dừng'];
+    // Tính tổng số giờ cho từng trạng thái
+    const totalHours = processedData.length; // Tổng cộng 24 giờ
+    const totalRunning = processedData.filter(d => d.status === 'Chạy').length; // Số giờ máy chạy
+    const totalStopped = totalHours - totalRunning; // Số giờ máy dừng
+    const runningPercentage = ((totalRunning / totalHours) * 100).toFixed(2); // Tính tỷ lệ chạy
+
+    // Vẽ phần chú thích (legend) với tổng thời gian
+    const legendData = [
+      { status: 'Chạy', hours: totalRunning, color: '#4bc0c0' },
+      { status: 'Dừng', hours: totalStopped, color: '#ff6384' },
+    ];
 
     const legend = svg
       .selectAll('.legend')
@@ -108,7 +107,7 @@ const MachineTimeline = () => {
       .enter()
       .append('g')
       .attr('class', 'legend')
-      .attr('transform', (d, i) => `translate(${margin.left + i * 70},${height - margin.bottom + 15})`);
+      .attr('transform', (d, i) => `translate(${margin.left + i * 150},${height - margin.bottom + 25})`);
 
     legend
       .append('rect')
@@ -116,22 +115,32 @@ const MachineTimeline = () => {
       .attr('y', -10)
       .attr('width', 20)
       .attr('height', 5)
-      .style('fill', d => colorScale(d));
+      .style('fill', d => d.color);
 
     legend
       .append('text')
       .attr('x', 25)
       .attr('y', -5)
-      .text(d => d)
+      .text(d => `${d.status}: ${d.hours} giờ`)
       .style('font-size', '10px')
       .style('text-anchor', 'start');
+
+    // Thêm tiêu đề ở cuối (bottom) với tỷ lệ chạy
+    svg
+      .append('text')
+      .attr('x', width / 2)
+      .attr('y', height - 10) // Đặt tiêu đề ở cuối SVG
+      .attr('text-anchor', 'middle')
+      .style('font-size', '14px')
+      .style('font-weight', 'bold')
+      .text(`Tỷ lệ máy chạy: ${runningPercentage}%`);
   }, [data, dimensions]);
 
   useEffect(() => {
     const handleResize = () => {
       if (wrapperRef.current) {
         const { clientWidth, clientHeight } = wrapperRef.current;
-        setDimensions({ width: clientWidth, height: clientHeight });
+        setDimensions({ width: clientWidth, height: fixedHeight });
       }
     };
     
@@ -142,7 +151,7 @@ const MachineTimeline = () => {
   }, []);
 
   return (
-    <div ref={wrapperRef} style={{ width: '100%', height: '100%' }}>
+    <div ref={wrapperRef} style={{ width: '100%', height: `${fixedHeight}px` }}>
       <svg ref={svgRef} width={dimensions.width} height={fixedHeight}></svg>
     </div>
   );
