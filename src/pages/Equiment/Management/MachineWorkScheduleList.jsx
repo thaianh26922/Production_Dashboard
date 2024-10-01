@@ -1,171 +1,196 @@
 import React, { useState } from 'react';
-import { Modal, Select, DatePicker, Space, Button, Input } from 'antd';
-import Breadcrumb from '../../../Components/Breadcrumb/Breadcrumb';
+import { Modal, Select, DatePicker, Button } from 'antd';
 import MachineWorkScheduleCard from '../../../Components/Equiment/MachineSchedule/MachineWorkScheduleCard';
+import CustomUpdateModal from '../../../Components/Modal/CustomUpdateModal'; // Import custom modal component
 const { Option } = Select;
+
+function onChange(date, dateString) {
+  console.log(date, dateString);
+}
 
 const MachineWorkScheduleList = () => {
   const [selectedArea, setSelectedArea] = useState('all'); // State to store selected area
-  const [selectedMachine, setSelectedMachine] = useState(null); // Track the selected machine for editing
-  const [isModalVisible, setIsModalVisible] = useState(false); // Modal visibility
+  const [selectedMachines, setSelectedMachines] = useState([]); // Track selected machines
+  const [isSelecting, setIsSelecting] = useState(false); // Track if the user is selecting devices
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // Modal visibility for update confirmation
+  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false); // Custom modal visibility for the final confirmation
 
-  // Sample data for machines (can be fetched from an API)
-  const machines = [
-    { id: 1, name: 'CNC1', status: 'Chạy', area: 'area1', shift: 'Ca Sáng', employees: ['nv1', 'nv2'] },
-    { id: 2, name: 'CNC2', status: 'Chờ', area: 'area1', shift: 'Ca Chiều', employees: ['nv3','nv2'] },
-    { id: 3, name: 'CNC3', status: 'Lỗi', area: 'area1', shift: 'Ca Sáng', employees: ['nv3','nv2'] },
-    { id: 4, name: 'CNC3', status: 'Lỗi', area: 'area1', shift: 'Ca Sáng', employees: ['nv3','nv2'] },
-    
-    { id: 5, name: 'CNC3', status: 'Lỗi', area: 'area1', shift: 'Ca Sáng', employees: ['nv3','nv2'] },
-    
-    { id: 6, name: 'CNC3', status: 'Lỗi', area: 'area2', shift: 'Ca Sáng', employees: ['nv3','nv2'] },
-    { id: 7, name: 'CNC3', status: 'Lỗi', area: 'area2', shift: 'Ca Sáng', employees: ['nv3','nv2'] },
-    
-    { id: 8, name: 'CNC3', status: 'Lỗi', area: 'area2', shift: 'Ca Sáng', employees: ['nv3','nv2'] },
-    
-    { id: 9, name: 'CNC3', status: 'Lỗi', area: 'area2', shift: 'Ca Sáng', employees: ['nv3','nv2'] },
-    
-  ];
+  // Toggle machine selection mode
+  const toggleSelecting = () => {
+    if (isSelecting) {
+      // Clear selected machines when switching to "Bỏ Chọn"
+      setSelectedMachines([]);
+    }
+    setIsSelecting(!isSelecting);
+  };
 
-  // Options for selecting different areas (can be fetched from an API)
-  const areaOptions = [
-    { value: 'all', label: 'All' },
-    { value: 'area1', label: 'Line 01' },
-    { value: 'area2', label: 'Line 02' },
-  ];
+  // Toggle machine selection
+  const handleMachineClick = (machine) => {
+    if (!isSelecting) return; // If not in selection mode, do nothing
 
-  // Shift and employee options (optional)
-  const shiftOptions = [
-    { value: 'Ca Sáng', label: 'Ca Sáng' },
-    { value: 'Ca Chiều', label: 'Ca Chiều' },
-    { value: 'Ca Tối', label: 'Ca Tối' },
-  ];
+    if (selectedMachines.includes(machine.id)) {
+      // Unselect the machine if it's already selected
+      setSelectedMachines(selectedMachines.filter((mId) => mId !== machine.id));
+    } else {
+      // Select the machine
+      setSelectedMachines([...selectedMachines, machine.id]);
+    }
+  };
 
-  const employeeOptions = [
-    { value: 'nv1', label: 'Nhân viên 1' },
-    { value: 'nv2', label: 'Nhân viên 2' },
-    { value: 'nv3', label: 'Nhân viên 3' },
-    { value: 'nv4', label: 'Nhân viên 4' },
-  ];
-
-  // Filter machines based on the selected area
-  const filteredMachines =
-    selectedArea === 'all'
-      ? machines // Show all machines if "All" is selected
-      : machines.filter((machine) => machine.area === selectedArea);
+  // Dynamic machines generation based on selected area
+  const generateMachines = () => {
+    if (selectedArea === 'area1') {
+      // Generate 17 CNC machines for KHU VỰC TIỆN
+      return Array.from({ length: 17 }, (_, index) => ({
+        id: index + 1,
+        name: `CNC - ${index + 1}`,
+        status: 'Chạy',
+        area: 'area1',
+        shift: 'Ca Sáng',
+        employees: ['nv1', 'nv2'],
+      }));
+    } else if (selectedArea === 'area2') {
+      // Generate 18 PHAY machines for KHU VỰC PHAY
+      return Array.from({ length: 18 }, (_, index) => ({
+        id: index + 1,
+        name: `PHAY - ${index + 1}`,
+        status: 'Chờ',
+        area: 'area2',
+        shift: 'Ca Chiều',
+        employees: ['nv3', 'nv4'],
+      }));
+    } else {
+      // Show all machines (combination of CNC and PHAY)
+      const cncMachines = Array.from({ length: 17 }, (_, index) => ({
+        id: index + 1,
+        name: `CNC - ${index + 1}`,
+        status: 'Chạy',
+        area: 'area1',
+        shift: 'Ca Sáng',
+        employees: ['nv1', 'nv2'],
+      }));
+      const phayMachines = Array.from({ length: 18 }, (_, index) => ({
+        id: index + 18 + 1,
+        name: `PHAY - ${index + 1}`,
+        status: 'Chờ',
+        area: 'area2',
+        shift: 'Ca Chiều',
+        employees: ['nv3', 'nv4'],
+      }));
+      return [...cncMachines, ...phayMachines];
+    }
+  };
 
   // Handle card click to open the modal for editing
   const handleCardClick = (machine) => {
-    setSelectedMachine(machine);
-    setIsModalVisible(true);
+    if (!isSelecting) return; // Prevent modal from opening if selecting mode is active
   };
 
   // Handle form submission to save the edited details
   const handleSave = () => {
-    console.log('Updated machine details:', selectedMachine);
-    setIsModalVisible(false);
+    console.log('Updated machine details:', selectedMachines);
+    setIsUpdateModalOpen(false);
+  };
+
+  // Handle "Cập nhật nhiệm vụ sản xuất" button click
+  const handleUpdateClick = () => {
+    setIsUpdateModalOpen(true); // Show update confirmation modal
+  };
+
+  // Handle modal confirmation
+  const handleConfirmUpdate = () => {
+    setIsUpdateModalOpen(false); // Close modal on confirm
+    setIsCustomModalOpen(true); // Show custom modal after confirmation
+  };
+
+  // Handle canceling the update (close modal and clear selections)
+  const handleCancelUpdate = () => {
+    setIsUpdateModalOpen(false);
+    setSelectedMachines([]); // Clear selected machines on cancel
   };
 
   return (
     <>
-      {/* Breadcrumb and Area Selection */}
+      {/* Area Selection */}
       <div className="flex justify-between items-center mb-4">
-        <Breadcrumb />
         <div className="flex items-center space-x-1">
           {/* Select Dropdown for Area */}
           <Select
             value={selectedArea}
             onChange={(value) => setSelectedArea(value)} // Update selected area
             placeholder="Chọn khu vực"
-            style={{ width: 100 }}
+            style={{ width: 160 }}
           >
-            {areaOptions.map((option) => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            ))}
+            {/* Area options */}
+            <Option value="all">Toàn nhà máy</Option>
+            <Option value="area1">KHU VỰC TIỆN</Option>
+            <Option value="area2">KHU VỰC PHAY</Option>
           </Select>
+          <Button onClick={toggleSelecting}>
+            {isSelecting ? 'Bỏ Chọn Thiết Bị' : 'Chọn Thiết Bị'}
+          </Button>
+
           {/* DatePicker */}
-          <Space direction="vertical">
-            <DatePicker onChange={(date, dateString) => console.log(date, dateString)} />
-          </Space>
+          <DatePicker onChange={onChange} />
+
+          {/* Conditionally render "Cập nhật nhiệm vụ sản xuất" */}
+          {selectedMachines.length > 0 && (
+            <Button type="primary" className="ml-2" onClick={handleUpdateClick}>
+              Cập nhật nhiệm vụ sản xuất
+            </Button>
+          )}
         </div>
       </div>
 
       {/* Machine List */}
       <div className="grid grid-cols-4 gap-2">
-        {filteredMachines.map((machine) => (
-          <div key={machine.id} onClick={() => handleCardClick(machine)}>
+        {generateMachines().map((machine) => (
+          <div
+            key={machine.id}
+            className={`relative cursor-pointer ${isSelecting && selectedMachines.includes(machine.id) ? 'border-2 border-blue-500' : ''}`}
+            onClick={() => handleMachineClick(machine)}
+          >
             <MachineWorkScheduleCard
               machine={machine}
-              shiftOptions={shiftOptions}
-              employeeOptions={employeeOptions}
+              shiftOptions={[
+                { value: 'Ca Sáng', label: 'Ca Sáng' },
+                { value: 'Ca Chiều', label: 'Ca Chiều' },
+                { value: 'Ca Tối', label: 'Ca Tối' },
+              ]}
+              employeeOptions={[
+                { value: 'nv1', label: 'Nhân viên 1' },
+                { value: 'nv2', label: 'Nhân viên 2' },
+                { value: 'nv3', label: 'Nhân viên 3' },
+                { value: 'nv4', label: 'Nhân viên 4' },
+              ]}
             />
+            {selectedMachines.includes(machine.id) && (
+              <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1">
+                ✓
+              </div>
+            )}
           </div>
         ))}
       </div>
 
-      {/* Modal for Editing */}
-      {selectedMachine && (
-        <Modal
-          title={`Edit Machine: ${selectedMachine.name}`}
-          visible={isModalVisible}
-          onCancel={() => setIsModalVisible(false)}
-          footer={[
-            <Button key="cancel" onClick={() => setIsModalVisible(false)}>
-              Cancel
-            </Button>,
-            <Button key="save" type="primary" onClick={handleSave}>
-              Save
-            </Button>,
-          ]}
-        >
-          <div>
-            <label>Status:</label>
-            <Select
-              value={selectedMachine.status}
-              onChange={(value) => setSelectedMachine({ ...selectedMachine, status: value })}
-              style={{ width: '100%' }}
-            >
-              <Option value="Chạy">Chạy</Option>
-              <Option value="Chờ">Chờ</Option>
-              <Option value="Lỗi">Lỗi</Option>
-              <Option value="Tắt">Tắt</Option>
-            </Select>
-          </div>
+      {/* Update Confirmation Modal */}
+      <Modal
+        title="Xác nhận cập nhật"
+        open={isUpdateModalOpen} // Use 'open' instead of 'visible'
+        onCancel={handleCancelUpdate} // Clear selections on cancel
+        onOk={handleConfirmUpdate}
+        okText="Xác nhận"
+        cancelText="Hủy"
+      >
+        <p>Bạn có muốn cập nhật nhiệm vụ sản xuất cho các thiết bị đã chọn?</p>
+      </Modal>
 
-          <div>
-            <label>Shift:</label>
-            <Select
-              value={selectedMachine.shift}
-              onChange={(value) => setSelectedMachine({ ...selectedMachine, shift: value })}
-              style={{ width: '100%' }}
-            >
-              {shiftOptions.map((option) => (
-                <Option key={option.value} value={option.value}>
-                  {option.label}
-                </Option>
-              ))}
-            </Select>
-          </div>
-
-          <div>
-            <label>Employees:</label>
-            <Select
-              mode="multiple"
-              value={selectedMachine.employees}
-              onChange={(value) => setSelectedMachine({ ...selectedMachine, employees: value })}
-              style={{ width: '100%' }}
-            >
-              {employeeOptions.map((option) => (
-                <Option key={option.value} value={option.value}>
-                  {option.label}
-                </Option>
-              ))}
-            </Select>
-          </div>
-        </Modal>
-      )}
+      {/* Custom Modal after Update Confirmation */}
+      <CustomUpdateModal
+        open={isCustomModalOpen} // Use 'open' instead of 'visible'
+        onClose={() => setIsCustomModalOpen(false)}
+        selectedMachines={selectedMachines}
+      />
     </>
   );
 };
