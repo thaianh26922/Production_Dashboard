@@ -9,26 +9,27 @@ const MachineTimeline = () => {
   const [data, setData] = useState([]);
   const [dimensions, setDimensions] = useState({ width: 800, height: fixedHeight });
 
-  // Hàm tạo dữ liệu giả lập cho 24 giờ
+  // Hàm tạo dữ liệu giả lập chi tiết hơn với khoảng thời gian 30 phút
   const generateSimulatedData = () => {
     const simulatedData = [];
     let currentTime = moment().startOf('day'); // Bắt đầu từ 00:00 của ngày hiện tại
 
-    // Tạo các khoảng thời gian xen kẽ giữa "Chạy" và "Dừng" mỗi 1 giờ
-    for (let i = 0; i < 24; i++) {
-      const status = i % 2 === 0 ? '1' : '0'; // Xen kẽ trạng thái "Chạy" (1) và "Dừng" (0)
+    // Tạo các khoảng thời gian xen kẽ giữa "Chạy", "Dừng" và "Chờ" mỗi 30 phút
+    for (let i = 0; i < 48; i++) { // 48 khoảng thời gian 30 phút cho 24 giờ
+      const randomStatus = Math.floor(Math.random() * 3); // Ngẫu nhiên chọn trạng thái "Chạy" (1), "Dừng" (0) hoặc "Chờ" (2)
+      const status = randomStatus === 0 ? '0' : randomStatus === 1 ? '1' : '2';
       simulatedData.push({
         ts: currentTime.valueOf(),
         value: status,
       });
-      currentTime = currentTime.add(1, 'hour'); // Tăng thêm 1 giờ
+      currentTime = currentTime.add(30, 'minutes'); // Tăng thêm 30 phút
     }
 
     return simulatedData;
   };
 
   useEffect(() => {
-    // Sử dụng dữ liệu giả lập 24 giờ
+    // Sử dụng dữ liệu giả lập chi tiết hơn
     const simulatedData = generateSimulatedData();
     setData(simulatedData);
   }, []);
@@ -42,8 +43,8 @@ const MachineTimeline = () => {
 
     const processedData = data.map(d => ({
       startTime: moment(d.ts).format('HH:mm'),
-      endTime: moment(d.ts + 3600000).format('HH:mm'), // Mỗi trạng thái kéo dài 1 giờ
-      status: d.value === '1' ? 'Chạy' : 'Dừng',
+      endTime: moment(d.ts + 1800000).format('HH:mm'), // Mỗi trạng thái kéo dài 30 phút
+      status: d.value === '1' ? 'Chạy' : d.value === '0' ? 'Dừng' : 'Chờ',
     }));
 
     svg.selectAll('*').remove(); // Xóa các phần tử cũ
@@ -58,8 +59,19 @@ const MachineTimeline = () => {
 
     const colorScale = d3
       .scaleOrdinal()
-      .domain(['Chạy', 'Dừng'])
-      .range(['#4bc0c0', '#ff6384']);
+      .domain(['Chạy', 'Dừng', 'Chờ'])
+      .range(['#4aea4a', '#f10401', '#ffcc00']); // Thêm màu vàng cho trạng thái "Chờ"
+
+    // Thêm tooltip vào DOM
+    const tooltip = d3.select('body')
+      .append('div')
+      .style('position', 'absolute')
+      .style('background-color', 'white')
+      .style('border', '1px solid #ccc')
+      .style('padding', '5px')
+      .style('border-radius', '4px')
+      .style('display', 'none') // Ẩn tooltip ban đầu
+      .style('pointer-events', 'none');
 
     // Vẽ trục X
     svg
@@ -70,9 +82,7 @@ const MachineTimeline = () => {
       .attr("transform", "translate(-10,0)rotate(-45)")
       .style("text-anchor", "end");
 
-    // Không vẽ trục Y, chỉ vẽ các thanh trên trục X
-
-    // Vẽ các thanh ngang trên trục X
+    // Vẽ các thanh ngang trên trục X và thêm sự kiện tooltip
     svg
       .selectAll('rect')
       .data(processedData)
@@ -86,19 +96,33 @@ const MachineTimeline = () => {
       })
       .attr('height', 30) // Đặt chiều cao của thanh
       .attr('fill', d => colorScale(d.status))
-      .append('title')
-      .text(d => `${d.status}: ${d.startTime} - ${d.endTime}`);
+      .on('mouseover', (event, d) => {
+        tooltip.style('display', 'block')
+          .html(`Trạng thái: <b>${d.status}</b><br>Thời gian: ${d.startTime} - ${d.endTime}`)
+          .style('left', `${event.pageX + 10}px`)
+          .style('top', `${event.pageY - 20}px`);
+      })
+      .on('mousemove', event => {
+        tooltip
+          .style('left', `${event.pageX + 10}px`)
+          .style('top', `${event.pageY - 20}px`);
+      })
+      .on('mouseout', () => {
+        tooltip.style('display', 'none'); // Ẩn tooltip khi chuột rời khỏi thanh
+      });
 
     // Tính tổng số giờ cho từng trạng thái
-    const totalHours = processedData.length; // Tổng cộng 24 giờ
-    const totalRunning = processedData.filter(d => d.status === 'Chạy').length; // Số giờ máy chạy
-    const totalStopped = totalHours - totalRunning; // Số giờ máy dừng
+    const totalHours = processedData.length * 0.5; // Tổng số giờ (vì mỗi khoảng là 30 phút, nên mỗi phần là 0.5 giờ)
+    const totalRunning = processedData.filter(d => d.status === 'Chạy').length * 0.5; // Số giờ máy chạy
+    const totalStopped = processedData.filter(d => d.status === 'Dừng').length * 0.5; // Số giờ máy dừng
+    const totalWaiting = processedData.filter(d => d.status === 'Chờ').length * 0.5; // Số giờ máy chờ
     const runningPercentage = ((totalRunning / totalHours) * 100).toFixed(2); // Tính tỷ lệ chạy
 
     // Vẽ phần chú thích (legend) với tổng thời gian
     const legendData = [
-      { status: 'Chạy', hours: totalRunning, color: '#4bc0c0' },
+      { status: 'Chạy', hours: totalRunning, color: '#4aea4a' },
       { status: 'Dừng', hours: totalStopped, color: '#ff6384' },
+      { status: 'Chờ', hours: totalWaiting, color: '#ffcc00' }, // Thêm chú thích cho "Chờ"
     ];
 
     const legend = svg

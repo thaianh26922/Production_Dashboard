@@ -12,12 +12,20 @@ const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 function DeviceReport() {
-  const [selectedMachine, setSelectedMachine] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(null);  // Trạng thái để lưu khoảng thời gian được chọn
+  const [selectedMachines, setSelectedMachines] = useState([]);  // Now multiple selections
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const machineOptions = [
-    { value: 'CNC1', label: 'CNC 01' },
-    { value: 'CNC2', label: 'CNC 02' },
+    
+    // Add the rest of the CNC and PHAY machines
+    ...Array.from({ length: 17 }, (_, i) => ({
+      value: `CNC${i + 1}`,
+      label: `CNC ${i + 1}`
+    })),
+    ...Array.from({ length: 18 }, (_, i) => ({
+      value: `PHAY${i + 1}`,
+      label: `PHAY ${i + 1}`
+    }))
   ];
 
   const handleFullscreen = () => {
@@ -28,12 +36,10 @@ function DeviceReport() {
     console.log("Print chart");
   };
 
-  // Xử lý khi người dùng chọn ngày
   const handleDateChange = (dates) => {
-    setSelectedDate(dates); // Lưu ngày được chọn vào state
+    setSelectedDate(dates);
   };
 
-  // Dữ liệu cho các biểu đồ khác (giữ nguyên)
   const runtimeChartData = {
     labels: ['Dừng', 'Chờ', 'Cài đặt', 'Tắt máy'],
     values: [50, 20, 20, 10],
@@ -51,26 +57,21 @@ function DeviceReport() {
         label: "Tỷ lệ máy chạy (%)",
         data: [85, 90, 80, 75],
         fill: false,
-        backgroundColor: 'green', // Màu nền
+        backgroundColor: 'green',
         borderColor: 'green',
         borderWidth: 2,
       }
     ],
   };
 
-  // Dữ liệu cho bar chart thời gian dừng sửa chữa
   const repairDowntimeBarData = {
-    labels: ['22/09', '23/09', '24/09', '25/09'], // Các ngày
+    labels: ['22/09', '23/09', '24/09', '25/09'],
     datasets: [
       {
-        label: "", // Nhãn cho biểu đồ
-        data: [1, 2, 1, 2,3,4,], // Dữ liệu thời gian dừng sửa chữa
-        backgroundColor: [
-          'rgba(5, 65, 151, 0.96)', // Màu cho cột đầu tiên
-        ], // Mảng các màu cho từng cột
-        borderColor: [
-          'rgba(5, 65, 151, 1)', // Màu viền cho cột đầu tiên
-        ], // Mảng các màu viền cho từng cột
+        label: "",
+        data: [1, 2, 1, 2, 3, 4],
+        backgroundColor: 'rgba(5, 65, 151, 0.96)',
+        borderColor: 'rgba(5, 65, 151, 1)',
         borderWidth: 1,
       }
     ],
@@ -82,10 +83,11 @@ function DeviceReport() {
         <Breadcrumb />
         <div className="flex items-center space-x-4">
           <Select
-            value={selectedMachine}
-            onChange={setSelectedMachine}
+            mode="multiple"  // Allow multiple selections
+            value={selectedMachines}
+            onChange={setSelectedMachines}
             placeholder="Chọn máy"
-            style={{ width: 200 }}
+            style={{ width: 300 }}
           >
             {machineOptions.map(option => (
               <Option key={option.value} value={option.value}>
@@ -94,12 +96,12 @@ function DeviceReport() {
             ))}
           </Select>
           
-          <RangePicker onChange={handleDateChange} needConfirm /> {/* Lắng nghe sự thay đổi ngày */}
+          <RangePicker onChange={handleDateChange} />
         </div>
       </div>
 
       <div className="grid grid-cols-12 gap-2 p-1">
-        {/* Hàng 1: 4 biểu đồ (2 hàng, 2 cột) */}
+        {/* Charts */}
         <div className="bg-white rounded-lg p-4 shadow-md col-span-2 ">
           <TitleChart
             title="Tỷ lệ máy chạy"
@@ -149,7 +151,6 @@ function DeviceReport() {
         </div>
       </div>
 
-      {/* Hàng 2: Nội dung Timeline và các biểu đồ khác */}
       <div className="grid grid-cols-2 gap-2 p-1">
         <div className="bg-white p-3 col-span-1 rounded-lg">
           <TitleChart
@@ -158,7 +159,6 @@ function DeviceReport() {
             onFullscreen={handleFullscreen}
             onPrint={handlePrint}
           />
-          {/* Truyền ngày được chọn vào TimelineChart */}
           <TimelineChart selectedDate={selectedDate} />
         </div>
         <div className="bg-white p-3 col-span-1 rounded-lg">

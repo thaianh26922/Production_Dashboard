@@ -1,28 +1,27 @@
 import React, { useEffect, useRef, useState } from 'react';
+import axios from 'axios';
 import * as d3 from 'd3';
 import moment from 'moment';
 
 const TimelineChart = ({ selectedDate }) => {
-  
   const svgRef = useRef();
   const wrapperRef = useRef();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [dimensions, setDimensions] = useState({ width: 800, height: 450 });
+  const dimensions = { width: 800, height: 440 };
 
+  // Hàm gọi API
   const fetchData = async (startDate, endDate) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(
-        `https://back-end-production.onrender.com/api/device-status/543ff470-54c6-11ef-8dd4-b74d24d26b24?startDate=${startDate}&endDate=${endDate}`
+      const response = await axios.get(
+        `http://localhost:5000/api/device-status/543ff470-54c6-11ef-8dd4-b74d24d26b24`, {
+          params: { startDate, endDate },
+        }
       );
-      if (!response.ok) {
-        throw new Error('Failed to fetch data from API');
-      }
-      const result = await response.json();
-      setData(result.statuses);
+      setData(response.data.statuses); // Lưu dữ liệu từ API
     } catch (error) {
       setError(error.message);
     } finally {
@@ -34,7 +33,7 @@ const TimelineChart = ({ selectedDate }) => {
     if (selectedDate && selectedDate.length === 2) {
       const startDate = Math.min(selectedDate[0].valueOf(), selectedDate[1].valueOf());
       const endDate = Math.max(selectedDate[0].valueOf(), selectedDate[1].valueOf());
-      fetchData(startDate, endDate);
+      fetchData(startDate, endDate); // Gọi API khi có ngày được chọn
     }
   }, [selectedDate]);
 
@@ -43,16 +42,16 @@ const TimelineChart = ({ selectedDate }) => {
 
     const svg = d3.select(svgRef.current);
     const { width, height } = dimensions;
-    const margin = { top: 20, right: 35, bottom: 50, left: 50 };
+    const margin = { top: 20, right: 30, bottom: 50, left: 100 };
 
     const processedData = data.map(d => ({
       date: moment(d.ts).format('YYYY-MM-DD'),
       startTime: moment(d.ts).format('HH:mm'),
-      endTime: moment(d.ts + 3600000).format('HH:mm'),
+      endTime: moment(d.ts + 3600000).format('HH:mm'), // Giả sử mỗi phiên kéo dài 1 giờ
       status: d.value === '1' ? 'Chạy' : 'Dừng',
     }));
 
-    svg.selectAll('*').remove();
+    svg.selectAll('*').remove(); // Xóa biểu đồ cũ
 
     const timeParse = d3.timeParse('%H:%M');
     const timeFormat = d3.timeFormat('%H:%M');
@@ -68,83 +67,76 @@ const TimelineChart = ({ selectedDate }) => {
     const yScale = d3
       .scaleBand()
       .domain(uniqueDates.sort())
-      .range([height - margin.bottom - 40,margin.top ])
-      .padding(0.1);
+      .range([height - margin.bottom - 40, margin.top])
+      .padding(0.6); // Giảm padding nếu cần để không gian giữa các thanh bar hẹp hơn
 
     const colorScale = d3
       .scaleOrdinal()
       .domain(['Chạy', 'Dừng'])
       .range(['#4bc0c0', '#ff6384']);
 
+    // Vẽ trục X (thời gian)
     svg
       .append('g')
       .attr('transform', `translate(0,${height - margin.bottom - 40})`)
       .call(d3.axisBottom(xScale).ticks(d3.timeHour.every(2)).tickFormat(timeFormat))
       .selectAll("text")
-      .attr("transform", "translate(-10,0)rotate(-45)")
-      .style("text-anchor", "end");
+      .attr("transform", "translate(0,0)rotate(0)")
+      .style("text-anchor", "middle");
 
+    // Vẽ trục Y (ngày tháng)
     svg
       .append('g')
-      .attr('transform', `translate(${margin.left},0)`)
+      .attr('transform', `translate(${margin.left-1},0)`)
       .call(d3.axisLeft(yScale).tickFormat(d => dateFormat(dateParse(d))));
 
+    // Vẽ các thanh ngang (horizontal bars)
     svg
       .selectAll('rect')
       .data(processedData)
       .enter()
       .append('rect')
-      .attr('x', d => xScale(timeParse(d.startTime)) + 1)
+      .attr('x', d => xScale(timeParse(d.startTime))) // Bắt đầu từ xScale, không đè lên trục Y
       .attr('y', d => yScale(d.date))
       .attr('width', d => {
         const width = xScale(timeParse(d.endTime)) - xScale(timeParse(d.startTime));
         return width > 0 ? width : 0;
       })
-      .attr('height',Math.min(yScale.bandwidth() / 2, 20))
+      .attr('height', yScale.bandwidth())
       .attr('fill', d => colorScale(d.status))
       .append('title')
       .text(d => `${d.status}: ${d.startTime} - ${d.endTime}`);
 
+    // Thêm Legend
+    const legend = svg
+      .append('g')
+      .attr('transform', `translate(${margin.left}, ${height - margin.bottom })`);
+
     const legendData = ['Chạy', 'Dừng'];
 
-    const legend = svg
-      .selectAll('.legend')
+    legend
+      .selectAll('g')
       .data(legendData)
       .enter()
       .append('g')
-      .attr('class', 'legend')
-      .attr('transform', (d, i) => `translate(${margin.left + i * 100},${height - margin.bottom + 20})`);
+      .attr('transform', (d, i) => `translate(${i * 100}, 0)`)
+      .call(g => {
+        // Legend rectangles
+        g.append('rect')
+          .attr('width', 18)
+          .attr('height', 5)
+          .attr('fill', colorScale);
 
-    legend
-      .append('rect')
-      .attr('x', 0)
-      .attr('y', 0)
-      .attr('width', 18)
-      .attr('height', 18)
-      .style('fill', d => colorScale(d));
+        // Legend text
+        g.append('text')
+          .attr('x', 24)
+          .attr('y', 1)
+          .attr('dy', '0.35em')
+          .text(d => d)
+          .attr('font-size', '10px'); // Điều chỉnh kích thước font chữ nếu cần
+      });
 
-    legend
-      .append('text')
-      .attr('x', 25)
-      .attr('y', 13)
-      .text(d => d)
-      .style('font-size', '12px')
-      .style('text-anchor', 'start');
-  }, [data, dimensions]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (wrapperRef.current) {
-        const { clientWidth, clientHeight } = wrapperRef.current;
-        setDimensions({ width: clientWidth, height: clientHeight });
-      }
-    };
-    
-    handleResize(); // Set initial dimensions
-    window.addEventListener('resize', handleResize);
-    
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [data]);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;

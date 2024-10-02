@@ -1,10 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
-import { DatePicker } from 'antd';
-
-const onChange = (date, dateString) => {
-  console.log(date, dateString);
-};
 
 const MachineComparisonChart = ({ data, machineType }) => {
   const svgRef = useRef();
@@ -29,6 +24,17 @@ const MachineComparisonChart = ({ data, machineType }) => {
       .domain([0, yMax])
       .range([height - margin.bottom, margin.top]);
 
+    // Create tooltip
+    const tooltip = d3.select('body')
+      .append('div')
+      .style('position', 'absolute')
+      .style('background-color', 'white')
+      .style('border', '1px solid #ccc')
+      .style('padding', '5px')
+      .style('border-radius', '4px')
+      .style('display', 'none')
+      .style('pointer-events', 'none'); // Ensure tooltip doesn't capture mouse events
+
     // Draw X axis
     svg
       .append('g')
@@ -48,25 +54,44 @@ const MachineComparisonChart = ({ data, machineType }) => {
       .attr('y', d => yScale(d.percentage))
       .attr('width', xScale.bandwidth())
       .attr('height', d => height - margin.bottom - yScale(d.percentage))
-      .attr('fill', '#4bc0c0');
+      .attr('fill', '#4aea4a')
+      .on('mouseover', (event, d) => {
+        tooltip
+          .style('display', 'block')
+          .html(`Máy: <b>${d.machine}</b><br>Tỷ lệ: ${d.percentage}%`)
+          .style('left', `${event.pageX + 10}px`)
+          .style('top', `${event.pageY - 20}px`);
+      })
+      .on('mousemove', (event) => {
+        tooltip
+          .style('left', `${event.pageX + 10}px`)
+          .style('top', `${event.pageY - 20}px`);
+      })
+      .on('mouseout', () => {
+        tooltip.style('display', 'none');
+      });
 
-    // Add percentage labels above bars
-    svg
-      .selectAll('.label')
-      .data(data)
-      .enter()
-      .append('text')
-      .attr('x', d => xScale(d.machine) + xScale.bandwidth() / 2)
-      .attr('y', d => yScale(d.percentage) - 5)
-      .attr('text-anchor', 'middle')
-      .text(d => `${d.percentage}%`);
+    // Ẩn phần nhãn dữ liệu trên các cột (bằng cách loại bỏ đoạn dưới)
+    // Add percentage labels above bars (bình luận hoặc xóa đoạn này nếu không cần)
+    // svg
+    //   .selectAll('.label')
+    //   .data(data)
+    //   .enter()
+    //   .append('text')
+    //   .attr('x', d => xScale(d.machine) + xScale.bandwidth() / 2)
+    //   .attr('y', d => yScale(d.percentage) - 5)
+    //   .attr('text-anchor', 'middle')
+    //   .text(d => `${d.percentage}%`);
+    
   }, [data]);
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-4">
-        <header className="flex justify-between items-center mb-4"> <h3 className="text-lg font-bold">Tỷ lệ máy chạy ({machineType})</h3>
-        <DatePicker onChange={onChange} needConfirm /> </header>
-      
+      <header className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-bold">Tỷ lệ máy chạy</h3>
+        
+      </header>
+
       <svg ref={svgRef} width="100%" height="300"></svg>
     </div>
   );

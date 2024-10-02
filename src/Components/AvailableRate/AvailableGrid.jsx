@@ -4,7 +4,7 @@ import AvailableCard from './AvailableCard'; // Import AvailableCard
 function AvailableGrid({ machines, machineType }) {
   return (
     <div
-      className="grid grid-cols-4 gap-2 overflow-y-auto"
+      className="grid grid-cols-2 gap-2 overflow-y-auto"
       style={{ maxHeight: 'calc(2 * 230px + 1rem)' }} // Giới hạn chiều cao (2 hàng + khoảng cách giữa)
     >
       {machines.map((machine) => (

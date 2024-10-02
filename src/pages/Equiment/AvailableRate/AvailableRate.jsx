@@ -4,6 +4,12 @@ import Breadcrumb from '../../../Components/Breadcrumb/Breadcrumb'; // Đường
 import AvailableGrid from '../../../Components/AvailableRate/AvailableGrid'; // Import AvailableGrid
 import MachineComparisonChart from '../../../Components/AvailableRate/MachineComparisonChart';
 
+
+const onChange = (date, dateString) => {
+  console.log(date, dateString);
+};
+
+
 const { Option } = Select;
 
 function AvailableRate() {
@@ -87,6 +93,7 @@ function AvailableRate() {
             <Option value="CNC">Tổ Tiện</Option>
             <Option value="PHAY">Tổ Phay</Option>
           </Select>
+          <DatePicker onChange={onChange} needConfirm />
         </div>
       </div>
       {/* Hiển thị AvailableGrid */}

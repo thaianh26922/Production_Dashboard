@@ -20,10 +20,10 @@ const DowntimePieChart = ({ data }) => {
     plugins: {
       legend: {
         display: true,
+        position: 'top', // Di chuyển legend lên top
         labels: {
-          // Use filter to limit the number of legend items to 2
-          filter: function (legendItem, data) {
-            return legendItem.index < 2; // Display only the first two legend items
+          font: {
+            size: 12, // Chỉnh kích thước nhỏ lại
           },
         },
       },

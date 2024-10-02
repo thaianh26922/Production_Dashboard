@@ -14,7 +14,7 @@ const AvailableCard = ({ machineName, selectedDate, machineType }) => {
         <h2 className="text-xl font-semibold">
           {machineType === "CNC" ? `${machineName}` : ` ${machineName}`}
         </h2>
-        <DatePicker onChange={onChange} needConfirm />
+       
       </header>
       <div className="card-body">
         {/* MachineTimeline component */}
