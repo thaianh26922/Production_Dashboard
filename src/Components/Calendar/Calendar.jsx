@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 
-const Calendar = ({ tasks = {} }) => {
+const Calendar = ({ tasks = {}, selectedDates, setSelectedDates }) => {
   const [currentDate, setCurrentDate] = useState(new Date()); // Default to current date
-  const [selectedDates, setSelectedDates] = useState([]); // To store multiple selected days
   const [today] = useState(new Date().toISOString().split('T')[0]); // Store today's date in 'YYYY-MM-DD' format
 
   // Function to get the number of days in a month

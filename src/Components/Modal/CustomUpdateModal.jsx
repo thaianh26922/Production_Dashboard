@@ -5,10 +5,21 @@ import ProductionTaskManagement from './ProductionTaskManagement'; // Your custo
 
 const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelectedDates }) => {
   // Handle saving the production tasks
+  const openSuccessNotification = () => {
+    notification.success({
+      message: 'Lưu thành công',
+      description: 'Kế hoạch và thiết bị đã được lưu thành công.',
+      duration: 3, // Notification will disappear after 3 seconds
+    });
+  };
   const handleSave = () => {
     console.log('Saved Dates:', selectedDates);
+   
+    
     onClose(); // Close the modal after saving
+    
   };
+  
 
   return (
     <Modal

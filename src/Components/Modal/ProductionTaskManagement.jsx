@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { X, Plus, ChevronDown, User } from 'lucide-react';
+import { Modal, Select, Button } from 'antd';
+import { UserOutlined, PlusOutlined, CloseOutlined, DownOutlined } from '@ant-design/icons';
 
 const ProductionTaskManagement = () => {
   // Simulated list of available employees
@@ -11,8 +12,16 @@ const ProductionTaskManagement = () => {
     "Hoàng Văn E"
   ];
 
+  const shiftOptions = [
+    { label: "Ca chính", value: "ca_chinh" },
+    { label: "Ca phụ 1 giờ", value: "ca_phu_1h" },
+    { label: "Ca phụ 2 giờ", value: "ca_phu_2h" },
+    { label: "Ca phụ 3 giờ", value: "ca_phu_3h" }
+  ];
+
   const [selectedEmployees, setSelectedEmployees] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState('');
+  const [selectedShift, setSelectedShift] = useState('');
 
   const addEmployee = () => {
     if (selectedEmployee && !selectedEmployees.includes(selectedEmployee)) {
@@ -30,7 +39,7 @@ const ProductionTaskManagement = () => {
       <div className="flex items-center justify-between p-4 bg-gray-100">
         <div className="flex items-center">
           <span className="font-semibold mr-2">Danh sách máy</span>
-          <ChevronDown size={20} />
+          <DownOutlined />
         </div>
         <span className="text-gray-600">'n Thiết bị</span>
       </div>
@@ -40,35 +49,45 @@ const ProductionTaskManagement = () => {
         <div className="bg-gray-100 rounded-md p-3 mb-4">
           <div className="flex justify-between items-center mb-2">
             <span className="font-semibold">Ca làm việc</span>
-            <X size={20} className="text-gray-600 cursor-pointer" />
+            <CloseOutlined className="text-gray-600 cursor-pointer" />
           </div>
           <div className="mb-2 flex">
-            <select
-              value={selectedEmployee}
-              onChange={(e) => setSelectedEmployee(e.target.value)}
-              className="w-full p-2 rounded border mr-2"
+            <Select
+              placeholder="Chọn ca làm việc"
+              style={{ width: '100%', marginRight: '8px' }}
+              value={selectedShift}
+              onChange={(value) => setSelectedShift(value)}
             >
-              <option value="">Chọn nhân viên</option>
-              {availableEmployees.map((employee, index) => (
-                <option key={index} value={employee}>{employee}</option>
+              {shiftOptions.map((shift, index) => (
+                <Select.Option key={index} value={shift.value}>{shift.label}</Select.Option>
               ))}
-            </select>
-            <button 
-              onClick={addEmployee}
-              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+            </Select>
+          </div>
+          <div className="mb-2 flex">
+            <Select
+              placeholder="Chọn nhân viên"
+              value={selectedEmployee}
+              onChange={(value) => setSelectedEmployee(value)}
+              style={{ width: '100%', marginRight: '8px' }}
             >
-              <Plus size={20} />
-            </button>
+              {availableEmployees.map((employee, index) => (
+                <Select.Option key={index} value={employee}>{employee}</Select.Option>
+              ))}
+            </Select>
+            <Button 
+              type="primary" 
+              icon={<PlusOutlined />} 
+              onClick={addEmployee}
+            />
           </div>
           <div className="max-h-32 overflow-y-auto mb-2">
             {selectedEmployees.map((employee, index) => (
               <div key={index} className="flex items-center justify-between bg-white p-2 rounded mb-1">
                 <div className="flex items-center">
-                  <User size={16} className="mr-2" />
+                  <UserOutlined className="mr-2" />
                   <span>{employee}</span>
                 </div>
-                <X
-                  size={16}
+                <CloseOutlined
                   className="text-gray-600 cursor-pointer"
                   onClick={() => removeEmployee(employee)}
                 />
@@ -81,10 +100,10 @@ const ProductionTaskManagement = () => {
             <div className="w-1/3 "></div>
           </div>
         </div>
-        <button className="w-full py-2 bg-gray-100 text-gray-600 rounded-md flex items-center justify-center">
-          <Plus size={20} className="mr-2" />
+        <Button className="w-full bg-gray-100 text-gray-600 flex items-center justify-center">
+          <PlusOutlined className="mr-2" />
           Thêm nhiệm vụ sản xuất
-        </button>
+        </Button>
       </div>
     </div>
   );
