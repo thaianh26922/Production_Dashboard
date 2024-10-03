@@ -29,6 +29,7 @@ import WorkShiftCatalog from '../Components/Shifr/WorkShiftCatalog';
 import EmployeeCatalog from '../Components/Equiment/Employee/EmployeeCatalog';
 import AreasManagement from '../pages/Equiment/Management/AreasManagement';
 import AvailableRate from '../pages/Equiment/AvailableRate/AvailableRate';
+import { DateProvider } from '../context/DateContext';
 
 const AppRouter = () => {
   return (
@@ -44,7 +45,16 @@ const AppRouter = () => {
         {/* Equipment Routes */}
         <Route path="/importdata/areas" element={<MainLayout><AreasManagement /></MainLayout>} />
         <Route path="/importdata/devivce" element={<MainLayout><DeviceManagement /></MainLayout>} />
-        <Route path="/importdata/schedule" element={<MainLayout><MachineWorkScheduleList /></MainLayout>} />
+        <Route
+          path="/importdata/schedule"
+          element={
+            <MainLayout>
+              <DateProvider>
+                <MachineWorkScheduleList />
+              </DateProvider>
+            </MainLayout>
+          }
+        />
         <Route path="/importdata/issue" element={<MainLayout><ErrorReportCatalog /></MainLayout>} />
         <Route path="/importdata/shift" element={<MainLayout><WorkShiftCatalog /></MainLayout>} />
         <Route path="/importdata/employee" element={<MainLayout><EmployeeCatalog /></MainLayout>} />

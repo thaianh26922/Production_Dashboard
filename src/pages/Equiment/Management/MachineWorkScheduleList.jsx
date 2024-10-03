@@ -1,17 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Modal, Select, DatePicker, Button } from 'antd';
 import MachineWorkScheduleCard from '../../../Components/Equiment/MachineSchedule/MachineWorkScheduleCard';
 import CustomUpdateModal from '../../../Components/Modal/CustomUpdateModal'; // Import custom modal component
 
 const { Option } = Select;
 
-function onChange(date, dateString) {
-  console.log(date, dateString);
-}
-
 const MachineWorkScheduleList = () => {
   const [selectedArea, setSelectedArea] = useState('all'); // State to store selected area
-  const [selectedDates, setSelectedDates] = useState([]); // Track selected dates
+  const [selectedDates, setSelectedDates] = useState([new Date().toISOString().split('T')[0]]); // Track selected dates (default to today)
   const [selectedMachines, setSelectedMachines] = useState([]); // Track selected machines
   const [isSelecting, setIsSelecting] = useState(false); // Track if the user is selecting devices
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // Modal visibility for update confirmation
@@ -25,7 +21,7 @@ const MachineWorkScheduleList = () => {
 
   // Handle canceling the selected dates
   const handleCancelDates = () => {
-    setSelectedDates([]); // Clear selected dates on cancel
+    setSelectedDates([new Date().toISOString().split('T')[0]]); // Clear selected dates on cancel (set to today)
     setIsCustomModalOpen(false); // Close the modal
   };
 
@@ -37,25 +33,39 @@ const MachineWorkScheduleList = () => {
     setIsSelecting(!isSelecting);
   };
 
-  // Toggle machine selection when clicking a card
-  const handleMachineClick = (machine) => {
-    if (!isSelecting) {
-      setIsSelecting(true); // Automatically enable selection mode if not already enabled
-    }
+  // Handle machine click
+  // Handle machine click
+ // Handle machine click
+const handleMachineClick = (machine) => {
+  if (!isSelecting) {
+    setIsSelecting(true); // Tự động bật chế độ chọn nếu chưa bật
+  }
 
-    if (selectedMachines.includes(machine.id)) {
-      // Unselect the machine if it's already selected
-      setSelectedMachines(selectedMachines.filter((mId) => mId !== machine.id));
-    } else {
-      // Select the machine
-      setSelectedMachines([...selectedMachines, machine.id]);
-    }
+  // Kiểm tra xem máy đã được chọn chưa
+  if (selectedMachines.some((m) => m.id === machine.id)) {
+    // Nếu đã được chọn, bỏ chọn máy
+    setSelectedMachines(prevMachines => prevMachines.filter((m) => m.id !== machine.id));
+  } else {
+    // Nếu chưa được chọn, thêm máy vào danh sách
+    setSelectedMachines(prevMachines => [...prevMachines, machine]);
+  }
+};
+
+// Sử dụng useEffect để theo dõi thay đổi của selectedMachines
+useEffect(() => {
+  console.log('Selected Machines Updated:', selectedMachines); // Log mỗi khi selectedMachines thay đổi
+}, [selectedMachines]);
+
+
+
+  // Handle date selection from DatePicker
+  const handleDateChange = (date, dateString) => {
+    setSelectedDates([dateString]); // Update selected date to the selected date string
   };
 
   // Dynamic machines generation based on selected area
   const generateMachines = () => {
     if (selectedArea === 'area1') {
-      // Generate 17 CNC machines for KHU VỰC TIỆN
       return Array.from({ length: 17 }, (_, index) => ({
         id: index + 1,
         name: `CNC - ${index + 1}`,
@@ -65,7 +75,6 @@ const MachineWorkScheduleList = () => {
         employees: ['nv1', 'nv2'],
       }));
     } else if (selectedArea === 'area2') {
-      // Generate 18 PHAY machines for KHU VỰC PHAY
       return Array.from({ length: 18 }, (_, index) => ({
         id: index + 1,
         name: `PHAY - ${index + 1}`,
@@ -75,7 +84,6 @@ const MachineWorkScheduleList = () => {
         employees: ['nv3', 'nv4'],
       }));
     } else {
-      // Show all machines (combination of CNC and PHAY)
       const cncMachines = Array.from({ length: 17 }, (_, index) => ({
         id: index + 1,
         name: `CNC - ${index + 1}`,
@@ -143,7 +151,7 @@ const MachineWorkScheduleList = () => {
           </Button>
 
           {/* DatePicker */}
-          <DatePicker onChange={onChange} />
+          <DatePicker onChange={handleDateChange} />
 
           {/* Conditionally render "Cập nhật nhiệm vụ sản xuất" */}
           {selectedMachines.length > 0 && (
@@ -158,11 +166,11 @@ const MachineWorkScheduleList = () => {
       <div className="grid grid-cols-4 gap-2">
         {generateMachines().map((machine) => (
           <div
-            key={machine.id}
-            className={`relative cursor-pointer transition duration-300 ease-in-out h-full
-              ${isSelecting && selectedMachines.includes(machine.id) ? 'border-2 border-blue-700 round-lg bg-gray-600 ' : ''}`}
-            onClick={() => handleMachineClick(machine)} // Handle card click
-          >
+          key={machine.id}
+          onClick={() => handleMachineClick(machine)} // Xử lý khi click vào máy
+          className={`relative cursor-pointer transition duration-300 ease-in-out h-full
+            ${isSelecting && selectedMachines.some((m) => m.id === machine.id) ? 'border-2 border-blue-700 round-lg bg-gray-600 ' : ''}`}
+        >
             <MachineWorkScheduleCard
               machine={machine}
               shiftOptions={[
@@ -178,11 +186,11 @@ const MachineWorkScheduleList = () => {
               ]}
             />
             {/* Green tick for selected machines, only visible when a machine is selected */}
-            {isSelecting && selectedMachines.includes(machine.id) && (
+            {isSelecting && selectedMachines.some((m) => m.id === machine.id) && (
               <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1">
                 ✓
               </div>
-            )}
+)}
           </div>
         ))}
       </div>
@@ -205,8 +213,10 @@ const MachineWorkScheduleList = () => {
         onClose={() => setIsCustomModalOpen(false)}
         onCancel={handleCancelDates} // Clear dates and close modal
         onSave={handleSaveDates} // Save the selected dates
-        selectedDates={selectedDates}
-        setSelectedDates={setSelectedDates}
+        selectedDates={selectedDates} // Pass selected dates to modal
+        setSelectedDates={setSelectedDates} 
+        selectedMachines={selectedMachines}// Allow modal to update dates if necessary
+        
       />
     </>
   );

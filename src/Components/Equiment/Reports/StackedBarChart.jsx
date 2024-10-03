@@ -14,7 +14,7 @@ const StackedBarChart = ({ selectedDate }) => {
     setError(null);
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/device-status/543ff470-54c6-11ef-8dd4-b74d24d26b24`, {
+        `http://192.168.1.5:5000/api/device-status/543ff470-54c6-11ef-8dd4-b74d24d26b24`, {
           params: { startDate, endDate },
         }
       );
@@ -93,7 +93,7 @@ const StackedBarChart = ({ selectedDate }) => {
     // Color Scale
     const colorScale = d3.scaleOrdinal()
       .domain(['Chạy', 'Dừng', ])
-      .range(['#4bc0c0', '#ff6384', ]);
+      .range(['#31e700', '#ff0137', ]);
 
     const chart = svg
       .append('g')
