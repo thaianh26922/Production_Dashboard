@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Select, Button } from 'antd';
+import { Select, Button, message } from 'antd';
 import { UserOutlined, PlusOutlined, CloseOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
 
 const ProductionTaskManagement = ({ selectedMachines, setSelectedMachines }) => {
@@ -18,35 +18,93 @@ const ProductionTaskManagement = ({ selectedMachines, setSelectedMachines }) => 
     { label: "Ca phụ 3 giờ", value: "ca_phu_3h" },
   ];
 
-  const [selectedEmployees, setSelectedEmployees] = useState([]);
-  const [selectedEmployee, setSelectedEmployee] = useState('');
-  const [selectedShift, setSelectedShift] = useState('');
-  const [isMachineListOpen, setIsMachineListOpen] = useState(false); // Track machine list toggle
+  const [tasks, setTasks] = useState([]);
+  const [isMachineListOpen, setIsMachineListOpen] = useState(false);
+  const [selectedDiv, setSelectedDiv] = useState(null); // Track selected div
+  const [savedPlans, setSavedPlans] = useState([]); // State to store saved plans
 
-  const addEmployee = () => {
-    if (selectedEmployee && !selectedEmployees.includes(selectedEmployee)) {
-      setSelectedEmployees([...selectedEmployees, selectedEmployee]);
-      setSelectedEmployee('');
+  // Hàm để thêm nhiệm vụ mới
+  const addTask = () => {
+    setTasks([...tasks, { selectedShift: '', selectedEmployees: [], selectedEmployee: '', color: '', date: '' }]);
+  };
+
+  // Hàm để xóa nhiệm vụ
+  const removeTask = (index) => {
+    const updatedTasks = tasks.filter((_, i) => i !== index);
+    setTasks(updatedTasks);
+  };
+
+  // Cập nhật ca làm việc
+  const updateShift = (index, value) => {
+    const updatedTasks = [...tasks];
+    updatedTasks[index].selectedShift = value;
+    setTasks(updatedTasks);
+  };
+
+  // Cập nhật nhân viên
+  const updateEmployee = (index, employee) => {
+    const updatedTasks = [...tasks];
+    updatedTasks[index].selectedEmployee = employee;
+    setTasks(updatedTasks);
+  };
+
+  // Thêm nhân viên vào danh sách
+  const addEmployee = (index) => {
+    const updatedTasks = [...tasks];
+    if (updatedTasks[index].selectedEmployee && !updatedTasks[index].selectedEmployees.includes(updatedTasks[index].selectedEmployee)) {
+      updatedTasks[index].selectedEmployees.push(updatedTasks[index].selectedEmployee);
+      updatedTasks[index].selectedEmployee = ''; // Reset selectedEmployee
     }
+    setTasks(updatedTasks);
   };
 
-  const removeEmployee = (employee) => {
-    setSelectedEmployees(selectedEmployees.filter((e) => e !== employee));
+  // Xóa nhân viên
+  const removeEmployee = (taskIndex, employee) => {
+    const updatedTasks = [...tasks];
+    updatedTasks[taskIndex].selectedEmployees = updatedTasks[taskIndex].selectedEmployees.filter((e) => e !== employee);
+    setTasks(updatedTasks);
   };
 
-  // Toggle the machine list visibility
+  // Toggle danh sách máy
   const toggleMachineList = () => {
     setIsMachineListOpen(!isMachineListOpen);
   };
 
-  // Function to remove a selected machine
+  // Xóa thiết bị
   const removeMachine = (machineId) => {
     setSelectedMachines(selectedMachines.filter((m) => m.id !== machineId));
   };
 
+  // Xử lý khi click vào các div màu
+  const handleDivClick = (index, color) => {
+    const updatedTasks = [...tasks];
+    updatedTasks[index].color = color; // Cập nhật màu cho nhiệm vụ
+    setTasks(updatedTasks);
+    setSelectedDiv(index); // Gán selectedDiv để xác định div nào đang được chọn
+  };
+
+  // Hàm lưu kế hoạch
+  const savePlan = () => {
+    // Iterate through tasks and save the necessary information
+    const updatedPlans = tasks.map((task) => ({
+      date: task.date,
+      shift: task.selectedShift,
+      color: task.color,
+      employees: task.selectedEmployees,
+    }));
+
+    setSavedPlans(updatedPlans);
+    message.success('Kế hoạch đã được lưu thành công!');
+
+    console.log('Saved Plans:', updatedPlans); // Optional: For debugging
+  };
+
   return (
-    <div className="w-64 bg-white shadow-md rounded-md overflow-hidden relative">
-      <div className="flex items-center justify-between p-4 bg-gray-100">
+    <div className="w-full p-4">
+      <h2 className="font-semibold mb-4">Quản lý nhiệm vụ sản xuất</h2>
+
+      {/* Danh sách máy */}
+      <div className="flex items-center justify-between p-4 bg-gray-100 rounded-md mb-4">
         <div className="flex items-center">
           <span className="font-semibold mr-2">Danh sách máy</span>
           <Button onClick={toggleMachineList} icon={isMachineListOpen ? <UpOutlined /> : <DownOutlined />}>
@@ -55,11 +113,11 @@ const ProductionTaskManagement = ({ selectedMachines, setSelectedMachines }) => 
         </div>
       </div>
 
-      {/* Machine list dropdown */}
+      {/* Hiển thị danh sách máy đã chọn */}
       {isMachineListOpen && (
-        <div className="absolute z-50 bg-white p-4 rounded-lg shadow-lg w-full max-h-60 overflow-y-auto">
+        <div className="bg-white p-4 rounded-lg shadow-lg w-full max-h-60 overflow-y-auto mb-4">
           <h2 className="font-semibold mb-2">Thiết bị đã chọn</h2>
-          <ul className="list-disc pl-5 w-full">
+          <ul className="list-disc pl-5">
             {selectedMachines.length > 0 ? (
               selectedMachines.map((machine) => (
                 <li key={machine.id} className="mb-1 flex justify-between items-center">
@@ -74,22 +132,31 @@ const ProductionTaskManagement = ({ selectedMachines, setSelectedMachines }) => 
         </div>
       )}
 
-      <div className="p-4">
-        <h2 className="font-semibold mb-2">Nhiệm vụ sản xuất</h2>
-        <div className="bg-gray-100 rounded-md p-3 mb-4">
+      {/* Nhiệm vụ sản xuất */}
+      {tasks.map((task, index) => (
+        <div key={index} className="bg-gray-100 rounded-md p-3 mb-4">
           <div className="flex justify-between items-center mb-2">
             <span className="font-semibold">Ca làm việc</span>
-            <CloseOutlined className="text-gray-600 cursor-pointer" />
+            <CloseOutlined
+              className="text-gray-600 cursor-pointer"
+              onClick={() => removeTask(index)} // Xóa nhiệm vụ
+            />
           </div>
           <div className="mb-2 flex">
             <Select
               placeholder="Chọn ca làm việc"
-              style={{ width: '100%', marginRight: '8px' }}
-              value={selectedShift}
-              onChange={(value) => setSelectedShift(value)}
+              style={{
+                width: '100%',
+                marginRight: '8px',
+                backgroundColor: task.color === 'red' ? '#ffcccc' :
+                                task.color === 'yellow' ? '#ffffcc' :
+                                task.color === 'green' ? '#ccffcc' : '',
+              }}
+              value={task.selectedShift}
+              onChange={(value) => updateShift(index, value)} // Cập nhật ca làm việc
             >
-              {shiftOptions.map((shift, index) => (
-                <Select.Option key={index} value={shift.value}>
+              {shiftOptions.map((shift, idx) => (
+                <Select.Option key={idx} value={shift.value}>
                   {shift.label}
                 </Select.Option>
               ))}
@@ -98,22 +165,22 @@ const ProductionTaskManagement = ({ selectedMachines, setSelectedMachines }) => 
           <div className="mb-2 flex">
             <Select
               placeholder="Chọn nhân viên"
-              value={selectedEmployee}
-              onChange={(value) => setSelectedEmployee(value)}
+              value={task.selectedEmployee}
+              onChange={(value) => updateEmployee(index, value)} // Cập nhật nhân viên
               style={{ width: '100%', marginRight: '8px' }}
             >
-              {availableEmployees.map((employee, index) => (
-                <Select.Option key={index} value={employee}>
+              {availableEmployees.map((employee, idx) => (
+                <Select.Option key={idx} value={employee}>
                   {employee}
                 </Select.Option>
               ))}
             </Select>
-            <Button type="primary" icon={<PlusOutlined />} onClick={addEmployee} />
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => addEmployee(index)} />
           </div>
           <div className="max-h-32 overflow-y-auto mb-2">
-            {selectedEmployees.map((employee, index) => (
+            {task.selectedEmployees.map((employee, idx) => (
               <div
-                key={index}
+                key={idx}
                 className="flex items-center justify-between bg-white p-2 rounded mb-1"
               >
                 <div className="flex items-center">
@@ -122,22 +189,53 @@ const ProductionTaskManagement = ({ selectedMachines, setSelectedMachines }) => 
                 </div>
                 <CloseOutlined
                   className="text-gray-600 cursor-pointer"
-                  onClick={() => removeEmployee(employee)}
+                  onClick={() => removeEmployee(index, employee)}
                 />
               </div>
             ))}
           </div>
+          <div className="h-12 bg-white border border-black rounded-lg overflow-hidden flex m-2">
+            <div
+              className={`w-1/3 border-l-4 border-l-red-600 cursor-pointer ${task.color === 'red' ? 'bg-red-600' : ''}`}
+              onClick={() => handleDivClick(index, 'red')}
+            />
+            <div
+              className={`w-1/3 border-l-4 border-l-yellow-600 cursor-pointer ${task.color === 'yellow' ? 'bg-yellow-500' : ''}`}
+              onClick={() => handleDivClick(index, 'yellow')}
+            />
+            <div
+              className={`w-1/3 cursor-pointer border-l-4 border-l-green-600 ${task.color === 'green' ? 'bg-green-500' : ''}`}
+              onClick={() => handleDivClick(index, 'green')}
+            />
+          </div>
         </div>
-        <div className="h-12 bg-white border border-black rounded-lg overflow-hidden flex m-2">
-          <div className="w-1/3 border-l-red-600 border-l-4 border-r-8 border-r-[#FCFC00]" />
-          <div className="w-1/3 border-r-green-500 border-r-4" />
-          <div className="w-1/3" />
+      ))}
+
+      {/* Nút để thêm nhiệm vụ sản xuất mới */}
+      <Button className="w-full bg-gray-100 text-gray-600 flex items-center justify-center" onClick={addTask}>
+        <PlusOutlined className="mr-2" />
+        Thêm nhiệm vụ sản xuất
+      </Button>
+
+      {/* Nút lưu kế hoạch */}
+      <Button className="w-full bg-blue-500 text-white mt-4" onClick={savePlan}>
+        Lưu kế hoạch
+      </Button>
+
+      {/* Hiển thị các kế hoạch đã lưu */}
+      {savedPlans.length > 0 && (
+        <div className="mt-4 p-4 bg-gray-100 rounded-lg">
+          <h2 className="font-semibold mb-2">Kế hoạch đã lưu</h2>
+          {savedPlans.map((plan, idx) => (
+            <div key={idx}>
+              <p>Ngày: {plan.date}</p>
+              <p>Ca: {plan.shift}</p>
+              <p>Màu: {plan.color}</p>
+              <p>Nhân viên: {plan.employees.join(', ')}</p>
+            </div>
+          ))}
         </div>
-        <Button className="w-full bg-gray-100 text-gray-600 flex items-center justify-center">
-          <PlusOutlined className="mr-2" />
-          Thêm nhiệm vụ sản xuất
-        </Button>
-      </div>
+      )}
     </div>
   );
 };

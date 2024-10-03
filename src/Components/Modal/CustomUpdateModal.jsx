@@ -1,23 +1,39 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Modal, Button } from 'antd';
 import CustomCalendar from '../../Components/Calendar/CustomCalendar';
 import ProductionTaskManagement from './ProductionTaskManagement'; // Import your custom task management component
 
-const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelectedDates,selectedMachines }) => {
-  
-  // Function to handle saving dates
+const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelectedDates, selectedMachines }) => {
+  const [taskData, setTaskData] = useState({}); // Store task data associated with dates
+
+  // Function to handle saving tasks along with selected dates
   const handleSave = () => {
-    console.log('Saved Dates:', selectedDates);
-    setSelectedDates([]); // Clear selected dates after saving (removes blue background)
+    const updatedTaskData = { ...taskData };
+
+    selectedDates.forEach(date => {
+      if (selectedMachines.length > 0) {
+        updatedTaskData[date] = {
+          machines: selectedMachines,
+          tasks: taskData.tasksForThisDate || [], // Ensure task data is saved with the date
+        };
+      }
+    });
+
+    setTaskData(updatedTaskData); // Save task info with associated dates
+    console.log('Saved Task Data:', updatedTaskData);
+    setSelectedDates([]); // Clear selected dates after saving
     onClose(); // Close the modal after saving
   };
 
   // Function to handle cancel action
   const handleCancel = () => {
-    setSelectedDates([]); // Clear selected dates when cancel is clicked
+    setSelectedDates([]); // Clear selected dates
     onCancel(); // Call the onCancel prop function if provided
     onClose(); // Close the modal
   };
+
+  // Function to pass saved task info to the calendar
+  const getTaskForDate = (date) => taskData[date] || null;
 
   return (
     <Modal
@@ -36,12 +52,20 @@ const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelected
     >
       <div className="grid grid-cols-4 gap-2">
         <div className="p-2 col-span-3">
-          {/* Pass selectedDates and setSelectedDates to CustomCalendar */}
-          <CustomCalendar selectedDates={selectedDates} setSelectedDates={setSelectedDates} />
+          {/* Pass selectedDates and taskData to CustomCalendar */}
+          <CustomCalendar
+            selectedDates={selectedDates}
+            setSelectedDates={setSelectedDates}
+            getTaskForDate={getTaskForDate} // Function to get saved tasks for a date
+          />
         </div>
         <div className="p-2 col-span-1">
-          {/* Production Task Management */}
-          <ProductionTaskManagement selectedMachines={selectedMachines}  />
+          {/* Pass taskData and setTaskData to ProductionTaskManagement */}
+          <ProductionTaskManagement
+            selectedMachines={selectedMachines}
+            setTaskData={setTaskData} // Set taskData in parent when needed
+            selectedDates={selectedDates}
+          />
         </div>
       </div>
     </Modal>
