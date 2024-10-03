@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Select, Button, message } from 'antd';
+import { Select, Button } from 'antd';
 import { UserOutlined, PlusOutlined, CloseOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
 
 const ProductionTaskManagement = ({ selectedMachines, setSelectedMachines }) => {
@@ -21,11 +21,10 @@ const ProductionTaskManagement = ({ selectedMachines, setSelectedMachines }) => 
   const [tasks, setTasks] = useState([]);
   const [isMachineListOpen, setIsMachineListOpen] = useState(false);
   const [selectedDiv, setSelectedDiv] = useState(null); // Track selected div
-  const [savedPlans, setSavedPlans] = useState([]); // State to store saved plans
 
   // Hàm để thêm nhiệm vụ mới
   const addTask = () => {
-    setTasks([...tasks, { selectedShift: '', selectedEmployees: [], selectedEmployee: '', color: '', date: '' }]);
+    setTasks([...tasks, { selectedShift: '', selectedEmployees: [], selectedEmployee: '', color: '' }]);
   };
 
   // Hàm để xóa nhiệm vụ
@@ -83,22 +82,6 @@ const ProductionTaskManagement = ({ selectedMachines, setSelectedMachines }) => 
     setSelectedDiv(index); // Gán selectedDiv để xác định div nào đang được chọn
   };
 
-  // Hàm lưu kế hoạch
-  const savePlan = () => {
-    // Iterate through tasks and save the necessary information
-    const updatedPlans = tasks.map((task) => ({
-      date: task.date,
-      shift: task.selectedShift,
-      color: task.color,
-      employees: task.selectedEmployees,
-    }));
-
-    setSavedPlans(updatedPlans);
-    message.success('Kế hoạch đã được lưu thành công!');
-
-    console.log('Saved Plans:', updatedPlans); // Optional: For debugging
-  };
-
   return (
     <div className="w-full p-4">
       <h2 className="font-semibold mb-4">Quản lý nhiệm vụ sản xuất</h2>
@@ -143,8 +126,8 @@ const ProductionTaskManagement = ({ selectedMachines, setSelectedMachines }) => 
             />
           </div>
           <div className="mb-2 flex">
-            <Select
-              placeholder="Chọn ca làm việc"
+            {/* Wrap the Select component in a div with background color */}
+            <div
               style={{
                 width: '100%',
                 marginRight: '8px',
@@ -152,15 +135,20 @@ const ProductionTaskManagement = ({ selectedMachines, setSelectedMachines }) => 
                                 task.color === 'yellow' ? '#ffffcc' :
                                 task.color === 'green' ? '#ccffcc' : '',
               }}
-              value={task.selectedShift}
-              onChange={(value) => updateShift(index, value)} // Cập nhật ca làm việc
             >
-              {shiftOptions.map((shift, idx) => (
-                <Select.Option key={idx} value={shift.value}>
-                  {shift.label}
-                </Select.Option>
-              ))}
-            </Select>
+              <Select
+                placeholder="Chọn ca làm việc"
+                value={task.selectedShift}
+                onChange={(value) => updateShift(index, value)} // Cập nhật ca làm việc
+                style={{ width: '100%' }} // Ensure the Select takes up the full width of the wrapping div
+              >
+                {shiftOptions.map((shift, idx) => (
+                  <Select.Option key={idx} value={shift.value}>
+                    {shift.label}
+                  </Select.Option>
+                ))}
+              </Select>
+            </div>
           </div>
           <div className="mb-2 flex">
             <Select
@@ -216,26 +204,6 @@ const ProductionTaskManagement = ({ selectedMachines, setSelectedMachines }) => 
         <PlusOutlined className="mr-2" />
         Thêm nhiệm vụ sản xuất
       </Button>
-
-      {/* Nút lưu kế hoạch */}
-      <Button className="w-full bg-blue-500 text-white mt-4" onClick={savePlan}>
-        Lưu kế hoạch
-      </Button>
-
-      {/* Hiển thị các kế hoạch đã lưu */}
-      {savedPlans.length > 0 && (
-        <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-          <h2 className="font-semibold mb-2">Kế hoạch đã lưu</h2>
-          {savedPlans.map((plan, idx) => (
-            <div key={idx}>
-              <p>Ngày: {plan.date}</p>
-              <p>Ca: {plan.shift}</p>
-              <p>Màu: {plan.color}</p>
-              <p>Nhân viên: {plan.employees.join(', ')}</p>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 };

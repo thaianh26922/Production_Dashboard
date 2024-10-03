@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Modal, Button } from 'antd';
 import CustomCalendar from '../../Components/Calendar/CustomCalendar';
-import ProductionTaskManagement from './ProductionTaskManagement'; // Import your custom task management component
+import ProductionTaskManagement from './ProductionTaskManagement';
 
 const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelectedDates, selectedMachines }) => {
-  const [taskData, setTaskData] = useState({}); // Store task data associated with dates
+  const [taskData, setTaskData] = useState({}); // Store shift data associated with dates
 
   // Function to handle saving tasks along with selected dates
   const handleSave = () => {
@@ -13,7 +13,7 @@ const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelected
     selectedDates.forEach(date => {
       if (selectedMachines.length > 0) {
         updatedTaskData[date] = {
-          machines: selectedMachines,
+          machines: selectedMachines, // Save selected machines for the date
           tasks: taskData.tasksForThisDate || [], // Ensure task data is saved with the date
         };
       }
@@ -60,11 +60,10 @@ const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelected
           />
         </div>
         <div className="p-2 col-span-1">
-          {/* Pass taskData and setTaskData to ProductionTaskManagement */}
-          <ProductionTaskManagement
+          {/* Production Task Management */}
+          <ProductionTaskManagement 
             selectedMachines={selectedMachines}
-            setTaskData={setTaskData} // Set taskData in parent when needed
-            selectedDates={selectedDates}
+            setTaskData={setTaskData} // Pass the function to update task data
           />
         </div>
       </div>
