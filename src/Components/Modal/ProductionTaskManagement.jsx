@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Select, Button } from 'antd';
+import { Dropdown, Button, Menu, Select, message } from 'antd';
 import { UserOutlined, PlusOutlined, CloseOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
 
-const ProductionTaskManagement = ({ selectedMachines, setSelectedMachines }) => {
+const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, selectedDates }) => {
   const availableEmployees = [
     "Nguyễn Văn A",
     "Trần Thị B",
@@ -12,19 +12,21 @@ const ProductionTaskManagement = ({ selectedMachines, setSelectedMachines }) => 
   ];
 
   const shiftOptions = [
-    { label: "Ca chính", value: "ca_chinh" },
+    { label: "Ca chính", value: "Ca chính" },
     { label: "Ca phụ 1 giờ", value: "ca_phu_1h" },
     { label: "Ca phụ 2 giờ", value: "ca_phu_2h" },
     { label: "Ca phụ 3 giờ", value: "ca_phu_3h" },
+    { label: "Ca đêm", value: "ca_dem" },
+    { label: "Ca sáng", value: "ca_sang" },
+    { label: "Ca chiều", value: "ca_chieu" },
   ];
 
   const [tasks, setTasks] = useState([]);
   const [isMachineListOpen, setIsMachineListOpen] = useState(false);
-  const [selectedDiv, setSelectedDiv] = useState(null); // Track selected div
 
   // Hàm để thêm nhiệm vụ mới
   const addTask = () => {
-    setTasks([...tasks, { selectedShift: '', selectedEmployees: [], selectedEmployee: '', color: '' }]);
+    setTasks([...tasks, { selectedShift: '', selectedEmployees: [], selectedEmployee: '', status: 'Dừng' }]);
   };
 
   // Hàm để xóa nhiệm vụ
@@ -69,24 +71,49 @@ const ProductionTaskManagement = ({ selectedMachines, setSelectedMachines }) => 
     setIsMachineListOpen(!isMachineListOpen);
   };
 
-  // Xóa thiết bị
-  const removeMachine = (machineId) => {
-    setSelectedMachines(selectedMachines.filter((m) => m.id !== machineId));
+  // Xử lý khi click vào các div màu
+  const handleDivClick = (index, status) => {
+    const updatedTasks = [...tasks];
+    updatedTasks[index].status = status; // Cập nhật trạng thái nhiệm vụ (status)
+    setTasks(updatedTasks);
   };
 
-  // Xử lý khi click vào các div màu
-  const handleDivClick = (index, color) => {
-    const updatedTasks = [...tasks];
-    updatedTasks[index].color = color; // Cập nhật màu cho nhiệm vụ
-    setTasks(updatedTasks);
-    setSelectedDiv(index); // Gán selectedDiv để xác định div nào đang được chọn
+  // Xử lý khi ấn nút Xác nhận (Hiển thị nhiệm vụ trên Calendar)
+  const handleConfirm = () => {
+    // Sao chép dữ liệu nhiệm vụ hiện tại
+    const updatedTaskData = { ...taskData };
+  
+    // Kiểm tra nếu `selectedDates` là một mảng hợp lệ
+    if (Array.isArray(selectedDates) && selectedDates.length > 0) {
+      // Nếu `selectedDates` là mảng hợp lệ, xử lý
+      selectedDates.forEach(date => {
+        updatedTaskData[date] = {
+          tasks: [...(updatedTaskData[date]?.tasks || []), ...tasks], // Lưu các nhiệm vụ mới
+          machines: selectedMachines, // Lưu các máy đã chọn
+        };
+      });
+  
+      // Cập nhật `taskData` với dữ liệu mới
+      setTaskData(updatedTaskData);
+      message.success('Nhiệm vụ đã được xác nhận!');
+      setTasks([]); // Reset các nhiệm vụ sau khi xác nhận
+    } else {
+      // Hiển thị thông báo nếu không có ngày nào được chọn
+      message.error('Vui lòng chọn ít nhất một ngày!');
+    }
+  };
+  
+
+  // Xử lý khi ấn nút Hủy bỏ (Xóa các task)
+  const handleCancel = () => {
+    setTasks([]); // Xóa tất cả các task đã tạo
+    message.info('Các nhiệm vụ đã được hủy bỏ.');
   };
 
   return (
-    <div className="w-full p-4">
+    <div className="w-full p-2 ">
       <h2 className="font-semibold mb-4">Quản lý nhiệm vụ sản xuất</h2>
 
-      {/* Danh sách máy */}
       <div className="flex items-center justify-between p-4 bg-gray-100 rounded-md mb-4">
         <div className="flex items-center">
           <span className="font-semibold mr-2">Danh sách máy</span>
@@ -97,8 +124,10 @@ const ProductionTaskManagement = ({ selectedMachines, setSelectedMachines }) => 
       </div>
 
       {/* Hiển thị danh sách máy đã chọn */}
+      <div className="overflow-y-scroll "> 
+      
       {isMachineListOpen && (
-        <div className="bg-white p-4 rounded-lg shadow-lg w-full max-h-60 overflow-y-auto mb-4">
+        <div className="bg-white p-4 rounded-lg shadow-lg w-full max-h-60 overflow-x-scroll mb-4">
           <h2 className="font-semibold mb-2">Thiết bị đã chọn</h2>
           <ul className="list-disc pl-5">
             {selectedMachines.length > 0 ? (
@@ -117,7 +146,7 @@ const ProductionTaskManagement = ({ selectedMachines, setSelectedMachines }) => 
 
       {/* Nhiệm vụ sản xuất */}
       {tasks.map((task, index) => (
-        <div key={index} className="bg-gray-100 rounded-md p-3 mb-4">
+        <div key={index} className="bg-gray-100 rounded-md p-3 mb-4  ">
           <div className="flex justify-between items-center mb-2">
             <span className="font-semibold">Ca làm việc</span>
             <CloseOutlined
@@ -125,36 +154,29 @@ const ProductionTaskManagement = ({ selectedMachines, setSelectedMachines }) => 
               onClick={() => removeTask(index)} // Xóa nhiệm vụ
             />
           </div>
-          <div className="mb-2 flex">
-            {/* Wrap the Select component in a div with background color */}
-            <div
-              style={{
-                width: '100%',
-                marginRight: '8px',
-                backgroundColor: task.color === 'red' ? '#ffcccc' :
-                                task.color === 'yellow' ? '#ffffcc' :
-                                task.color === 'green' ? '#ccffcc' : '',
-              }}
-            >
-              <Select
-                placeholder="Chọn ca làm việc"
-                value={task.selectedShift}
-                onChange={(value) => updateShift(index, value)} // Cập nhật ca làm việc
-                style={{ width: '100%' }} // Ensure the Select takes up the full width of the wrapping div
-              >
-                {shiftOptions.map((shift, idx) => (
-                  <Select.Option key={idx} value={shift.value}>
+
+          {/* Dropdown button for selecting shifts */}
+          <div className="mb-2 flex justify-between ">
+            <Dropdown overlay={
+              <Menu>
+                {shiftOptions.map((shift) => (
+                  <Menu.Item key={shift.value} onClick={() => updateShift(index, shift.value)}>
                     {shift.label}
-                  </Select.Option>
+                  </Menu.Item>
                 ))}
-              </Select>
-            </div>
+              </Menu>
+            }>
+              <Button style={{ background: task.status === 'Dừng' ? 'red' : task.status === 'Chờ' ? '#fafa98' : '#8ff28f' }}>
+                {task.selectedShift || 'Chọn ca làm việc'}
+              </Button>
+            </Dropdown>
           </div>
+
           <div className="mb-2 flex">
             <Select
               placeholder="Chọn nhân viên"
               value={task.selectedEmployee}
-              onChange={(value) => updateEmployee(index, value)} // Cập nhật nhân viên
+              onChange={(value) => updateEmployee(index, value)}
               style={{ width: '100%', marginRight: '8px' }}
             >
               {availableEmployees.map((employee, idx) => (
@@ -165,12 +187,10 @@ const ProductionTaskManagement = ({ selectedMachines, setSelectedMachines }) => 
             </Select>
             <Button type="primary" icon={<PlusOutlined />} onClick={() => addEmployee(index)} />
           </div>
+
           <div className="max-h-32 overflow-y-auto mb-2">
             {task.selectedEmployees.map((employee, idx) => (
-              <div
-                key={idx}
-                className="flex items-center justify-between bg-white p-2 rounded mb-1"
-              >
+              <div key={idx} className="flex items-center justify-between bg-white p-2 rounded mb-1">
                 <div className="flex items-center">
                   <UserOutlined className="mr-2" />
                   <span>{employee}</span>
@@ -182,28 +202,41 @@ const ProductionTaskManagement = ({ selectedMachines, setSelectedMachines }) => 
               </div>
             ))}
           </div>
+
+          {/* Divs for status colors */}
           <div className="h-12 bg-white border border-black rounded-lg overflow-hidden flex m-2">
             <div
-              className={`w-1/3 border-l-4 border-l-red-600 cursor-pointer ${task.color === 'red' ? 'bg-red-600' : ''}`}
-              onClick={() => handleDivClick(index, 'red')}
+              className={`w-1/3 border-l-4 border-l-red-600 cursor-pointer ${task.status === 'Dừng' ? 'bg-red-600' : ''}`}
+              onClick={() => handleDivClick(index, 'Dừng')}
             />
             <div
-              className={`w-1/3 border-l-4 border-l-yellow-600 cursor-pointer ${task.color === 'yellow' ? 'bg-yellow-500' : ''}`}
-              onClick={() => handleDivClick(index, 'yellow')}
+              className={`w-1/3 border-l-4 border-l-yellow-600 cursor-pointer ${task.status === 'Chờ' ? 'bg-yellow-500' : ''}`}
+              onClick={() => handleDivClick(index, 'Chờ')}
             />
             <div
-              className={`w-1/3 cursor-pointer border-l-4 border-l-green-600 ${task.color === 'green' ? 'bg-green-500' : ''}`}
-              onClick={() => handleDivClick(index, 'green')}
+              className={`w-1/3 cursor-pointer border-l-4 border-l-green-600 ${task.status === 'Chạy' ? 'bg-green-500' : ''}`}
+              onClick={() => handleDivClick(index, 'Chạy')}
             />
           </div>
-        </div>
+        </div> 
       ))}
 
       {/* Nút để thêm nhiệm vụ sản xuất mới */}
       <Button className="w-full bg-gray-100 text-gray-600 flex items-center justify-center" onClick={addTask}>
         <PlusOutlined className="mr-2" />
         Thêm nhiệm vụ sản xuất
-      </Button>
+      </Button>  
+      </div>
+
+      {/* Nút Xác nhận và Hủy bỏ */}
+      <div className="grid grid-cols-2 mt-2">
+        <Button className="mr-2 bg-gray-100 text-gray-600 flex items-center justify-center" onClick={handleCancel}>
+          Hủy bỏ
+        </Button>
+        <Button className="bg-gray-100 text-gray-600 flex items-center justify-center" onClick={handleConfirm}>
+          Xác nhận
+        </Button>
+      </div>
     </div>
   );
 };

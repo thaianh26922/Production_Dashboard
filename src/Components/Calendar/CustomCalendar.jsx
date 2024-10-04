@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const CustomCalendar = ({ selectedDates, setSelectedDates }) => {
+const CustomCalendar = ({ selectedDates, setSelectedDates ,taskData}) => {
   const [currentDate, setCurrentDate] = useState(new Date()); // Ngày hiện tại trên lịch
   const [showMonthPicker, setShowMonthPicker] = useState(false); // Trạng thái hiển thị picker tháng
   const [showYearPicker, setShowYearPicker] = useState(false); // Trạng thái hiển thị picker năm
@@ -26,6 +26,14 @@ const CustomCalendar = ({ selectedDates, setSelectedDates }) => {
       setSelectedDates([...selectedDates, date]); // Chọn ngày
     }
   };
+  const getTasksForDate = (date) => {
+    // Kiểm tra nếu `tasks` là một mảng
+    if (Array.isArray(taskData)) {
+      return tasks.filter((taskData) => taskData.selectedDate === date);
+    }
+    return []; // Nếu không phải là mảng, trả về mảng trống
+  };
+  console.log(taskData)
 
   // Kiểm tra xem một ngày có được chọn hay không
   const isSelected = (date) => selectedDates.includes(date);
@@ -65,6 +73,15 @@ const CustomCalendar = ({ selectedDates, setSelectedDates }) => {
           }`}
         >
           <span>{day}</span>
+          {/* Hiển thị các nhiệm vụ */}
+          <ul className="list-disc mt-1">
+            {getTasksForDate(date).map((task, index) => (
+          <li key={index} className="text-xs">
+            {task[i].selectedShift} - {task[i].status}
+          </li>
+      ))}
+
+          </ul>
         </div>
       );
     }

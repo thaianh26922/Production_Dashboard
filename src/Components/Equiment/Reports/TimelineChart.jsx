@@ -15,7 +15,7 @@ const TimelineChart = ({ selectedDate }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const dimensions = { width: 800, height: 440 }; // Tăng chiều cao để có đủ không gian cho legend
+  const dimensions = { width: 680, height: 440 }; // Tăng chiều cao để có đủ không gian cho legend
 
   // Hàm gọi API
   const fetchData = async (startDate, endDate) => {
@@ -97,7 +97,7 @@ const TimelineChart = ({ selectedDate }) => {
 
     const svg = d3.select(svgRef.current);
     const { width, height } = dimensions;
-    const margin = { top: 20, right: 30, bottom: 50, left: 100 };
+    const margin = { top: 20, right: 30, bottom: 50, left: 35 };
 
     // Chuẩn bị dữ liệu với thời gian liên tiếp (tính duration giữa các trạng thái)
     const processedData = formatHistoryData(data);

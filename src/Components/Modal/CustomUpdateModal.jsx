@@ -4,36 +4,38 @@ import CustomCalendar from '../../Components/Calendar/CustomCalendar';
 import ProductionTaskManagement from './ProductionTaskManagement';
 
 const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelectedDates, selectedMachines }) => {
-  const [taskData, setTaskData] = useState({}); // Store shift data associated with dates
+  const [taskData, setTaskData] = useState({}); // Dữ liệu nhiệm vụ sản xuất lưu theo ngày
 
-  // Function to handle saving tasks along with selected dates
+  // Hàm xử lý khi lưu nhiệm vụ cùng ngày đã chọn
   const handleSave = () => {
     const updatedTaskData = { ...taskData };
 
+    // Lưu thông tin nhiệm vụ cho từng ngày được chọn
     selectedDates.forEach(date => {
       if (selectedMachines.length > 0) {
         updatedTaskData[date] = {
-          machines: selectedMachines, // Save selected machines for the date
-          tasks: taskData.tasksForThisDate || [], // Ensure task data is saved with the date
+          machines: selectedMachines, // Lưu các thiết bị đã chọn cho ngày đó
+          tasks: updatedTaskData[date]?.tasks || [], // Đảm bảo thông tin nhiệm vụ được lưu kèm ngày
         };
       }
     });
 
-    setTaskData(updatedTaskData); // Save task info with associated dates
-    console.log('Saved Task Data:', updatedTaskData);
-    setSelectedDates([]); // Clear selected dates after saving
-    onClose(); // Close the modal after saving
+    setTaskData(updatedTaskData); // Lưu thông tin nhiệm vụ với các ngày đã chọn
+    console.log('Dữ liệu nhiệm vụ đã lưu:', updatedTaskData);
+    setSelectedDates([]); // Xóa các ngày đã chọn sau khi lưu
+    onClose(); // Đóng modal sau khi lưu
   };
 
-  // Function to handle cancel action
+  // Hàm xử lý khi nhấn nút Hủy bỏ
   const handleCancel = () => {
-    setSelectedDates([]); // Clear selected dates
-    onCancel(); // Call the onCancel prop function if provided
-    onClose(); // Close the modal
+    setSelectedDates([]); // Xóa các ngày đã chọn
+    onCancel(); // Gọi hàm onCancel nếu được truyền vào
+    onClose(); // Đóng modal
   };
 
-  // Function to pass saved task info to the calendar
+  // Hàm để lấy thông tin nhiệm vụ đã lưu cho một ngày cụ thể
   const getTaskForDate = (date) => taskData[date] || null;
+  console.log (taskData)
 
   return (
     <Modal
@@ -50,20 +52,23 @@ const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelected
       ]}
       width={1200}
     >
-      <div className="grid grid-cols-4 gap-2">
-        <div className="p-2 col-span-3">
-          {/* Pass selectedDates and taskData to CustomCalendar */}
+      <div className="grid grid-cols-5 gap-1 h-100">
+        <div className="p-1 col-span-4">
+          {/* Hiển thị lịch với các ngày đã chọn */}
           <CustomCalendar
             selectedDates={selectedDates}
             setSelectedDates={setSelectedDates}
-            getTaskForDate={getTaskForDate} // Function to get saved tasks for a date
+            getTaskForDate={getTaskForDate} // Lấy thông tin nhiệm vụ đã lưu cho từng ngày
+            taskData={taskData} // Truyền dữ liệu nhiệm vụ đầy đủ để hiển thị trên lịch
           />
         </div>
-        <div className="p-2 col-span-1">
-          {/* Production Task Management */}
+        <div className="col-span-1">
+          {/* Quản lý nhiệm vụ sản xuất */}
           <ProductionTaskManagement 
             selectedMachines={selectedMachines}
-            setTaskData={setTaskData} // Pass the function to update task data
+            setTaskData={setTaskData} // Cập nhật dữ liệu nhiệm vụ khi chỉnh sửa hoặc thêm mới
+            taskData={taskData} // Truyền dữ liệu nhiệm vụ hiện tại để cho phép chỉnh sửa/cập nhật
+            selectedDates={selectedDates || []}
           />
         </div>
       </div>

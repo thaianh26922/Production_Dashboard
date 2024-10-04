@@ -7,7 +7,7 @@ import RuntimeTrendChart from '../../../Components/Equiment/Reports/RuntimeTrend
 import RepairBarChart from '../../../Components/Equiment/Reports/RepairBarChart'; // Import RepairBarChart
 import StackedBarChart from '../../../Components/Equiment/Reports/StackedBarChart';
 import TimelineChart from '../../../Components/Equiment/Reports/TimelineChart';
-
+import { datastatus } from '../../../data/status'; 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
@@ -159,7 +159,7 @@ function DeviceReport() {
             onFullscreen={handleFullscreen}
             onPrint={handlePrint}
           />
-          <TimelineChart selectedDate={selectedDate} />
+          <TimelineChart data={datastatus.status} selectedDate={selectedDate} />
         </div>
         <div className="bg-white p-3 col-span-1 rounded-lg">
           <TitleChart

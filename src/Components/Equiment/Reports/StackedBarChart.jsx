@@ -14,7 +14,7 @@ const StackedBarChart = ({ selectedDate }) => {
     setError(null);
     try {
       const response = await axios.get(
-        `http://192.168.1.5:5000/api/device-status/543ff470-54c6-11ef-8dd4-b74d24d26b24`, {
+        `http://localhost:5000/api/device-status/543ff470-54c6-11ef-8dd4-b74d24d26b24`, {
           params: { startDate, endDate },
         }
       );
@@ -41,50 +41,47 @@ const StackedBarChart = ({ selectedDate }) => {
     svg.selectAll('*').remove(); // Clear previous chart
 
     const margin = { top: 10, right: 30, bottom: 50, left: 40 };
-    const width = 800 - margin.left - margin.right;
-    const height = 400 - margin.top - margin.bottom ;
+    const width = 680 - margin.left - margin.right;
+    const height = 400 - margin.top - margin.bottom;
 
+    // Format data
     const formattedData = data.map(d => ({
       date: moment(d.ts).format('YYYY-MM-DD'),
-      status: d.value === '1' ? 'Chạy' : d.value === '0' ? 'Dừng' : 'Tắt máy',
-      duration: 1, // Assume equal duration for each status, adjust if needed
+      status: d.value === '1' ? 'Chạy' : 'Dừng',
+      duration: 1, // Assuming equal duration for each status, adjust if needed
     }));
 
     const groupedData = {};
     formattedData.forEach(d => {
       if (!groupedData[d.date]) {
-        groupedData[d.date] = { Chạy: 0, Dừng: 0, 'Tắt máy': 0 };
+        groupedData[d.date] = { Chạy: 0, Dừng: 0 };
       }
       groupedData[d.date][d.status] += d.duration;
     });
 
     const labels = Object.keys(groupedData);
-    const chạyData = labels.map(date => groupedData[date].Chạy);
-    const dừngData = labels.map(date => groupedData[date].Dừng);
-    const tắtMáyData = labels.map(date => groupedData[date]['Tắt máy']);
 
-    // Tính toán % cho mỗi trạng thái
+    // Calculate percentage for each status
     const stackedData = labels.map(date => {
-      const total = groupedData[date].Chạy + groupedData[date].Dừng ;
+      const total = groupedData[date].Chạy + groupedData[date].Dừng;
       return {
         date,
         Chạy: (groupedData[date].Chạy / total) * 100,
         Dừng: (groupedData[date].Dừng / total) * 100,
-        
       };
     });
 
-    const stack = d3.stack().keys(['Chạy', 'Dừng', ]);
+    const stack = d3.stack().keys(['Chạy', 'Dừng']);
     const stackedSeries = stack(stackedData);
 
-    // X Scale (Phần trăm %)
+    // X Scale (Percentage)
     const xScale = d3.scaleLinear()
-      .domain([0, 100]) // X là phần trăm, từ 0 đến 100
+      .domain([0, 100]) // X is percentage from 0 to 100
       .range([0, width]);
 
-    // Y Scale (Ngày định dạng dd/mm)
+    // Y Scale (Dates - recent dates at the top)
     const yScale = d3.scaleBand()
-      .domain(labels)
+      .domain(labels) // Most recent dates first
       .range([0, height])
       .padding(0.6);
 
@@ -92,8 +89,8 @@ const StackedBarChart = ({ selectedDate }) => {
 
     // Color Scale
     const colorScale = d3.scaleOrdinal()
-      .domain(['Chạy', 'Dừng', ])
-      .range(['#31e700', '#ff0137', ]);
+      .domain(['Chạy', 'Dừng'])
+      .range(['#31e700', '#ff0137']); // Chạy: Green, Dừng: Red
 
     const chart = svg
       .append('g')
@@ -115,35 +112,33 @@ const StackedBarChart = ({ selectedDate }) => {
       .attr('width', d => xScale(d[1]) - xScale(d[0]))
       .attr('height', yScale.bandwidth())
       .append('title') // Tooltip
-      .text(d => `${d.data.date}: ${d[1] - d[0]}%`);
+      .text(d => `${d.data.date}: ${(d[1] - d[0]).toFixed(1)}%`);
 
-    // Thêm datalabels bên trong các thanh bar
-    // Thêm datalabels bên trong các thanh bar
+    // Add data labels inside the bars
     chart
-    .selectAll('.serie')
-    .data(stackedSeries)
-    .enter()
-    .append('g')
-    .attr('fill', 'white')
-    .selectAll('text')
-    .data(d => d)
-    .enter()
-    .append('text')
-    .attr('font-size', '12px')
-    .attr('x', d => xScale(d[0]) + 10) // Di chuyển sang trái (thêm 10px vào vị trí x)
-    .attr('y', d => yScale(d.data.date) + yScale.bandwidth() / 2)
-    .attr('dy', '.30em')
-    .attr('text-anchor', 'start') // Căn chỉnh chữ sang bên trái
-    .text(d => `${(d[1] - d[0]).toFixed(1)}%`);
+      .selectAll('.serie')
+      .data(stackedSeries)
+      .enter()
+      .append('g')
+      .attr('fill', 'white')
+      .selectAll('text')
+      .data(d => d)
+      .enter()
+      .append('text')
+      .attr('font-size', '12px')
+      .attr('x', d => xScale(d[0]) + 10)
+      .attr('y', d => yScale(d.data.date) + yScale.bandwidth() / 2)
+      .attr('dy', '.30em')
+      .attr('text-anchor', 'start')
+      .text(d => `${(d[1] - d[0]).toFixed(1)}%`);
 
-
-    // X Axis (Phần trăm %)
+    // X Axis (Percentage)
     chart
       .append('g')
       .attr('transform', `translate(0, ${height})`)
       .call(d3.axisBottom(xScale).tickFormat(d => d + '%'));
 
-    // Y Axis (Ngày định dạng dd/mm)
+    // Y Axis (Formatted Dates)
     chart
       .append('g')
       .call(d3.axisLeft(yScale)
@@ -153,9 +148,9 @@ const StackedBarChart = ({ selectedDate }) => {
     // Legend
     const legend = svg
       .append('g')
-      .attr('transform', `translate(${margin.left}, ${height + margin.bottom - 5 })`);
+      .attr('transform', `translate(${margin.left}, ${height + margin.bottom - 5})`);
 
-    const legendData = ['Chạy', 'Dừng', ];
+    const legendData = ['Chạy', 'Dừng'];
 
     legend
       .selectAll('g')
