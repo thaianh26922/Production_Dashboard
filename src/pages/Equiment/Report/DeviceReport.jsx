@@ -168,7 +168,7 @@ function DeviceReport() {
             onFullscreen={handleFullscreen}
             onPrint={handlePrint}
           />
-          <StackedBarChart selectedDate={selectedDate} />
+          {/* <StackedBarChart selectedDate={selectedDate} /> */}
         </div>
       </div>
     </>
