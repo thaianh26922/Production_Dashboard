@@ -27,13 +27,9 @@ const CustomCalendar = ({ selectedDates, setSelectedDates ,taskData}) => {
     }
   };
   const getTasksForDate = (date) => {
-    // Kiểm tra nếu `tasks` là một mảng
-    if (Array.isArray(taskData)) {
-      return tasks.filter((taskData) => taskData.selectedDate === date);
-    }
-    return []; // Nếu không phải là mảng, trả về mảng trống
+    return taskData[date]?.tasks || []; // Lấy nhiệm vụ cho ngày cụ thể
   };
-  console.log(taskData)
+  console.log(getTasksForDate())
 
   // Kiểm tra xem một ngày có được chọn hay không
   const isSelected = (date) => selectedDates.includes(date);
@@ -77,7 +73,7 @@ const CustomCalendar = ({ selectedDates, setSelectedDates ,taskData}) => {
           <ul className="list-disc mt-1">
             {getTasksForDate(date).map((task, index) => (
           <li key={index} className="text-xs">
-            {task[i].selectedShift}
+            {task.selectedShift}
           </li>
       ))}
 

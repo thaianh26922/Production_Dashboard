@@ -34,7 +34,7 @@ const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelected
   };
 
   // Hàm để lấy thông tin nhiệm vụ đã lưu cho một ngày cụ thể
-  const getTaskForDate = (date) => taskData[date] || null;
+  const getTaskForDate = (selectedDates) => taskData[selectedDates] || null;
   console.log (taskData)
 
   return (
@@ -69,6 +69,7 @@ const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelected
             setTaskData={setTaskData} // Cập nhật dữ liệu nhiệm vụ khi chỉnh sửa hoặc thêm mới
             taskData={taskData} // Truyền dữ liệu nhiệm vụ hiện tại để cho phép chỉnh sửa/cập nhật
             selectedDates={selectedDates || []}
+            
           />
         </div>
       </div>
