@@ -77,7 +77,7 @@ const CustomCalendar = ({ selectedDates, setSelectedDates ,taskData}) => {
           <ul className="list-disc mt-1">
             {getTasksForDate(date).map((task, index) => (
           <li key={index} className="text-xs">
-            {task[i].selectedShift} - {task[i].status}
+            {task[i].selectedShift}
           </li>
       ))}
 
