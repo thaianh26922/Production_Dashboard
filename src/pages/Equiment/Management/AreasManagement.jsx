@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { Form } from 'antd';
 import AddButton from '../../../Components/Button/AddButton';
@@ -9,67 +9,78 @@ import FormSample from '../../../Components/Button/FormSample';
 import ImportButton from '../../../Components/Button/ImportButton';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
 
 // Import sample template and data for areas
-import sampleTemplate from '../../../assets/form/Khu vực sản xuất.xlsx';  
-
-// Assuming areasData is already defined or imported from a file
-const areasData = [
-  { id: 1, areaCode: 'KV001', areaName: 'Khu Vực 1' },
-  { id: 2, areaCode: 'KV002', areaName: 'Khu Vực 2' },
-];
+import sampleTemplate from '../../../assets/form/Khu vực sản xuất.xlsx';
 
 const AreasManagement = () => {
-  const [areas, setAreas] = useState(areasData); // Directly set areas without loading
-  const [filteredAreas, setFilteredAreas] = useState(areasData);
+  const [areas, setAreas] = useState([]); // Initialize empty areas array
+  const [filteredAreas, setFilteredAreas] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedArea, setSelectedArea] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [form] = Form.useForm();
 
+  // Fetch areas from the back-end API
+  const fetchAreas = async () => {
+    try {
+      const response = await axios.get('https://back-end-production.onrender.com/api/device/areas'); // Your API URL
+      setAreas(response.data);
+      setFilteredAreas(response.data);
+    } catch (error) {
+      toast.error('Failed to fetch areas');
+    }
+  };
+
+  useEffect(() => {
+    fetchAreas(); // Fetch areas on component mount
+  }, []);
+
   // Handle search input change
   const handleSearch = (query) => {
     setSearchQuery(query);
-
-    // Filter the areas based on search query (search in areaCode, areaName)
     const filtered = areas.filter((area) =>
       area.areaCode.toLowerCase().includes(query.toLowerCase()) ||
       area.areaName.toLowerCase().includes(query.toLowerCase())
     );
-    
     setFilteredAreas(filtered);
   };
 
-  const handleSave = (values) => {
+  // Save new or updated area
+  const handleSave = async (values) => {
     const areaData = {
       ...values,
       id: selectedArea ? selectedArea.id : areas.length + 1,
     };
 
-    if (selectedArea) {
-      const updatedAreas = areas.map((area) =>
-        area.id === selectedArea.id ? { ...area, ...areaData } : area
-      );
-      setAreas(updatedAreas);
-      setFilteredAreas(updatedAreas); // Update filtered areas after save
-      toast.success('Cập nhật khu vực thành công!');
-    } else {
-      const newAreas = [...areas, areaData];
-      setAreas(newAreas);
-      setFilteredAreas(newAreas); // Update filtered areas after adding a new one
-      toast.success('Thêm khu vực thành công!');
-    }
+    try {
+      if (selectedArea) {
+        await axios.put(`https://back-end-production.onrender.com/api/device/areas/${selectedArea.id}`, areaData);
+        toast.success('Cập nhật khu vực thành công!');
+      } else {
+        await axios.post('https://back-end-production.onrender.com/api/device/areas', areaData);
+        toast.success('Thêm khu vực thành công!');
+      }
 
-    setIsModalOpen(false);
-    setSelectedArea(null);
-    form.resetFields();
+      fetchAreas(); // Refresh area list after save
+      setIsModalOpen(false);
+      setSelectedArea(null);
+      form.resetFields();
+    } catch (error) {
+      toast.error('Failed to save area');
+    }
   };
 
-  const handleDelete = (id) => {
-    const updatedAreas = areas.filter((area) => area.id !== id);
-    setAreas(updatedAreas);
-    setFilteredAreas(updatedAreas); // Update filtered areas after delete
-    toast.success('Xóa khu vực thành công!');
+  // Delete area by ID
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`https://back-end-production.onrender.com/api/device/areas/${id}`);
+      toast.success('Xóa khu vực thành công!');
+      fetchAreas(); // Refresh area list after delete
+    } catch (error) {
+      toast.error('Failed to delete area');
+    }
   };
 
   return (
@@ -81,7 +92,11 @@ const AreasManagement = () => {
           onSearch={(q) => handleSearch(q)}
         />
         <div className="flex items-center gap-2 ml-auto">
-          <AddButton onClick={() => setIsModalOpen(true)} />
+          <AddButton onClick={() => {
+            form.resetFields(); // Reset form fields when opening modal for new area
+            setSelectedArea(null); // Clear selectedArea to indicate a new area
+            setIsModalOpen(true);
+          }} />
           <FormSample href={sampleTemplate} label="Tải Form Mẫu" />
           <ImportButton />
           <ExportExcelButton data={areas} fileName="DanhSachKhuVuc.xlsx" />
@@ -132,7 +147,7 @@ const AreasManagement = () => {
           setIsModalOpen(false);
           form.resetFields();
         }}
-        onOk={handleSave}
+        onOk={form.submit} // This will trigger the form submission
         form={form}
         title={selectedArea ? 'Chỉnh sửa Khu Vực' : 'Thêm mới Khu Vực'}
         fields={[
@@ -149,6 +164,7 @@ const AreasManagement = () => {
             rules: [{ required: true, message: 'Tên Khu Vực là bắt buộc' }]
           }
         ]}
+        onFinish={handleSave} // Attach the handleSave function to onFinish
       />
 
       <ToastContainer />

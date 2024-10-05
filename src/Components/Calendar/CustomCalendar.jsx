@@ -5,7 +5,7 @@ const CustomCalendar = ({ selectedDates, setSelectedDates ,taskData}) => {
   const [showMonthPicker, setShowMonthPicker] = useState(false); // Trạng thái hiển thị picker tháng
   const [showYearPicker, setShowYearPicker] = useState(false); // Trạng thái hiển thị picker năm
   const [showDecadePicker, setShowDecadePicker] = useState(false); // Trạng thái hiển thị picker thập kỷ
-
+  
   // Khi `selectedDates` thay đổi, cập nhật `currentDate`
   useEffect(() => {
     if (selectedDates && selectedDates.length > 0) {
@@ -70,9 +70,9 @@ const CustomCalendar = ({ selectedDates, setSelectedDates ,taskData}) => {
         >
           <span>{day}</span>
           {/* Hiển thị các nhiệm vụ */}
-          <ul className="list-disc mt-1">
+          <ul className="list-none mt-1  text-xl" >
             {getTasksForDate(date).map((task, index) => (
-          <li key={index} className="text-xs">
+          <li key={index} className="text-xs text-black w-full p-1 mt-1" style={{ background: task.status === 'Dừng' ? 'red' : task.status === 'Chờ' ? '#fafa98' : '#8ff28f' }}>
             {task.selectedShift}
           </li>
       ))}

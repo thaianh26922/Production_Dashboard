@@ -13,12 +13,10 @@ const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, sel
 
   const shiftOptions = [
     { label: "Ca chính", value: "Ca chính" },
-    { label: "Ca phụ 1 giờ", value: "ca_phu_1h" },
-    { label: "Ca phụ 2 giờ", value: "ca_phu_2h" },
-    { label: "Ca phụ 3 giờ", value: "ca_phu_3h" },
-    { label: "Ca đêm", value: "ca_dem" },
-    { label: "Ca sáng", value: "ca_sang" },
-    { label: "Ca chiều", value: "ca_chieu" },
+    { label: "Ca phụ 1 giờ", value: "Ca phụ 1 giờ" },
+    { label: "Ca phụ 2 giờ", value: "Ca phụ 2 giờ" },
+    { label: "Ca phụ 3 giờ", value: "Ca phụ 3 giờ" },
+    
   ];
 
   const [tasks, setTasks] = useState([]);

@@ -1,82 +1,27 @@
 import React from 'react';
-import { Modal, Form, Input, TimePicker, Button, Space } from 'antd';
-import { FaPlus, FaMinus } from 'react-icons/fa';
+import { Modal, Form } from 'antd';
 
-const { RangePicker } = TimePicker;
-
-const DynamicModal = ({ open, onCancel, onOk, form, title, fields }) => {
+const DynamicModal = ({ open, onCancel, onOk, form, title, fields, onFinish }) => {
   return (
     <Modal
       title={title}
-      open={open}
+      visible={open}
       onCancel={onCancel}
-      onOk={() => {
-        form
-          .validateFields()
-          .then((values) => {
-            onOk(values);
-          })
-          .catch((info) => {
-            console.log('Validate Failed:', info);
-          });
-      }}
+      onOk={onOk} // Ensure onOk triggers form.submit
+      okText="OK"
+      cancelText="Hủy"
     >
-      <Form form={form} layout="vertical">
-        {fields.map((field) => {
-          if (field.type === 'input') {
-            return (
-              <Form.Item
-                key={field.name}
-                name={field.name}
-                label={field.label}
-                rules={field.rules}
-              >
-                <Input />
-              </Form.Item>
-            );
-          }
-          if (field.type === 'timePicker') {
-            return (
-              <Form.Item
-                key={field.name}
-                name={field.name}
-                label={field.label}
-                rules={field.rules}
-              >
-                <TimePicker format="HH:mm" />
-              </Form.Item>
-            );
-          }
-          if (field.type === 'rangePicker') {
-            return (
-              <Form.List key={field.name} name={field.name}>
-                {(fields, { add, remove }) => (
-                  <>
-                    {fields.map(({ key, name, fieldKey, ...restField }) => (
-                      <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'range']}
-                          fieldKey={[fieldKey, 'range']}
-                          rules={field.rules}
-                        >
-                          <RangePicker format="HH:mm" />
-                        </Form.Item>
-                        <FaMinus onClick={() => remove(name)} />
-                      </Space>
-                    ))}
-                    <Form.Item>
-                      <Button type="dashed" onClick={() => add()} block icon={<FaPlus />}>
-                        Thêm Thời Gian Nghỉ Ngơi
-                      </Button>
-                    </Form.Item>
-                  </>
-                )}
-              </Form.List>
-            );
-          }
-          return null;
-        })}
+      <Form form={form} onFinish={onFinish} layout="vertical">
+        {fields.map((field) => (
+          <Form.Item
+            key={field.name}
+            name={field.name}
+            label={field.label}
+            rules={field.rules}
+          >
+            <input type={field.type === 'input' ? 'text' : field.type} />
+          </Form.Item>
+        ))}
       </Form>
     </Modal>
   );
