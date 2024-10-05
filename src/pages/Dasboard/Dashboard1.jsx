@@ -108,8 +108,8 @@ const Dashboard1 = () => {
   return (
     <div className="w-full h-full mx-auto relative bg-gray-100 p-6 ">
       <div className="flex justify-between items-center mb-4 px-2">
-        <Breadcrumb />
-        <div className="relative">
+       
+        <div className="relative flex justify-end">
           <select
             value={selectedWorkcenter}
             onChange={handleWorkcenterChange}

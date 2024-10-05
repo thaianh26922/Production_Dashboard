@@ -12,6 +12,7 @@ const MachineWorkScheduleList = () => {
   const [isSelecting, setIsSelecting] = useState(false); // Track if the user is selecting devices
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // Modal visibility for update confirmation
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false); // Custom modal visibility for the final confirmation
+ 
 
   // Handle saving the selected dates
   const handleSaveDates = () => {

@@ -23,7 +23,7 @@ const TimelineChart = ({ selectedDate }) => {
     setError(null);
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/device-status/543ff470-54c6-11ef-8dd4-b74d24d26b24`, {
+        `http://192.168.1.6:5000/api/device-status/543ff470-54c6-11ef-8dd4-b74d24d26b24`, {
           params: { startDate, endDate },
         }
       );
@@ -34,6 +34,7 @@ const TimelineChart = ({ selectedDate }) => {
       setLoading(false);
     }
   };
+  console.log(fetchData)
 
   useEffect(() => {
     if (selectedDate && selectedDate.length === 2) {
@@ -207,7 +208,7 @@ const TimelineChart = ({ selectedDate }) => {
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
-  if (data.length === 0) return <p>No data available for the selected date range.</p>;
+  // if (data.length === 0) return <p>No data available for the selected date range.</p>;
 
   return (
     <div ref={wrapperRef} style={{ width: '100%', height: '100%' }}>

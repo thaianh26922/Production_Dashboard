@@ -40,10 +40,10 @@
         <div className="flex flex-col items-start p-4 mt-2">
           <div className="flex justify-between w-full">
             {!isCollapsed && (
-              <div className="flex items-center">
+              <div className="">
                 {/* Hiển thị Logo */}
-                <img src={logo} alt="Logo" className="w-28 h-auto object-contain" />
-                <h3 className="font-bold text-sky-700 ml-2">DI.OEE</h3>
+                <img src={logo} alt="Logo" className="w-[180px] h-auto object-contain" />
+                <h3 className="font-bold text-sky-700 ml-2 flex justify-center">DI.OEE</h3>
               </div>
             )}
             <button onClick={toggleSidebar} className="p-2 rounded-full hover:bg-gray-200 focus:outline-none flex items-center">
@@ -51,6 +51,8 @@
             </button>
           </div>
         </div>
+
+        <hr />
     
         {/* Phần chứa các menu */}
         <div className="flex-grow flex flex-col space-y-4 p-2  mt-4 text-gray-500">

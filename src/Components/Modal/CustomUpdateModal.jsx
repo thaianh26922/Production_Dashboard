@@ -30,7 +30,8 @@ const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelected
   const handleCancel = () => {
     setSelectedDates([]); // Xóa các ngày đã chọn
     onCancel(); // Gọi hàm onCancel nếu được truyền vào
-    onClose(); // Đóng modal
+    onClose();
+    setTaskData([]) // Đóng modal
   };
 
   // Hàm để lấy thông tin nhiệm vụ đã lưu cho một ngày cụ thể
