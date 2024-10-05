@@ -29,7 +29,7 @@ const AreasManagement = () => {
       setAreas(response.data);
       setFilteredAreas(response.data);
     } catch (error) {
-      toast.error('Failed to fetch areas');
+      toast.error('Failed to fetch areas management');
     }
   };
 
