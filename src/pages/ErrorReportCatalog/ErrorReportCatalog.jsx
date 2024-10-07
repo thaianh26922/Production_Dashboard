@@ -1,82 +1,102 @@
 import React, { useState, useEffect } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
+import { Modal, Form, Input, Select, Button } from 'antd';  // Import các thành phần cần thiết từ Ant Design
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import DynamicFormModal from '../../Components/Modal/DynamicFormModal';
 import SearchButton from '../../Components/Button/SearchButton';
 import AddButton from '../../Components/Button/AddButton';
 import ExportExcelButton from '../../Components/Button/ExportExcelButton';
-import * as yup from 'yup';
-import { format } from 'date-fns';
-import { devicesData } from '../../data/Machine/machineData'; // Nhập dữ liệu từ file data
+import axios from 'axios';  // Import axios để gọi API
 import FormSample from '../../Components/Button/FormSample';
 import ImportButton from '../../Components/Button/ImportButton';
 
-const ErrorReportCatalog = () => {
-  const [errorReports, setErrorReports] = useState(() => {
-    const savedReports = localStorage.getItem('errorReports');
-    return savedReports ? JSON.parse(savedReports) : [];
-  });
+const { Option } = Select; // Sử dụng Option từ Select
 
+const ErrorReportCatalog = () => {
+  const [errorReports, setErrorReports] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedReport, setSelectedReport] = useState(null);
-  const [exportStartDate, setExportStartDate] = useState(new Date());
-  const [exportEndDate, setExportEndDate] = useState(new Date());
-  const [deviceSuggestions, setDeviceSuggestions] = useState(devicesData); // Danh sách mã thiết bị gợi ý
+  const [deviceSuggestions, setDeviceSuggestions] = useState([]);
+  const [form] = Form.useForm(); // Tạo form instance từ Ant Design
 
-  // Cập nhật LocalStorage mỗi khi `errorReports` thay đổi
-  useEffect(() => {
-    localStorage.setItem('errorReports', JSON.stringify(errorReports));
-  }, [errorReports]);
-
-  // Hàm lưu báo cáo lỗi
-  const handleSave = (data) => {
-    if (selectedReport) {
-      const updatedReports = errorReports.map((report) =>
-        report.id === selectedReport.id ? { ...selectedReport, ...data } : report
-      );
-      setErrorReports(updatedReports);
-      toast.success('Cập nhật báo cáo lỗi thành công!');
-    } else {
-      const newReport = { ...data, id: errorReports.length + 1 };
-      setErrorReports([...errorReports, newReport]);
-      toast.success('Thêm báo cáo lỗi thành công!');
+  // Gọi API để lấy danh sách issue
+  const fetchErrorReports = async () => {
+    try {
+      const response = await axios.get('http://192.168.1.13:5000/api/issue');
+      setErrorReports(response.data);
+    } catch (error) {
+      toast.error('Lỗi khi tải báo cáo lỗi');
     }
-    setIsModalOpen(false);
-    setSelectedReport(null);
   };
 
-  // Hàm xóa báo cáo lỗi
-  const handleDelete = (id) => {
-    const updatedReports = errorReports.filter((report) => report.id !== id);
-    setErrorReports(updatedReports);
-    toast.success('Xóa báo cáo lỗi thành công!');
+  // Gọi API để lấy danh sách deviceName từ model Device
+  const fetchDeviceSuggestions = async () => {
+    try {
+      const response = await axios.get('http://192.168.1.13:5000/api/device');
+      setDeviceSuggestions(response.data); // Giả định rằng response trả về danh sách thiết bị
+    } catch (error) {
+      toast.error('Lỗi khi tải danh sách thiết bị');
+    }
   };
 
-  // Hàm tìm kiếm mã thiết bị
-  const handleDeviceSearch = (query) => {
-    setSearchQuery(query);
+  // Gọi API khi component mount
+  useEffect(() => {
+    fetchErrorReports();
+    fetchDeviceSuggestions();
+  }, []);
 
-    // Lọc danh sách mã thiết bị dựa trên từ khóa nhập vào
-    const suggestions = devicesData.filter((device) =>
-      device.machineCode.toLowerCase().includes(query.toLowerCase()) ||
-      device.machineName.toLowerCase().includes(query.toLowerCase())
-    );
-
-    setDeviceSuggestions(suggestions); // Cập nhật danh sách thiết bị gợi ý
+  // Hàm lưu issue (thêm mới hoặc cập nhật)
+  const handleSave = async () => {
+    try {
+      const values = await form.validateFields(); // Lấy và validate dữ liệu từ form
+      if (selectedReport) {
+        // Cập nhật issue
+        await axios.put(`http://192.168.1.13:5000/api/issue/${selectedReport._id}`, values);
+        toast.success('Cập nhật báo cáo lỗi thành công!');
+      } else {
+        // Thêm mới issue
+        await axios.post('http://192.168.1.13:5000/api/issue', values);
+        toast.success('Thêm báo cáo lỗi thành công!');
+      }
+      fetchErrorReports();  // Tải lại dữ liệu sau khi thêm/cập nhật
+      setIsModalOpen(false);
+      setSelectedReport(null);
+      form.resetFields(); // Reset form sau khi lưu
+    } catch (error) {
+      toast.error('Lỗi khi lưu báo cáo lỗi');
+    }
   };
 
+  // Hàm xóa issue
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://192.168.1.13:5000/api/issue/${id}`);
+      toast.success('Xóa báo cáo lỗi thành công!');
+      fetchErrorReports();  // Tải lại dữ liệu sau khi xóa
+    } catch (error) {
+      toast.error('Lỗi khi xóa báo cáo lỗi');
+    }
+  };
+
+  // Hàm mở modal khi thêm/sửa
+  const openModal = (report = null) => {
+    setIsModalOpen(true);
+    if (report) {
+      setSelectedReport(report);
+      form.setFieldsValue(report);  // Đặt giá trị cho form khi chỉnh sửa
+    } else {
+      setSelectedReport(null);
+      form.resetFields();  // Reset form khi thêm mới
+    }
+  };
+
+  // Hàm lọc báo cáo lỗi theo từ khóa tìm kiếm
   const filteredReports = errorReports.filter(
     (report) =>
-      report.errorCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.deviceCode.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const filteredExportReports = errorReports.filter(
-    (report) =>
-      report.createdDate >= exportStartDate &&
-      report.createdDate <= exportEndDate
+      report.reasonCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      report.reasonName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (report.deviceNames && report.deviceNames.join(', ').toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
@@ -84,16 +104,11 @@ const ErrorReportCatalog = () => {
       {/* Các nút tìm kiếm, thêm mới và xuất Excel */}
       <div className="flex items-center gap-2 mb-4">
         <SearchButton placeholder="Tìm kiếm mã lỗi, mã thiết bị..." onSearch={(q) => setSearchQuery(q)} />
-        
-
-        
-
         <div className="flex items-center gap-2 ml-auto">
-        <div className="flex-grow"> <AddButton onClick={() => setIsModalOpen(true)} /></div>
-        <div className="flex-grow"> <FormSample onClick={() => setIsModalOpen(false)} /></div>
-        <div className="flex-grow"> <ImportButton onClick={() => setIsModalOpen(false)} /></div>
-          
-          <ExportExcelButton data={filteredExportReports} fileName="Báo cáo lỗi.xlsx" />
+          <AddButton onClick={() => openModal()} />
+          <FormSample />
+          <ImportButton />
+          <ExportExcelButton data={filteredReports} fileName="Báo cáo lỗi.xlsx" />
         </div>
       </div>
 
@@ -102,36 +117,31 @@ const ErrorReportCatalog = () => {
         <thead>
           <tr className="bg-gray-100">
             <th className="border px-4 py-2 text-xs">STT</th>
-            <th className="border px-4 py-2 text-xs">Mã nguyên nhân</th>
-            <th className="border px-4 py-2 text-xs">Tên nguyên nhân</th>
-            <th className="border px-4 py-2 text-xs">Thiết Bị</th>
-         
+            <th className="border px-4 py-2 text-xs">Mã Nguyên Nhân</th>
+            <th className="border px-4 py-2 text-xs">Tên Nguyên Nhân</th>
+            <th className="border px-4 py-2 text-xs">Tên Thiết Bị</th>
             <th className="border px-4 py-2 text-xs">Thao Tác</th>
           </tr>
         </thead>
         <tbody>
           {filteredReports.map((report, index) => (
-            <tr key={report.id} className="hover:bg-gray-50">
+            <tr key={report._id} className="hover:bg-gray-50">
               <td className="border px-4 py-2 text-sm text-center">{index + 1}</td>
-              <td className="border px-4 py-2 text-sm text-center">{report.errorCode}</td>
-              <td className="border px-4 py-2 text-sm text-center">{report.errorName}</td>
-              <td className="border px-4 py-2 text-sm text-center">{report.deviceCode}</td>
-              <td className="border px-4 py-2 text-sm text-center">{report.errorType}</td>
-            
-              
+              <td className="border px-4 py-2 text-sm text-center">{report.reasonCode}</td>
+              <td className="border px-4 py-2 text-sm text-center">{report.reasonName}</td>
+              <td className="border px-4 py-2 text-sm text-center">
+                {report.deviceNames && report.deviceNames.join(', ')}
+              </td>
               <td className="py-2 px-2 text-center border">
                 <button
                   className="mr-2 text-blue-500 hover:text-blue-700"
-                  onClick={() => {
-                    setSelectedReport(report);
-                    setIsModalOpen(true);
-                  }}
+                  onClick={() => openModal(report)}
                 >
                   <FaEdit />
                 </button>
                 <button
                   className="text-red-500 hover:text-red-700"
-                  onClick={() => handleDelete(report.id)}
+                  onClick={() => handleDelete(report._id)}
                 >
                   <FaTrash />
                 </button>
@@ -141,47 +151,55 @@ const ErrorReportCatalog = () => {
         </tbody>
       </table>
 
-      {/* Modal nhập dữ liệu báo cáo lỗi */}
-      <DynamicFormModal
-        isOpen={isModalOpen}
-        onClose={() => {
+      {/* Modal thêm/sửa báo cáo lỗi */}
+      <Modal
+        title={selectedReport ? 'Chỉnh sửa Báo cáo Lỗi' : 'Thêm mới Báo cáo Lỗi'}
+        open={isModalOpen}
+        onCancel={() => {
           setIsModalOpen(false);
           setSelectedReport(null);
+          form.resetFields(); // Reset form khi đóng modal
         }}
-        onSave={handleSave}
-        formFields={[
-          { name: 'errorCode', label: 'Mã Nguyên Nhân', type: 'text', validation: yup.string().required('Mã Lỗi là bắt buộc') },
-          { name: 'errorName', label: 'Tên Nguyên Nhân', type: 'text', validation: yup.string().required('Tên Lỗi là bắt buộc') },
-          
-          {
-            name: 'deviceCode',
-            label: 'Thiết Bị',
-            type: 'text',
-            validation: yup.string().required('Mã Thiết Bị là bắt buộc'),
-            renderInput: (props) => (
-              <>
-                <input
-                  {...props}
-                  className="p-2 border rounded w-full"
-                  placeholder="Chọn mã thiết bị..."
-                  onChange={(e) => handleDeviceSearch(e.target.value)} // Gọi hàm tìm kiếm
-                  list="deviceCodeList"
-                />
-                <datalist id="deviceCodeList">
-                  {deviceSuggestions.map((device) => (
-                    <option key={device.machineCode} value={device.machineCode}>
-                      {device.machineName}
-                    </option>
-                  ))}
-                </datalist>
-              </>
-            ),
-          },
-         
-        ]}
-        contentLabel={selectedReport ? 'Chỉnh sửa Báo cáo Lỗi' : 'Thêm mới Báo cáo Lỗi'}
-        initialData={selectedReport}
-      />
+        onOk={handleSave}
+        okText={selectedReport ? 'Cập nhật' : 'Thêm mới'}
+        cancelText="Hủy"
+      >
+        <Form form={form} layout="vertical">
+          <Form.Item
+            label="Mã Nguyên Nhân"
+            name="reasonCode"
+            rules={[{ required: true, message: 'Mã Nguyên Nhân là bắt buộc' }]}
+          >
+            <Input placeholder="Nhập mã nguyên nhân" />
+          </Form.Item>
+
+          <Form.Item
+            label="Tên Nguyên Nhân"
+            name="reasonName"
+            rules={[{ required: true, message: 'Tên Nguyên Nhân là bắt buộc' }]}
+          >
+            <Input placeholder="Nhập tên nguyên nhân" />
+          </Form.Item>
+
+          <Form.Item
+            label="Thiết Bị"
+            name="deviceNames"
+            rules={[{ required: true, message: 'Thiết Bị là bắt buộc' }]}
+          >
+            <Select
+              mode="multiple"
+              placeholder="Chọn thiết bị"
+              allowClear
+            >
+              {deviceSuggestions.map((device) => (
+                <Option key={device.deviceName} value={device.deviceName}>
+                  {device.deviceName}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Form>
+      </Modal>
 
       <ToastContainer />
     </div>

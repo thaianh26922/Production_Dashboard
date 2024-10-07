@@ -58,7 +58,7 @@ const Dashboard1 = () => {
       setLoading(false);
     }, 500);
   };
-
+  const runningMachinesCount = machines.filter(machine => machine.status === 'Chạy').length;
   // Lọc các máy dựa trên workcenter được chọn
   const filteredMachines = machines.filter(
     (machine) => selectedWorkcenter === 'All Workcenters' || machine.workcenter === selectedWorkcenter
@@ -107,9 +107,14 @@ const Dashboard1 = () => {
 
   return (
     <div className="w-full h-full mx-auto relative bg-gray-100 p-6 ">
-      <div className="flex justify-between items-center mb-4 px-2">
-       
-        <div className="relative flex justify-end">
+      <div className="flex justify-end items-center mb-4 px-1">
+      <div className="relative flex justify-end items-center space-x-2">
+          {/* Display the total number of running machines */}
+          <button className="bg-white border border-gray-300 rounded-lg py-2 px-4 leading-tight text-gray-800">
+            Tổng số máy chạy: {runningMachinesCount}/35 máy
+          </button>
+          
+          {/* Workcenter dropdown */}
           <select
             value={selectedWorkcenter}
             onChange={handleWorkcenterChange}

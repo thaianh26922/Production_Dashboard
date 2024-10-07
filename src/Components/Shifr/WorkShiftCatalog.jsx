@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { Button, Form } from 'antd';
 import AddButton from '../Button/AddButton';
@@ -11,6 +11,7 @@ import * as XLSX from 'xlsx';
 import moment from 'moment';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
 
 // Import file mẫu Excel từ thư mục assets
 import sampleTemplate from '../../assets/form/Ca làm việc.xlsx';
@@ -21,46 +22,81 @@ const WorkShiftCatalog = () => {
   const [selectedShift, setSelectedShift] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [form] = Form.useForm();
-
-  // Tham chiếu đến thẻ input ẩn để nhập file
   const fileInputRef = useRef(null);
 
-  // Hàm xử lý khi nhấn "ImportButton"
-  const handleImportClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click(); // Kích hoạt sự kiện click trên thẻ input ẩn
+  // Fetch work shifts from backend
+  const fetchWorkShifts = async () => {
+    try {
+      const response = await axios.get('http://192.168.1.13:5000/api/workShifts');
+      setWorkShifts(response.data);
+    } catch (error) {
+      toast.error('Lỗi khi tải danh sách ca làm việc');
     }
   };
 
-  // Hàm để lưu ca làm việc từ modal
-  const handleSave = (values) => {
+  useEffect(() => {
+    fetchWorkShifts();
+  }, []);
+
+  // Handle save work shift
+  const handleSave = async (values) => {
     const shiftData = {
       ...values,
-      id: selectedShift ? selectedShift.id : workShifts.length + 1,
       startTime: values.startTime ? values.startTime.format('HH:mm') : null,
       endTime: values.endTime ? values.endTime.format('HH:mm') : null,
       breakTime: values.breakTime
-        ? values.breakTime.map((range) => ({
-            startTime: range[0] ? range[0].format('HH:mm') : null, // Chuyển đổi sang chuỗi
-            endTime: range[1] ? range[1].format('HH:mm') : null,   // Chuyển đổi sang chuỗi
+        ? values.breakTime.map((item) => ({
+            startTime: item[0] ? item[0].format('HH:mm') : null,
+            endTime: item[1] ? item[1].format('HH:mm') : null,
           }))
         : []
     };
 
-    if (selectedShift) {
-      const updatedShifts = workShifts.map((shift) =>
-        shift.id === selectedShift.id ? { ...shift, ...shiftData } : shift
-      );
-      setWorkShifts(updatedShifts);
-      toast.success('Cập nhật ca làm việc thành công!');
-    } else {
-      setWorkShifts([...workShifts, shiftData]);
-      toast.success('Thêm ca làm việc thành công!');
+    try {
+      if (selectedShift) {
+        // Update work shift
+        await axios.put(`http://192.168.1.13:5000/api/workShifts/${selectedShift._id}`, shiftData);
+        toast.success('Cập nhật ca làm việc thành công!');
+      } else {
+        // Create new work shift
+        await axios.post('http://192.168.1.13:5000/api/workShifts', shiftData);
+        toast.success('Thêm ca làm việc thành công!');
+      }
+      fetchWorkShifts();
+      setIsModalOpen(false);
+      setSelectedShift(null);
+      form.resetFields();
+    } catch (error) {
+      toast.error('Lỗi khi lưu ca làm việc');
     }
+  };
 
-    setIsModalOpen(false);
-    setSelectedShift(null);
-    form.resetFields();
+  // Handle delete work shift
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://192.168.1.13:5000/api/workShifts/${id}`);
+      toast.success('Xóa ca làm việc thành công!');
+      fetchWorkShifts();
+    } catch (error) {
+      toast.error('Lỗi khi xóa ca làm việc');
+    }
+  };
+
+  // Handle search input change
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+  };
+
+  const filteredShifts = workShifts.filter(
+    (shift) =>
+      shift.shiftCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      shift.shiftName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleImportClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click(); // Kích hoạt sự kiện click trên thẻ input ẩn
+    }
   };
 
   // Xử lý việc tải file Excel lên
@@ -94,7 +130,6 @@ const WorkShiftCatalog = () => {
     reader.readAsArrayBuffer(file);
   };
 
-  // Khi mở modal để chỉnh sửa ca làm việc, cần chuyển đổi chuỗi thành đối tượng moment
   const openModal = (shift = null) => {
     setSelectedShift(shift);
     if (shift) {
@@ -104,46 +139,32 @@ const WorkShiftCatalog = () => {
         startTime: shift.startTime ? moment(shift.startTime, 'HH:mm') : null,
         endTime: shift.endTime ? moment(shift.endTime, 'HH:mm') : null,
         breakTime: shift.breakTime
-          ? shift.breakTime.map(bt => [
+          ? shift.breakTime.map((bt) => [
               bt.startTime ? moment(bt.startTime, 'HH:mm') : null,
-              bt.endTime ? moment(bt.endTime, 'HH:mm') : null
+              bt.endTime ? moment(bt.endTime, 'HH:mm') : null,
             ])
-          : []
+          : [],
       });
     }
     setIsModalOpen(true);
   };
 
-  // Hàm để xóa ca làm việc
-  const handleDelete = (id) => {
-    const updatedShifts = workShifts.filter((shift) => shift.id !== id);
-    setWorkShifts(updatedShifts);
-    toast.success('Xóa ca làm việc thành công!');
-  };
-
   return (
     <div className="p-4 bg-white shadow-md rounded-md">
       <div className="flex items-center gap-2 mb-4">
-        <SearchButton placeholder="Tìm kiếm mã lỗi, mã thiết bị..." onSearch={(q) => setSearchQuery(q)} />
+        <SearchButton placeholder="Tìm kiếm mã ca, tên ca..." onSearch={(q) => handleSearch(q)} />
         <div className="flex items-center gap-2 ml-auto">
-          <div className="flex-grow"> <AddButton onClick={() => setIsModalOpen(true)} /></div>
-          {/* Nút tải mẫu Excel */}
-          <div className="flex-grow">
-            <FormSample href={sampleTemplate} label="Tải Form Mẫu" />
-          </div>
-          {/* Nút Import Excel */}
-          <div className="flex-grow">
-            <ImportButton onClick={handleImportClick} />
-            {/* Thẻ input ẩn để người dùng chọn file */}
-            <input
-              type="file"
-              ref={fileInputRef}
-              style={{ display: 'none' }}
-              accept=".xlsx, .xls"
-              onChange={handleFileUpload}
-            />
-          </div>
-          <ExportExcelButton data={workShifts} fileName="Báo cáo lỗi.xlsx" />
+          <AddButton onClick={() => openModal()} />
+          <FormSample href={sampleTemplate} label="Tải Form Mẫu" />
+          <ImportButton onClick={handleImportClick} />
+          <input
+            type="file"
+            ref={fileInputRef}
+            style={{ display: 'none' }}
+            accept=".xlsx, .xls"
+            onChange={handleFileUpload}
+          />
+          <ExportExcelButton data={workShifts} fileName="CaLamViec.xlsx" />
         </div>
       </div>
 
@@ -161,18 +182,18 @@ const WorkShiftCatalog = () => {
           </tr>
         </thead>
         <tbody>
-          {workShifts.map((shift, index) => (
-            <tr key={shift.id} className="hover:bg-gray-50">
+          {filteredShifts.map((shift, index) => (
+            <tr key={shift._id} className="hover:bg-gray-50">
               <td className="border px-4 py-2 text-sm text-center">{index + 1}</td>
               <td className="border px-4 py-2 text-sm text-center">{shift.shiftCode}</td>
               <td className="border px-4 py-2 text-sm text-center">{shift.shiftName}</td>
               <td className="border px-4 py-2 text-sm text-center">{shift.startTime}</td>
               <td className="border px-4 py-2 text-sm text-center">{shift.endTime}</td>
               <td className="border px-4 py-2 text-sm text-center">
-                {shift.breakTime.length > 0
+                {shift.breakTime && shift.breakTime.length > 0
                   ? shift.breakTime.map((bt, i) => (
                       <div key={i}>
-                        {bt.startTime} - {bt.endTime}
+                        {bt.startTime || 'N/A'} - {bt.endTime || 'N/A'}
                       </div>
                     ))
                   : 'N/A'}
@@ -186,7 +207,7 @@ const WorkShiftCatalog = () => {
                 </button>
                 <button
                   className="text-red-500 hover:text-red-700"
-                  onClick={() => handleDelete(shift.id)}
+                  onClick={() => handleDelete(shift._id)}
                 >
                   <FaTrash />
                 </button>
@@ -196,13 +217,14 @@ const WorkShiftCatalog = () => {
         </tbody>
       </table>
 
+      {/* Modal for add/edit work shift */}
       <DynamicModal
         open={isModalOpen}
         onCancel={() => {
           setIsModalOpen(false);
           form.resetFields();
         }}
-        onOk={handleSave} // Đảm bảo rằng hàm handleSave được truyền vào đây
+        onOk={() => form.submit()}
         form={form}
         title={selectedShift ? 'Chỉnh sửa Ca Làm Việc' : 'Thêm mới Ca Làm Việc'}
         fields={[
@@ -210,35 +232,34 @@ const WorkShiftCatalog = () => {
             name: 'shiftCode',
             label: 'Mã Ca Làm Việc',
             type: 'input',
-            rules: [{ required: true, message: 'Mã Ca Làm Việc là bắt buộc' }]
+            rules: [{ required: true, message: 'Mã Ca Làm Việc là bắt buộc' }],
           },
           {
             name: 'shiftName',
             label: 'Tên Ca Làm Việc',
             type: 'input',
-            rules: [{ required: true, message: 'Tên Ca Làm Việc là bắt buộc' }]
+            rules: [{ required: true, message: 'Tên Ca Làm Việc là bắt buộc' }],
           },
           {
             name: 'startTime',
             label: 'Thời gian vào ca',
             type: 'timePicker',
-            rules: [{ required: true, message: 'Thời Gian Bắt Đầu là bắt buộc' }]
+            rules: [{ required: true, message: 'Thời Gian Bắt Đầu là bắt buộc' }],
           },
           {
             name: 'endTime',
             label: 'Thời gian tan ca',
             type: 'timePicker',
-            rules: [{ required: true, message: 'Thời Gian Kết Thúc là bắt buộc' }]
+            rules: [{ required: true, message: 'Thời Gian Kết Thúc là bắt buộc' }],
           },
           {
             name: 'breakTime',
             label: 'Thời gian nghỉ ngơi',
             type: 'rangePicker',
-            rules: [{ required: true, message: 'Thời gian nghỉ ngơi là bắt buộc' }]
-          }
+            rules: [{ required: true, message: 'Thời gian nghỉ ngơi là bắt buộc' }],
+          },
         ]}
       />
-
       <ToastContainer />
     </div>
   );

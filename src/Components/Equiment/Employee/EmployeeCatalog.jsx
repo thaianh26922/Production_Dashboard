@@ -2,76 +2,104 @@ import React, { useState, useEffect } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import DynamicFormModal from '../../Modal/DynamicFormModal';
+import { Modal, Form, Input, Button } from 'antd';  // Sử dụng Modal và Form từ Ant Design
 import SearchButton from '../../Button/SearchButton';
 import AddButton from '../../Button/AddButton';
 import ExportExcelButton from '../../Button/ExportExcelButton';
-import * as yup from 'yup';
 import FormSample from '../../Button/FormSample';
 import ImportButton from '../../Button/ImportButton';
+import axios from 'axios'; // Thêm axios để gọi API
 
 const EmployeeCatalog = () => {
-  const [employees, setEmployees] = useState(() => {
-    const savedEmployees = localStorage.getItem('employees');
-    return savedEmployees ? JSON.parse(savedEmployees) : [];
-  });
-
+  const [employees, setEmployees] = useState([]);
+  const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [form] = Form.useForm(); // Ant Design Form
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Cập nhật LocalStorage mỗi khi `employees` thay đổi
-  useEffect(() => {
-    localStorage.setItem('employees', JSON.stringify(employees));
-  }, [employees]);
-
-  // Hàm lưu nhân viên
-  const handleSave = (data) => {
-    if (selectedEmployee) {
-      const updatedEmployees = employees.map((employee) =>
-        employee.id === selectedEmployee.id ? { ...selectedEmployee, ...data } : employee
-      );
-      setEmployees(updatedEmployees);
-      toast.success('Cập nhật nhân viên thành công!');
-    } else {
-      const newEmployee = { ...data, id: employees.length + 1 };
-      setEmployees([...employees, newEmployee]);
-      toast.success('Thêm nhân viên thành công!');
+  // Fetch employees from API on component mount
+  const fetchEmployees = async () => {
+    try {
+      const response = await axios.get('http://192.168.1.13:5000/api/employees'); // API GET để lấy danh sách nhân viên
+      setEmployees(response.data);
+      setFilteredEmployees(response.data);
+    } catch (error) {
+      toast.error('Lỗi khi tải danh sách nhân viên');
     }
-    setIsModalOpen(false);
-    setSelectedEmployee(null);
   };
 
-  // Hàm xóa nhân viên
-  const handleDelete = (id) => {
-    const updatedEmployees = employees.filter((employee) => employee.id !== id);
-    setEmployees(updatedEmployees);
-    toast.success('Xóa nhân viên thành công!');
-  };
+  useEffect(() => {
+    fetchEmployees(); // Gọi API khi component được mount
+  }, []);
 
-  // Hàm tìm kiếm nhân viên
+  // Handle search input change
   const handleSearch = (query) => {
     setSearchQuery(query);
+    const filtered = employees.filter((employee) =>
+      employee.employeeCode.toLowerCase().includes(query.toLowerCase()) ||
+      employee.employeeName.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredEmployees(filtered);
   };
 
-  const filteredEmployees = employees.filter(
-    (employee) =>
-      employee.employeeCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      employee.employeeName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Handle saving new or edited employee
+  const handleSave = async (values) => {
+    try {
+      if (selectedEmployee) {
+        // Update employee
+        await axios.put(`http://192.168.1.13:5000/api/employees/${selectedEmployee._id}`, values);
+        toast.success('Cập nhật nhân viên thành công!');
+      } else {
+        // Create new employee
+        await axios.post('http://192.168.1.13:5000/api/employees', values);
+        toast.success('Thêm nhân viên thành công!');
+      }
+
+      fetchEmployees(); // Refresh employee list after save
+      setIsModalOpen(false);
+      setSelectedEmployee(null);
+      form.resetFields(); // Reset form fields after saving
+    } catch (error) {
+      toast.error('Mã nhân viên không được trùng nhau');
+    }
+  };
+
+  // Handle delete employee by ID
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://192.168.1.13:5000/api/employees/${id}`);
+      toast.success('Xóa nhân viên thành công!');
+      fetchEmployees(); // Refresh employee list after delete
+    } catch (error) {
+      toast.error('Lỗi khi xóa nhân viên');
+    }
+  };
+
+  // Open modal to add or edit employee
+  const openModal = (employee = null) => {
+    setIsModalOpen(true);
+    if (employee) {
+      setSelectedEmployee(employee);
+      form.setFieldsValue(employee); // Set values in form for editing
+    } else {
+      setSelectedEmployee(null);
+      form.resetFields(); // Reset form for new employee
+    }
+  };
 
   return (
     <div className="p-4 bg-white shadow-md rounded-md">
       {/* Các nút tìm kiếm, thêm mới và xuất Excel */}
       <div className="flex items-center gap-2 mb-4">
-        <SearchButton placeholder="Tìm kiếm mã nhân viên, tên nhân viên..." onSearch={(q) => setSearchQuery(q)} />
-       
-
+        <SearchButton
+          placeholder="Tìm kiếm mã nhân viên, tên nhân viên..."
+          onSearch={(q) => handleSearch(q)}
+        />
         <div className="flex-grow"></div>
-        <AddButton onClick={() => setIsModalOpen(true)} />
-        <FormSample onClick={() => setIsModalOpen(false)} />
-        <ImportButton onClick={() => setIsModalOpen(false)} />
-
+        <AddButton onClick={() => openModal()} />
+        <FormSample />
+        <ImportButton />
         <ExportExcelButton data={filteredEmployees} fileName="DanhSachNhanVien.xlsx" />
       </div>
 
@@ -88,7 +116,7 @@ const EmployeeCatalog = () => {
         </thead>
         <tbody>
           {filteredEmployees.map((employee, index) => (
-            <tr key={employee.id} className="hover:bg-gray-50">
+            <tr key={employee._id} className="hover:bg-gray-50">
               <td className="border px-4 py-2 text-sm text-center">{index + 1}</td>
               <td className="border px-4 py-2 text-sm text-center">{employee.employeeCode}</td>
               <td className="border px-4 py-2 text-sm text-center">{employee.employeeName}</td>
@@ -96,16 +124,13 @@ const EmployeeCatalog = () => {
               <td className="py-2 px-2 text-center border">
                 <button
                   className="mr-2 text-blue-500 hover:text-blue-700"
-                  onClick={() => {
-                    setSelectedEmployee(employee);
-                    setIsModalOpen(true);
-                  }}
+                  onClick={() => openModal(employee)} // Open modal for editing
                 >
                   <FaEdit />
                 </button>
                 <button
                   className="text-red-500 hover:text-red-700"
-                  onClick={() => handleDelete(employee.id)}
+                  onClick={() => handleDelete(employee._id)}
                 >
                   <FaTrash />
                 </button>
@@ -116,21 +141,42 @@ const EmployeeCatalog = () => {
       </table>
 
       {/* Modal nhập dữ liệu nhân viên */}
-      <DynamicFormModal
-        isOpen={isModalOpen}
-        onClose={() => {
+      <Modal
+        title={selectedEmployee ? 'Chỉnh sửa Nhân Viên' : 'Thêm mới Nhân Viên'}
+        open={isModalOpen}
+        onCancel={() => {
           setIsModalOpen(false);
           setSelectedEmployee(null);
+          form.resetFields();
         }}
-        onSave={handleSave}
-        formFields={[
-          { name: 'employeeCode', label: 'Mã Nhân Viên', type: 'text', validation: yup.string().required('Mã Nhân Viên là bắt buộc') },
-          { name: 'employeeName', label: 'Tên Nhân Viên', type: 'text', validation: yup.string().required('Tên Nhân Viên là bắt buộc') },
-          { name: 'team', label: 'Tổ', type: 'text', validation: yup.string().required('Tổ là bắt buộc') },
-        ]}
-        contentLabel={selectedEmployee ? 'Chỉnh sửa Nhân Viên' : 'Thêm mới Nhân Viên'}
-        initialData={selectedEmployee}
-      />
+        onOk={() => form.submit()}
+      >
+        <Form form={form} layout="vertical" onFinish={handleSave}>
+          <Form.Item
+            label="Mã Nhân Viên"
+            name="employeeCode"
+            rules={[{ required: true, message: 'Mã Nhân Viên là bắt buộc' }]}
+          >
+            <Input placeholder="Nhập mã nhân viên" />
+          </Form.Item>
+
+          <Form.Item
+            label="Tên Nhân Viên"
+            name="employeeName"
+            rules={[{ required: true, message: 'Tên Nhân Viên là bắt buộc' }]}
+          >
+            <Input placeholder="Nhập tên nhân viên" />
+          </Form.Item>
+
+          <Form.Item
+            label="Tổ"
+            name="team"
+            rules={[{ required: true, message: 'Tổ là bắt buộc' }]}
+          >
+            <Input placeholder="Nhập tổ của nhân viên" />
+          </Form.Item>
+        </Form>
+      </Modal>
 
       <ToastContainer />
     </div>

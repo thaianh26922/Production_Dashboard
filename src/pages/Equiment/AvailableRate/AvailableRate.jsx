@@ -81,7 +81,7 @@ function AvailableRate() {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <Breadcrumb />
+        <div></div>
         <div className="flex items-center space-x-2">
           {/* Lựa chọn loại máy CNC hoặc PHAY */}
           <Select

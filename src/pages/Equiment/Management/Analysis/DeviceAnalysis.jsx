@@ -115,8 +115,8 @@ const DeviceAnalysis = () => {
       
       
       {/* Lựa chọn loại máy và chọn máy cụ thể */}
-      <div className="flex justify-between items-center mb-4">
-        <Breadcrumb />
+      <div className="flex justify-end items-center mb-4">
+        
           <div className="flex items-center space-x-4">
             {/* Lựa chọn loại máy CNC hoặc PHAY */}
             <Select

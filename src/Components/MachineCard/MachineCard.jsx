@@ -5,19 +5,19 @@ import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 
 // Function to get the header color based on machine status
 const getHeaderColor = (status) => {
-  if (status === 'Chạy') return '#38F338';  // Green for Active
-  if (status === 'Chờ') return '#F5F542';   // Yellow for Idle
-  if (status === 'Cài Đặt') return '#F5F542';  // Yellow for Set up
-  if (status === 'Lỗi') return 'red';       // Red for Error
+  if (status === 'Chạy') return '#60ec60';  // Green for Active
+  if (status === 'Chờ') return '#f8f867';   // Yellow for Idle
+  if (status === 'Cài Đặt') return '#f8f867';  // Yellow for Set up
+  if (status === 'Lỗi') return '#ff3333';       // Red for Error
   if (status === 'Off') return '#f7f5f5';   // Grey for Off
   return 'bg-gray-500';                     // Gray for other statuses
 };
 
 // Function to get the signal light colors based on machine status
 const getSignalLightColors = (status) => {
-  if (status === 'Chạy') return { red: 'white', yellow: 'white', green: '#8ff28f' };
-  if (status === 'Chờ' || status === 'Cài Đặt') return { red: 'white', yellow: '#fafa98', green: 'white' };
-  if (status === 'Lỗi') return { red: 'red', yellow: 'white', green: 'white' };
+  if (status === 'Chạy') return { red: 'white', yellow: 'white', green: '#13a113' };
+  if (status === 'Chờ' || status === 'Cài Đặt') return { red: 'white', yellow: '#f4f41e', green: 'white' };
+  if (status === 'Lỗi') return { red: '#e60000', yellow: 'white', green: 'white' };
   if (status === 'Off') return { red: 'white', yellow: 'white', green: 'white' };
   return { red: 'white', yellow: 'white', green: 'white' }; // Default case
 };
@@ -32,8 +32,7 @@ const MachineCard = ({ machine }) => {
 
   // Calculate change compared to yesterday (positive/negative)
   const changePercent = machine.oee - machine.oeeYesterday; // So sánh với ngày hôm qua
-  const changeColor = changePercent >= 0 ? 'text-green-600' : 'text-[#1a1c1a]'; // Xanh nếu tăng, đỏ nếu giảm
-  const changeSymbol = changePercent >= 0 ? '+' : ''; // Thêm dấu "+" nếu là tăng
+  const changeIcon = changePercent >= 0 ? <FaArrowUp className="text-green-700 inline" /> : <FaArrowDown className="text-blue-950 inline" />; // Mũi tên xanh nếu tăng, đỏ nếu giảm
 
   // Thời gian hoạt động và so sánh với ngày hôm qua
   const timeChangePercent = ((machine.totalTimeToday - machine.totalTimeYesterday) / machine.totalTimeYesterday) * 100;
@@ -63,12 +62,12 @@ const MachineCard = ({ machine }) => {
           <div className="w-14 h-40 border border-black rounded-lg mr-2">
             <div style={{ backgroundColor: signalLightColors.red, height: '33.33%' }} className={`rounded-t-lg ${blinkClass} border-l-red-600 border-l-4 rounded-t-lg border-b-2 border-b-red-600`}></div>
             <div style={{ backgroundColor: signalLightColors.yellow, height: '33.33%' }} className="border-[#FCFC00] border-l-4 border-b-2"></div>
-            <div style={{ backgroundColor: signalLightColors.green, height: '33.33%' }} className="border-[#38F338] border-l-4 rounded-b-lg"></div>
+            <div style={{ backgroundColor: signalLightColors.green, height: '33.33%' }} className="border-[#13a113] border-l-4 rounded-b-lg"></div>
           </div>
         </div>
 
         {/* OEE Circular Progress */}
-        <div className="relative " style={{ width: 150, height: 150 }}>
+        <div className="relative ml-2 " style={{ width: 200, height: 200 }}>
           <CircularProgressbar
             value={machine.oee}
             styles={buildStyles({
@@ -80,10 +79,9 @@ const MachineCard = ({ machine }) => {
           />
 
           {/* OEE Value */}
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 flex flex-col items-center justify-center text-center h-full">
-            <span className="text-lg font-bold">{`%A`}</span>
-            <span className="text-lg font-bold">{`${machine.oee}%`}</span>
-            <span className={`text-sm ${changeColor}`}>{changeSymbol}{changePercent}% hôm qua</span>
+          <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 flex flex-col items-center justify-center text-center w-full h-full">
+            <span className="text-4xl font-bold mb-2">{`${machine.oee}%`}</span>
+            <span className=" text-sm text-wrap font-bold">{changeIcon} {Math.abs(changePercent).toFixed(2)}% hôm qua</span>
           </div>
         </div>
       </div>

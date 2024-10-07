@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
-import { Form, Input, Select, Modal } from 'antd';
+import { Form, Input, AutoComplete, Modal } from 'antd';
 import AddButton from '../../../Components/Button/AddButton';
 import ExportExcelButton from '../../../Components/Button/ExportExcelButton';
 import SearchButton from '../../../Components/Button/SearchButton';
@@ -21,17 +21,36 @@ const DeviceManagement = () => {
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [areas, setAreas] = useState([]); // To store area names from Area model
   const [form] = Form.useForm();
+  const [sortOrderDate, setSortOrderDate] = useState('asc'); // 'asc' cho tăng dần, 'desc' cho giảm dần
+
+  const sortDevicesByDate = () => {
+    const sortedDevices = [...filteredDevices].sort((a, b) => {
+      if (sortOrderDate === 'asc') {
+        return new Date(a.purchaseDate) - new Date(b.purchaseDate);
+      } else {
+        return new Date(b.purchaseDate) - new Date(a.purchaseDate);
+      }
+    });
+    setFilteredDevices(sortedDevices);
+    setSortOrderDate(sortOrderDate === 'asc' ? 'desc' : 'asc'); // Đảo hướng sắp xếp
+  };
+  
+  // Hàm sắp xếp thiết bị theo thứ tự bảng chữ cái tăng dần
+  const sortDevicesAlphabetically = (devices) => {
+    return devices.sort((a, b) => a.deviceCode.localeCompare(b.deviceCode));
+  };
 
   // Fetch devices and areas from API
   const fetchDevicesAndAreas = async () => {
     try {
       // Fetch devices
-      const deviceResponse = await axios.get('http://localhost:5000/api/device');
-      setDevices(deviceResponse.data);
-      setFilteredDevices(deviceResponse.data);
+      const deviceResponse = await axios.get('http://192.168.1.13:5000/api/device');
+      const sortedDevices = sortDevicesAlphabetically(deviceResponse.data);
+      setDevices(sortedDevices);
+      setFilteredDevices(sortedDevices);
 
       // Fetch areas for dropdown
-      const areaResponse = await axios.get('http://localhost:5000/api/areas');
+      const areaResponse = await axios.get('http://192.168.1.13:5000/api/areas');
       setAreas(areaResponse.data); // Store areas from API
     } catch (error) {
       toast.error('Failed to fetch devices or areas');
@@ -52,39 +71,54 @@ const DeviceManagement = () => {
     setFilteredDevices(filtered);
   };
 
+  // Kiểm tra trùng lặp mã thiết bị hoặc tên thiết bị
+  const checkDuplicateDevice = (deviceCode, deviceName) => {
+    return devices.some((device) => device.deviceCode === deviceCode || device.deviceName === deviceName);
+  };
+
   // Save new or updated device
   const handleSave = async (values) => {
+    const { deviceCode, deviceName } = values;
+
+    // Kiểm tra trùng lặp
+    if (checkDuplicateDevice(deviceCode, deviceName)) {
+      toast.error('Mã thiết bị hoặc tên thiết bị đã tồn tại. Vui lòng nhập lại.');
+      return; // Dừng lại không gửi yêu cầu lên API
+    }
+
     const deviceData = {
       ...values,
-      purchaseDate: values.purchaseDate, // No need to format since it's already in YYYY-MM-DD
+      areaName: values.areaName ? values.areaName.trim() : '', // Đảm bảo 'areaName' không undefined
+      purchaseDate: values.purchaseDate,
       _id: selectedDevice ? selectedDevice._id : null,
     };
-  
+
     try {
       if (selectedDevice) {
         // Update device
-        await axios.put(`http://localhost:5000/api/device/${selectedDevice._id}`, deviceData);
+        await axios.put(`http://192.168.1.13:5000/api/device/${selectedDevice._id}`, deviceData);
         toast.success('Cập nhật thiết bị thành công!');
       } else {
         // Create new device
-        await axios.post('http://localhost:5000/api/device', deviceData);
+        await axios.post('http://192.168.1.13:5000/api/device', deviceData);
         toast.success('Thêm thiết bị thành công!');
       }
-  
-      fetchDevicesAndAreas(); // Refresh device list after save
+
+      // Fetch lại danh sách và sắp xếp
+      fetchDevicesAndAreas();
       setIsModalOpen(false);
       setSelectedDevice(null);
       form.resetFields(); // Reset form fields after saving
     } catch (error) {
+      console.error(error.response); // Xem chi tiết lỗi từ API
       toast.error('Failed to save device');
     }
   };
-  
 
   // Delete device by ID
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/device/${id}`);
+      await axios.delete(`http://192.168.1.13:5000/api/device/${id}`);
       toast.success('Xóa thiết bị thành công!');
       fetchDevicesAndAreas(); // Refresh device list after delete
     } catch (error) {
@@ -106,7 +140,6 @@ const DeviceManagement = () => {
     }
     setIsModalOpen(true);
   };
-  
 
   return (
     <div className="p-4 bg-white shadow-md rounded-md">
@@ -132,7 +165,13 @@ const DeviceManagement = () => {
             <th className="border px-4 py-2 text-xs">Khu Vực</th>
             <th className="border px-4 py-2 text-xs">Model</th>
             <th className="border px-4 py-2 text-xs">Thông Số Kỹ Thuật</th>
-            <th className="border px-4 py-2 text-xs">Ngày Mua</th>
+            <th className="border px-4 py-2 text-xs">
+                Ngày Mua
+                <button onClick={sortDevicesByDate} className="ml-2">
+                  {sortOrderDate === 'asc' ? '▼' : '▲'} {/* Biểu tượng sắp xếp */}
+                </button>
+              </th>
+
             <th className="border px-4 py-2 text-xs">Thao Tác</th>
           </tr>
         </thead>
@@ -194,17 +233,23 @@ const DeviceManagement = () => {
           {/* Area Dropdown */}
           <Form.Item
             label="Khu Vực"
-            name="area"
+            name="areaName"
             rules={[{ required: true, message: 'Khu Vực là bắt buộc' }]}
           >
-            <Select>
-              {areas.map((area) => (
-                <Select.Option key={area._id} value={area.areaName}>
-                  {area.areaName}
-                </Select.Option>
-              ))}
-            </Select>
+            <AutoComplete
+              options={areas.map((area) => ({ value: area.areaName }))} // Load các khu vực từ API và chuyển thành gợi ý
+              onChange={(value) => {
+                form.setFieldsValue({ area: value }); // Cập nhật giá trị khu vực khi thay đổi
+              }}
+              placeholder="Nhập khu vực"
+              filterOption={(inputValue, option) =>
+                option.value.toLowerCase().includes(inputValue.toLowerCase()) // Lọc gợi ý theo input
+              }
+            >
+              <Input />
+            </AutoComplete>
           </Form.Item>
+
           <Form.Item
             label="Model"
             name="model"
@@ -237,4 +282,3 @@ const DeviceManagement = () => {
 };
 
 export default DeviceManagement;
-

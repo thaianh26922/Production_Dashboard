@@ -14,7 +14,7 @@ const DynamicModal = ({ open, onCancel, onOk, form, title, fields }) => {
         form
           .validateFields()
           .then((values) => {
-            onOk(values);
+            onOk(values); // Pass form values after validation
           })
           .catch((info) => {
             console.log('Validate Failed:', info);
@@ -35,6 +35,7 @@ const DynamicModal = ({ open, onCancel, onOk, form, title, fields }) => {
               </Form.Item>
             );
           }
+
           if (field.type === 'timePicker') {
             return (
               <Form.Item
@@ -47,6 +48,7 @@ const DynamicModal = ({ open, onCancel, onOk, form, title, fields }) => {
               </Form.Item>
             );
           }
+
           if (field.type === 'rangePicker') {
             return (
               <Form.List key={field.name} name={field.name}>
@@ -62,7 +64,7 @@ const DynamicModal = ({ open, onCancel, onOk, form, title, fields }) => {
                         >
                           <RangePicker format="HH:mm" />
                         </Form.Item>
-                        <FaMinus onClick={() => remove(name)} />
+                        <Button type="link" icon={<FaMinus />} onClick={() => remove(name)} />
                       </Space>
                     ))}
                     <Form.Item>
@@ -75,6 +77,7 @@ const DynamicModal = ({ open, onCancel, onOk, form, title, fields }) => {
               </Form.List>
             );
           }
+
           return null;
         })}
       </Form>

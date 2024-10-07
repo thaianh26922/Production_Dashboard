@@ -79,8 +79,8 @@ function DeviceReport() {
 
   return (
     <>
-      <div className="flex justify-between items-center mb-4">
-        <Breadcrumb />
+      <div className="flex justify-end items-center mb-4">
+        
         <div className="flex items-center space-x-4">
           <Select
             mode="multiple"  // Allow multiple selections

@@ -1,7 +1,8 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Select, DatePicker, Button } from 'antd';
 import MachineWorkScheduleCard from '../../../Components/Equiment/MachineSchedule/MachineWorkScheduleCard';
 import CustomUpdateModal from '../../../Components/Modal/CustomUpdateModal'; // Import custom modal component
+import CustomCalendar from '../../../Components/Calendar/CustomCalendar'; // Import CustomCalendar component
 
 const { Option } = Select;
 
@@ -12,7 +13,7 @@ const MachineWorkScheduleList = () => {
   const [isSelecting, setIsSelecting] = useState(false); // Track if the user is selecting devices
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // Modal visibility for update confirmation
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false); // Custom modal visibility for the final confirmation
- 
+  const [isCalendarVisible, setIsCalendarVisible] = useState(false); // Track if calendar is visible
 
   // Handle saving the selected dates
   const handleSaveDates = () => {
@@ -35,29 +36,25 @@ const MachineWorkScheduleList = () => {
   };
 
   // Handle machine click
-  // Handle machine click
- // Handle machine click
-const handleMachineClick = (machine) => {
-  if (!isSelecting) {
-    setIsSelecting(true); // Tự động bật chế độ chọn nếu chưa bật
-  }
+  const handleMachineClick = (machine) => {
+    if (!isSelecting) {
+      setIsSelecting(true); // Tự động bật chế độ chọn nếu chưa bật
+    }
 
-  // Kiểm tra xem máy đã được chọn chưa
-  if (selectedMachines.some((m) => m.id === machine.id)) {
-    // Nếu đã được chọn, bỏ chọn máy
-    setSelectedMachines(prevMachines => prevMachines.filter((m) => m.id !== machine.id));
-  } else {
-    // Nếu chưa được chọn, thêm máy vào danh sách
-    setSelectedMachines(prevMachines => [...prevMachines, machine]);
-  }
-};
+    // Kiểm tra xem máy đã được chọn chưa
+    if (selectedMachines.some((m) => m.id === machine.id)) {
+      // Nếu đã được chọn, bỏ chọn máy
+      setSelectedMachines(prevMachines => prevMachines.filter((m) => m.id !== machine.id));
+    } else {
+      // Nếu chưa được chọn, thêm máy vào danh sách
+      setSelectedMachines(prevMachines => [...prevMachines, machine]);
+    }
+  };
 
-// Sử dụng useEffect để theo dõi thay đổi của selectedMachines
-useEffect(() => {
-  console.log('Selected Machines Updated:', selectedMachines); // Log mỗi khi selectedMachines thay đổi
-}, [selectedMachines]);
-
-
+  // Sử dụng useEffect để theo dõi thay đổi của selectedMachines
+  useEffect(() => {
+    console.log('Selected Machines Updated:', selectedMachines); // Log mỗi khi selectedMachines thay đổi
+  }, [selectedMachines]);
 
   // Handle date selection from DatePicker
   const handleDateChange = (date, dateString) => {
@@ -128,10 +125,18 @@ useEffect(() => {
     setSelectedMachines([]); // Clear selected machines on cancel
   };
 
+  // Toggle calendar visibility
+  const toggleCalendar = () => {
+    setIsCalendarVisible(!isCalendarVisible); // Toggle calendar visibility
+  };
+
   return (
     <>
       {/* Area Selection */}
       <div className="flex justify-between items-center mb-4">
+       <Button className="ml-2 bg-gray-400 text-white " onClick={toggleCalendar}>
+            Lịch Sản xuất
+          </Button>
         <div className="flex items-center space-x-1">
           {/* Select Dropdown for Area */}
           <Select
@@ -160,6 +165,9 @@ useEffect(() => {
               Cập nhật nhiệm vụ sản xuất
             </Button>
           )}
+
+          {/* Button to toggle CustomCalendar */}
+          
         </div>
       </div>
 
@@ -167,11 +175,11 @@ useEffect(() => {
       <div className="grid grid-cols-4 gap-2">
         {generateMachines().map((machine) => (
           <div
-          key={machine.id}
-          onClick={() => handleMachineClick(machine)} // Xử lý khi click vào máy
-          className={`relative cursor-pointer transition duration-300 ease-in-out h-full
-            ${isSelecting && selectedMachines.some((m) => m.id === machine.id) ? 'border-2 border-blue-700 round-lg bg-gray-600 ' : ''}`}
-        >
+            key={machine.id}
+            onClick={() => handleMachineClick(machine)} // Xử lý khi click vào máy
+            className={`relative cursor-pointer transition duration-300 ease-in-out h-full
+              ${isSelecting && selectedMachines.some((m) => m.id === machine.id) ? 'border-2 border-blue-700 round-lg bg-gray-600 ' : ''}`}
+          >
             <MachineWorkScheduleCard
               machine={machine}
               shiftOptions={[
@@ -191,7 +199,7 @@ useEffect(() => {
               <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1">
                 ✓
               </div>
-)}
+            )}
           </div>
         ))}
       </div>
@@ -215,10 +223,16 @@ useEffect(() => {
         onCancel={handleCancelDates} // Clear dates and close modal
         onSave={handleSaveDates} // Save the selected dates
         selectedDates={selectedDates} // Pass selected dates to modal
-        setSelectedDates={setSelectedDates} 
-        selectedMachines={selectedMachines}// Allow modal to update dates if necessary
-        
+        setSelectedDates={setSelectedDates}
+        selectedMachines={selectedMachines} // Allow modal to update dates if necessary
       />
+
+      {/* Custom Calendar Component */}
+      {isCalendarVisible && (
+        <CustomCalendar 
+          onClose={toggleCalendar} // Pass function to close the calendar
+        />
+      )}
     </>
   );
 };

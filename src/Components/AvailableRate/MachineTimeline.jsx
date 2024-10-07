@@ -121,7 +121,7 @@ const MachineTimeline = () => {
     // Vẽ phần chú thích (legend) với tổng thời gian
     const legendData = [
       { status: 'Chạy', hours: totalRunning, color: '#4aea4a' },
-      { status: 'Dừng', hours: totalStopped, color: '#ff6384' },
+      { status: 'Dừng', hours: totalStopped, color: '#f10401' },
       { status: 'Chờ', hours: totalWaiting, color: '#ffcc00' }, // Thêm chú thích cho "Chờ"
     ];
 
@@ -131,11 +131,11 @@ const MachineTimeline = () => {
       .enter()
       .append('g')
       .attr('class', 'legend')
-      .attr('transform', (d, i) => `translate(${margin.left + i * 150},${height - margin.bottom + 25})`);
+      .attr('transform', (d, i) => `translate(${margin.left + i * 120},${height - margin.bottom + 25})`);
 
     legend
       .append('rect')
-      .attr('x', 0)
+      .attr('x', 120)
       .attr('y', -10)
       .attr('width', 20)
       .attr('height', 5)
@@ -143,7 +143,7 @@ const MachineTimeline = () => {
 
     legend
       .append('text')
-      .attr('x', 25)
+      .attr('x', 145)
       .attr('y', -5)
       .text(d => `${d.status}: ${d.hours} giờ`)
       .style('font-size', '10px')
