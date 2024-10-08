@@ -51,27 +51,28 @@ const DynamicModal = ({ open, onCancel, onOk, form, title, fields }) => {
 
           if (field.type === 'rangePicker') {
             return (
-              <Form.List key={field.name} name={field.name}>
+              <Form.List name="breakTime">
                 {(fields, { add, remove }) => (
                   <>
-                    {fields.map(({ key, name, fieldKey, ...restField }) => (
+                    <Form.Item>
+                      <Button type="dashed" onClick={() => add()} block icon={<FaPlus />}>
+                        Thêm Thời Gian Nghỉ Ngơi
+                      </Button>
+                    </Form.Item>
+                    {fields.map(({ key, name, ...restField }) => (
                       <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
                         <Form.Item
                           {...restField}
                           name={[name, 'range']}
-                          fieldKey={[fieldKey, 'range']}
-                          rules={field.rules}
+                          rules={[
+                            { required: true, message: 'Thời gian nghỉ là bắt buộc' }
+                          ]}
                         >
                           <RangePicker format="HH:mm" />
                         </Form.Item>
                         <Button type="link" icon={<FaMinus />} onClick={() => remove(name)} />
                       </Space>
                     ))}
-                    <Form.Item>
-                      <Button type="dashed" onClick={() => add()} block icon={<FaPlus />}>
-                        Thêm Thời Gian Nghỉ Ngơi
-                      </Button>
-                    </Form.Item>
                   </>
                 )}
               </Form.List>

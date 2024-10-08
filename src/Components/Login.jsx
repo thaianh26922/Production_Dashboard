@@ -1,25 +1,25 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaUserAlt, FaLock, FaEye, FaEyeSlash, FaUsers, FaBook } from 'react-icons/fa'; 
+import { FaUserAlt, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa'; // Thêm các icon show/hide password
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
-
-
+import { jwtDecode } from 'jwt-decode'; // Import đúng jwtDecode
 import { useAuth } from '../context/AuthContext'; // Đảm bảo đường dẫn này chính xác
 
 function Login() {
   const navigate = useNavigate();
   const { setUserRole } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [showPassword, setShowPassword] = useState(false); // Trạng thái để hiển thị/ẩn mật khẩu
 
   const handleLogin = async (event) => {
     event.preventDefault();
+    setIsLoading(true); // Bắt đầu loading
 
     try {
-      const response = await axios.post('https://back-end-production.onrender.com/api/login', {
+      const response = await axios.post('http://192.168.1.13:5000/api/login', {
         username,
         password,
       });
@@ -28,15 +28,19 @@ function Login() {
         const { token } = response.data;
         localStorage.setItem('token', token);
 
-        const decodedToken = jwtDecode(token);
-        console.log('Decoded token:', decodedToken);
-        const role = decodedToken.user.role;
-        console.log('Extracted role:', role);
+        const decodedToken = jwtDecode(token); // Giải mã token
+        const role = decodedToken.user.role; // Lấy vai trò từ token
         localStorage.setItem('role', role);  
         setUserRole(role);
 
         toast.success('Đăng nhập thành công!');
-        navigate('/dashboard');
+
+        // Kiểm tra vai trò người dùng và điều hướng phù hợp
+        if (role === 'CNVH') {
+          navigate('/dashboard/mobile'); // Điều hướng tới dashboard mobile cho CNVH
+        } else {
+          navigate('/dashboard'); // Điều hướng tới dashboard chính cho các vai trò khác
+        }
       }
     } catch (error) {
       console.error('Login Error:', error); 
@@ -49,11 +53,9 @@ function Login() {
         draggable: true,
         progress: undefined,
       });
+    } finally {
+      setIsLoading(false); // Kết thúc loading dù thành công hay thất bại
     }
-  };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
   };
 
   return (
@@ -79,27 +81,38 @@ function Login() {
             <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"/>
             <input
               id="password"
-              type={showPassword ? "text" : "password"}
+              type={showPassword ? "text" : "password"} // Chuyển đổi giữa hiển thị và ẩn mật khẩu
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               className="w-full py-2 pl-10 pr-10 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500"
               placeholder="Mật khẩu"
             />
-            <button
-              type="button"
-              onClick={togglePasswordVisibility}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            {/* Biểu tượng con mắt để bật/tắt hiển thị mật khẩu */}
+            <span
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+              onClick={() => setShowPassword(!showPassword)}
             >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </button>
+              {showPassword ? <FaEyeSlash /> : <FaEye />} {/* Hiển thị FaEye khi mật khẩu đang ẩn và FaEyeSlash khi mật khẩu đang hiển thị */}
+            </span>
           </div>
 
           <button 
             type="submit" 
-            className="w-full py-2 text-white bg-blue-600 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            disabled={isLoading} // Khóa nút khi đang xử lý đăng nhập
+            className={`w-full py-2 text-white bg-blue-600 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            Đăng nhập
+            {isLoading ? (
+              <span className="flex items-center justify-center">
+                <svg className="animate-spin h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 0116 0"></path>
+                </svg>
+                Đang đăng nhập...
+              </span>
+            ) : (
+              'Đăng nhập'
+            )}
           </button>
 
           <div className="flex items-center justify-between">
@@ -110,8 +123,6 @@ function Login() {
             <a href="#" className="text-sm text-blue-600 hover:underline">Quên mật khẩu?</a>
           </div>
         </form>
-
-        
       </div>
     </div>
   );

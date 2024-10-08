@@ -1,95 +1,211 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import MainLayout from '../layouts/MainLayout';
-import Dashboard from '../pages/Dasboard/Dashboard';
-import ProductionDashboard from '../pages/Production/ProductionDashboard';
-import ProductionPlanCatalog from '../pages/Production/ProductionPlanCatalog';
-import EquipmentDashboard from '../pages/Equiment/EquimentDashboard';
-import ProductionAnalysisPage from '../pages/Production/ProductionAnalysisPage';
-import QualityDashboard from '../pages/Quality/QualityDashboard';
-import EquimentReports from '../pages/Equiment/EquimentReports';
-import QualityOverView from '../pages/Quality/QualityOverView';
-import MaintenancePlanCatalog from '../pages/Equiment/MaintenancePlanCatalog';
-import InventoryCatalog from '../pages/Inventory/InventoryCatalog';
-import InventoryForm from '../pages/Inventory/InventoryForm';
-import InventoryTable from '../pages/Inventory/InventoryTable';
-import UserManagement from '../pages/Admin/UserManagement';
-import EquipmentAnalysis from '../pages/Equiment/EquipmentAnalysis';
-import MachineReport from '../pages/Equiment/MachineReport'
-import Profile from '../pages/Profile/Profile'
-import Messenger from '../pages/Message/Messenger ';
-import FAQAccordion from '../pages/FAQ/FAQAccordion'
-import Dashboard1 from '../pages/Dasboard/Dashboard1';
-import DeviceManagement from '../pages/Equiment/Management/DeviceManagement';
-import MachineWorkScheduleList from '../pages/Equiment/Management/MachineWorkScheduleList';
-import DeviceAnalysis from '../pages/Equiment/Management/Analysis/DeviceAnalysis';
-import ErrorReportCatalog from '../pages/ErrorReportCatalog/ErrorReportCatalog';
+import MainLayout from '../layouts/MainLayout';  // Layout cho các role khác
+import MainLayout2 from '../layouts/MainLayout2'; // Layout dành riêng cho CNVH
+import Dashboard1 from '../pages/Dasboard/Dashboard1'; // Desktop view
+import Dashboard2 from '../pages/Dasboard/Dashboard2'; // Mobile view dành cho CNVH
+import Login from '../Components/Login'; // Trang Login
+import UserManagement from '../pages/Admin/UserManagement'; // Admin page
 import DeviceReport from '../pages/Equiment/Report/DeviceReport';
-import WorkShiftCatalog from '../Components/Shifr/WorkShiftCatalog';
-import EmployeeCatalog from '../Components/Equiment/Employee/EmployeeCatalog';
-import AreasManagement from '../pages/Equiment/Management/AreasManagement';
-import AvailableRate from '../pages/Equiment/AvailableRate/AvailableRate';
-import { DateProvider } from '../context/DateContext';
+import AreasManagement from '../pages/Equiment/Management/AreasManagement'; // Import Areas Management page
+import MachineWorkScheduleList from '../pages/Equiment/Management/MachineWorkScheduleList'; // Import Machine Work Schedule
+import ErrorReportCatalog from '../pages/ErrorReportCatalog/ErrorReportCatalog'; // Import Error Report
+import WorkShiftCatalog from '../Components/Shifr/WorkShiftCatalog'; // Import Work Shift Catalog
+import EmployeeCatalog from '../Components/Equiment/Employee/EmployeeCatalog'; // Import Employee Catalog
+import AvailableRate from '../pages/Equiment/AvailableRate/AvailableRate'; // Import Available Rate
+import DeviceAnalysis from '../pages/Equiment/Management/Analysis/DeviceAnalysis';
+import DeviceManagement from '../pages/Equiment/Management/DeviceManagement'
+
+
+const ProtectedRoute = ({ children, isAuthenticated, requiredRole, userRole }) => {
+  if (!isAuthenticated) {
+    // Nếu chưa đăng nhập, điều hướng đến trang login
+    return <Navigate to="/login" replace />;
+  }
+
+  // Kiểm tra role yêu cầu và điều hướng nếu không khớp
+  if (requiredRole && requiredRole !== userRole) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+};
 
 const AppRouter = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
+    if (token && role) {
+      setIsAuthenticated(true);
+      setUserRole(role);
+    }
+  }, []);
+
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<MainLayout><Dashboard1 /></MainLayout>} />
-        <Route path="/dashboard" element={<MainLayout><Dashboard1 /></MainLayout>} />
+        {/* Route cho trang đăng nhập */}
+        <Route path="/login" element={<Login />} />
 
-        {/* Production Routes
-        <Route path="/production/overview" element={<MainLayout><ProductionDashboard /></MainLayout>} />
-        <Route path="/production/reports" element={<MainLayout><ProductionAnalysisPage /></MainLayout>} />
-        <Route path="/production/schedule" element={<MainLayout><ProductionPlanCatalog /></MainLayout>} /> */}
-        {/* Equipment Routes */}
-        <Route path="/importdata/areas" element={<MainLayout><AreasManagement /></MainLayout>} />
-        <Route path="/importdata/devivce" element={<MainLayout><DeviceManagement /></MainLayout>} />
+        {/* Route dành riêng cho CNVH */}
         <Route
-          path="/importdata/schedule"
+          path="/dashboard/mobile"
           element={
-            <MainLayout>
-              <DateProvider>
-                <MachineWorkScheduleList />
-              </DateProvider>
-            </MainLayout>
+            <ProtectedRoute isAuthenticated={isAuthenticated} userRole={userRole}>
+              <MainLayout2>
+                <Dashboard2 /> {/* Hiển thị Dashboard2 cho CNVH */}
+              </MainLayout2>
+            </ProtectedRoute>
           }
         />
-        <Route path="/importdata/issue" element={<MainLayout><ErrorReportCatalog /></MainLayout>} />
-        <Route path="/importdata/shift" element={<MainLayout><WorkShiftCatalog /></MainLayout>} />
-        <Route path="/importdata/employee" element={<MainLayout><EmployeeCatalog /></MainLayout>} />
 
-          {/* QCS Routes */}
-        {/* <Route path="/QCS/overview" element={<MainLayout><QualityOverView /></MainLayout>} /> */}
-        <Route path="/QCS/analysis" element={<MainLayout><DeviceAnalysis /></MainLayout>} />
-        <Route path="/QCS/reports" element={<MainLayout><DeviceReport /></MainLayout>} />
-        <Route path="/QCS/issue" element={<MainLayout><ErrorReportCatalog /></MainLayout>} />
+        {/* Route mặc định cho các role khác */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated} userRole={userRole} >
+              {userRole === 'CNVH' ? (
+                <Navigate to="/dashboard/mobile" replace /> // Điều hướng đến mobile nếu user là CNVH
+              ) : (
+                <MainLayout>
+                  <Dashboard1 /> {/* Hiển thị Dashboard1 cho các role khác */}
+                </MainLayout>
+              )}
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/QCS/available" element={<MainLayout><AvailableRate /></MainLayout>} />
+        {/* Admin Routes: Chỉ Admin có quyền truy cập */}
+        <Route
+          path="/admin/userlist"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isAuthenticated}
+              requiredRole="Admin" // Yêu cầu role là Admin
+              userRole={userRole}
+            >
+              <MainLayout>
+                <UserManagement />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Route cho Device Management */}
+        <Route
+          path="/importdata/devivce"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated} userRole={userRole}>
+              <MainLayout>
+                <DeviceManagement />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Route cho Areas Management */}
+        <Route
+          path="/importdata/areas"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated} userRole={userRole}>
+              <MainLayout>
+                <AreasManagement />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
 
 
-        {/* Equipment Routes
-        <Route path="/equipment/machines" element={<MainLayout><EquipmentDashboard /></MainLayout>} />
-        <Route path="/equipment/analysis" element={<MainLayout> <EquipmentAnalysis /> </MainLayout>} />
-        <Route path="/equipment/reports" element={<MainLayout><MachineReport /></MainLayout>} />
-        <Route path="/equipment/maintenance" element={<MainLayout><MaintenancePlanCatalog /></MainLayout>} /> */}
+        {/* Route cho Error Report Catalog */}
+        <Route
+          path="/importdata/issue"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated} userRole={userRole}>
+              <MainLayout>
+                <ErrorReportCatalog />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Quality Routes */}
-        <Route path="/quality/overview" element={<MainLayout><QualityOverView /></MainLayout>} />
-        <Route path="/quality/reports" element={<MainLayout><QualityDashboard /></MainLayout>} />
+        {/* Route cho Work Shift Catalog */}
+        <Route
+          path="/importdata/shift"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated} userRole={userRole}>
+              <MainLayout>
+                <WorkShiftCatalog />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Inventory Routes */}
-        <Route path="/inventory/material" element={<MainLayout><InventoryForm /></MainLayout>} />
-        <Route path="/inventory/reports" element={<MainLayout><InventoryTable /></MainLayout>} />
+        {/* Route cho Employee Catalog */}
+        <Route
+          path="/importdata/employee"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated} userRole={userRole}>
+              <MainLayout>
+                <EmployeeCatalog />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Admin Routes */}
-        <Route path="/admin/userlist" element={<MainLayout><UserManagement /></MainLayout>} />
+        {/* Route cho Available Rate */}
+        <Route
+          path="/QCS/availablerate"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated} userRole={userRole}>
+              <MainLayout>
+                <AvailableRate />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        
+        {/* Route cho Machine Work Schedule */}
+        <Route
+          path="/QCS/schedule"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated} userRole={userRole}>
+              <MainLayout>
+                <MachineWorkScheduleList />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/settings/profile" element={<MainLayout><Profile /></MainLayout>} />
-        <Route path="/support/faq" element={<MainLayout> <FAQAccordion /> </MainLayout>} />
-        <Route path="/message" element={<MainLayout><Messenger /></MainLayout>} />
+      <Route
+          path="/QCS/analysis"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated} userRole={userRole}>
+              <MainLayout>
+                <DeviceAnalysis />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Redirect tất cả các đường dẫn khác */}
+        <Route
+                  path="/QCS/reports"
+                  element={
+                    <ProtectedRoute isAuthenticated={isAuthenticated} userRole={userRole}>
+                      <MainLayout>
+                        <DeviceReport/>
+                      </MainLayout>
+                    </ProtectedRoute>
+                  }
+                />
+
+     
+
+        
+
+        {/* Fallback route */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>

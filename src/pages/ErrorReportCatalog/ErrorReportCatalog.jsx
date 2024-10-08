@@ -53,18 +53,18 @@ const ErrorReportCatalog = () => {
       if (selectedReport) {
         // Cập nhật issue
         await axios.put(`http://192.168.1.13:5000/api/issue/${selectedReport._id}`, values);
-        toast.success('Cập nhật báo cáo lỗi thành công!');
+        toast.success('Cập nhật nguyên nhân lỗi thành công!');
       } else {
         // Thêm mới issue
         await axios.post('http://192.168.1.13:5000/api/issue', values);
-        toast.success('Thêm báo cáo lỗi thành công!');
+        toast.success('Thêm nguyên nhân lỗi thành công!');
       }
       fetchErrorReports();  // Tải lại dữ liệu sau khi thêm/cập nhật
       setIsModalOpen(false);
       setSelectedReport(null);
       form.resetFields(); // Reset form sau khi lưu
     } catch (error) {
-      toast.error('Lỗi khi lưu báo cáo lỗi');
+      toast.error('Lỗi khi lưu nguyên nhân');
     }
   };
 
@@ -153,7 +153,7 @@ const ErrorReportCatalog = () => {
 
       {/* Modal thêm/sửa báo cáo lỗi */}
       <Modal
-        title={selectedReport ? 'Chỉnh sửa Báo cáo Lỗi' : 'Thêm mới Báo cáo Lỗi'}
+        title={selectedReport ? 'Chỉnh sửa Nguyên Nhân' : 'Thêm mới Nguyên Nhân'}
         open={isModalOpen}
         onCancel={() => {
           setIsModalOpen(false);

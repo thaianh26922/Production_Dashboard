@@ -1,23 +1,13 @@
 import React, { useContext } from 'react';
-import Sidebar from '../Components/Sider.bar/Siderbar';  
+
 import Header from '../Components/Header/Header';
 import { AuthContext } from '../context/AuthContext'; 
 
-function MainLayout({ children, className }) {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
-  const { userRole } = useContext(AuthContext); 
-
+function MainLayout2({ children, className }) {
+  
   return (
     <div className={`lg:flex h-screen w-screen ${className}`}>
       {/* Sidebar được ẩn trên mobile bằng cách sử dụng hidden lg:block */}
-      <aside className={`bg-gray-200 lg:flex flex-shrink-0 transition-all duration-300 hidden  ${isSidebarCollapsed ? 'w-20' : 'w-54'}`}>
-        <Sidebar 
-          isCollapsed={isSidebarCollapsed} 
-          setIsCollapsed={setIsSidebarCollapsed} 
-          role={userRole} 
-        />
-      </aside>
-
       <div className="flex flex-col flex-grow">
         <header className="flex-shrink-0 lg:ml-2">
           <Header />
@@ -32,4 +22,4 @@ function MainLayout({ children, className }) {
   );
 }
 
-export default MainLayout;
+export default MainLayout2;

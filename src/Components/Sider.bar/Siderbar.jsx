@@ -73,11 +73,11 @@
     
             {/* Tổng Quan */}
             
-            <Link to="/QCS/available" className="flex items-center text-gray-700 hover:text-black">
+            <Link to="/QCS/availablerate" className="flex items-center text-gray-700 hover:text-black">
               <FiPercent className="mr-4 text-lg text-gray-500" />
               {!isCollapsed && <span className="text-gray-500 hover:text-black">Tỷ lệ máy chạy</span>}
             </Link>
-            <Link to="/importdata/schedule" className="flex items-center text-gray-700 hover:text-black">
+            <Link to="/QCS/schedule" className="flex items-center text-gray-700 hover:text-black">
               <FiCalendar className="mr-4 text-lg text-gray-500" />
               {!isCollapsed && <span className="text-gray-500 hover:text-black">Nhiệm vụ sản xuất</span>}
             </Link>
@@ -89,17 +89,14 @@
               <FiFolder className="mr-4 text-lg text-gray-500" />
               {!isCollapsed && <span className="text-gray-500 hover:text-black">Báo cáo</span>}
             </Link>
-    
+
             {userRole === 'Admin' && (
-              <Submenu
-                title={<><FiSettings className="mr-4 text-lg text-gray-500" />{!isCollapsed && <span className="text-gray-500">Hệ thống</span>}</>}
-                items={adminItems}
-                mainLink="/admin/userlist"
-                isCollapsed={isCollapsed}
-                onSubmenuClick={handleSubmenuClick}
-                setIsCollapsed={setIsCollapsed}
-              />
-            )}
+            <Link to="/admin/userlist" className="flex items-center text-gray-700 hover:text-black">
+              <FiSettings className="mr-4 text-lg text-gray-500" />
+              {!isCollapsed && <span className="text-gray-500 hover:text-black">Quản lý tài khoản</span>}
+            </Link>
+          )}
+                
           </nav>
         </div>
     

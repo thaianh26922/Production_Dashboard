@@ -40,25 +40,40 @@ const WorkShiftCatalog = () => {
 
   // Handle save work shift
   const handleSave = async (values) => {
+    console.log('Received values from form:', values); // Log giá trị form nhận được
+  
+    
+    const breakTimeData = values.breakTime
+      ? values.breakTime.map((item) => {
+          if (item && item.range) {
+            // Chỉ format nếu giá trị range có tồn tại
+            return {
+              startTime: item.range[0] ? item.range[0].format('HH:mm') : null,
+              endTime: item.range[1] ? item.range[1].format('HH:mm') : null,
+            };
+          }
+          return null;
+        }).filter(item => item !== null) // Loại bỏ các item null
+      : [];
+  
     const shiftData = {
       ...values,
       startTime: values.startTime ? values.startTime.format('HH:mm') : null,
       endTime: values.endTime ? values.endTime.format('HH:mm') : null,
-      breakTime: values.breakTime
-        ? values.breakTime.map((item) => ({
-            startTime: item[0] ? item[0].format('HH:mm') : null,
-            endTime: item[1] ? item[1].format('HH:mm') : null,
-          }))
-        : []
+      breakTime: breakTimeData
     };
-
+  
+    console.log('Formatted shiftData:', shiftData); 
+  
     try {
       if (selectedShift) {
         // Update work shift
+        console.log('Updating work shift:', selectedShift._id);
         await axios.put(`http://192.168.1.13:5000/api/workShifts/${selectedShift._id}`, shiftData);
         toast.success('Cập nhật ca làm việc thành công!');
       } else {
         // Create new work shift
+        console.log('Creating new work shift', shiftData.breakTimeData);
         await axios.post('http://192.168.1.13:5000/api/workShifts', shiftData);
         toast.success('Thêm ca làm việc thành công!');
       }
@@ -67,9 +82,11 @@ const WorkShiftCatalog = () => {
       setSelectedShift(null);
       form.resetFields();
     } catch (error) {
+      console.log('Error when saving work shift:', error); // Log lỗi nếu xảy ra
       toast.error('Lỗi khi lưu ca làm việc');
     }
   };
+  
 
   // Handle delete work shift
   const handleDelete = async (id) => {
@@ -132,6 +149,7 @@ const WorkShiftCatalog = () => {
 
   const openModal = (shift = null) => {
     setSelectedShift(shift);
+    console.log("editting shift: " ,shift.breakTime.startTime)
     if (shift) {
       form.setFieldsValue({
         shiftCode: shift.shiftCode,
@@ -139,13 +157,15 @@ const WorkShiftCatalog = () => {
         startTime: shift.startTime ? moment(shift.startTime, 'HH:mm') : null,
         endTime: shift.endTime ? moment(shift.endTime, 'HH:mm') : null,
         breakTime: shift.breakTime
-          ? shift.breakTime.map((bt) => [
-              bt.startTime ? moment(bt.startTime, 'HH:mm') : null,
-              bt.endTime ? moment(bt.endTime, 'HH:mm') : null,
+          ? shift.breakTime.map(() => [
+              shift.breakTime ? moment(shift.breakTime.startTime, 'HH:mm') : null,
+              shift.breakTime ? moment(shift.breakTime.endTime, 'HH:mm') : null,
             ])
           : [],
       });
+      
     }
+    
     setIsModalOpen(true);
   };
 
@@ -224,7 +244,7 @@ const WorkShiftCatalog = () => {
           setIsModalOpen(false);
           form.resetFields();
         }}
-        onOk={() => form.submit()}
+        onOk={handleSave}
         form={form}
         title={selectedShift ? 'Chỉnh sửa Ca Làm Việc' : 'Thêm mới Ca Làm Việc'}
         fields={[
