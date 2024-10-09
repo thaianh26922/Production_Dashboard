@@ -15,30 +15,43 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false); // Trạng thái để hiển thị/ẩn mật khẩu
 
   const handleLogin = async (event) => {
-    event.preventDefault();
+    event.preventDefault(); // Ngăn form reload lại trang
+    console.log('Nút Đăng nhập được nhấn'); // Log sự kiện nhấn nút
+  
     setIsLoading(true); // Bắt đầu loading
-
+  
     try {
       const response = await axios.post('http://192.168.1.13:5000/api/login', {
         username,
         password,
       });
-
+  
       if (response.status === 200) {
         const { token } = response.data;
         localStorage.setItem('token', token);
-
+  
         const decodedToken = jwtDecode(token); // Giải mã token
         const role = decodedToken.user.role; // Lấy vai trò từ token
         localStorage.setItem('role', role);  
         setUserRole(role);
 
+        // Log router trước khi điều hướng
+        console.log('Vai trò nhận được:', role);
+
+        // Đợi cho đến khi vai trò được cập nhật xong
+        await new Promise((resolve) => setTimeout(resolve, 100)); 
+
+        console.log('Token:', localStorage.getItem('token'));
+        console.log('Role:', localStorage.getItem('role'));
+  
         toast.success('Đăng nhập thành công!');
 
-        // Kiểm tra vai trò người dùng và điều hướng phù hợp
+        // Log router nhận được trước khi điều hướng
         if (role === 'CNVH') {
+          console.log('Điều hướng tới: /dashboard/mobile');
           navigate('/dashboard/mobile'); // Điều hướng tới dashboard mobile cho CNVH
         } else {
+          console.log('Điều hướng tới: /dashboard');
           navigate('/dashboard'); // Điều hướng tới dashboard chính cho các vai trò khác
         }
       }
@@ -57,13 +70,14 @@ function Login() {
       setIsLoading(false); // Kết thúc loading dù thành công hay thất bại
     }
   };
+  
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-cyan-500 to-blue-700">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-xl">
-        <h2 className="text-2xl font-bold text-center text-gray-800">Đăng nhập tài khoản của bạn</h2>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-cyan-500 to-blue-700 px-4 sm:px-0">
+      <div className="w-full max-w-lg sm:w-3/4 md:w-1/2 lg:w-1/3 p-8 bg-white rounded-lg shadow-xl">
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">Đăng nhập tài khoản của bạn</h2>
         
-        <form className="space-y-4" onSubmit={handleLogin}>
+        <form className="space-y-6" onSubmit={handleLogin}>
           <div className="relative">
             <FaUserAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"/>
             <input
@@ -72,7 +86,7 @@ function Login() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              className="w-full py-2 pl-10 pr-4 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500"
+              className="w-full py-3 pl-10 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               placeholder="Tên đăng nhập"
             />
           </div>
@@ -85,22 +99,21 @@ function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full py-2 pl-10 pr-10 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500"
+              className="w-full py-3 pl-10 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               placeholder="Mật khẩu"
             />
-            {/* Biểu tượng con mắt để bật/tắt hiển thị mật khẩu */}
             <span
               className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
               onClick={() => setShowPassword(!showPassword)}
             >
-              {showPassword ? <FaEyeSlash /> : <FaEye />} {/* Hiển thị FaEye khi mật khẩu đang ẩn và FaEyeSlash khi mật khẩu đang hiển thị */}
+              {showPassword ? <FaEye /> : <FaEyeSlash />}
             </span>
           </div>
 
           <button 
             type="submit" 
-            disabled={isLoading} // Khóa nút khi đang xử lý đăng nhập
-            className={`w-full py-2 text-white bg-blue-600 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={isLoading} 
+            className={`w-full py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {isLoading ? (
               <span className="flex items-center justify-center">
@@ -115,7 +128,7 @@ function Login() {
             )}
           </button>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mt-4">
             <label className="flex items-center">
               <input type="checkbox" className="form-checkbox text-blue-600" />
               <span className="ml-2 text-sm text-gray-600">Ghi nhớ đăng nhập</span>

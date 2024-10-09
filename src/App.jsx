@@ -21,6 +21,7 @@ function App() {
           pauseOnFocusLoss
           draggable
           pauseOnHover
+         
         />
         
       </AuthProvider>

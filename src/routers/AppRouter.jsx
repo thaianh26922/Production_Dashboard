@@ -15,25 +15,30 @@ import EmployeeCatalog from '../Components/Equiment/Employee/EmployeeCatalog'; /
 import AvailableRate from '../pages/Equiment/AvailableRate/AvailableRate'; // Import Available Rate
 import DeviceAnalysis from '../pages/Equiment/Management/Analysis/DeviceAnalysis';
 import DeviceManagement from '../pages/Equiment/Management/DeviceManagement'
-
+import ResponeIssue from '../pages/CNVH/ResponeIssue';
+import ResponeSubmbit from '../pages/CNVH/ResponeSubmbit';
 
 const ProtectedRoute = ({ children, isAuthenticated, requiredRole, userRole }) => {
   if (!isAuthenticated) {
-    // Nếu chưa đăng nhập, điều hướng đến trang login
+    
     return <Navigate to="/login" replace />;
   }
 
-  // Kiểm tra role yêu cầu và điều hướng nếu không khớp
-  if (requiredRole && requiredRole !== userRole) {
+  if (requiredRole && requiredRole == !userRole) {
     return <Navigate to="/dashboard" replace />;
   }
 
   return children;
 };
 
+// Hàm kiểm tra vai trò người dùng
+const checkUserRole = (userRole, requiredRole) => {
+  return userRole === requiredRole;
+};
+
 const AppRouter = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState(null);
+  const [userRole, setUserRole] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -49,15 +54,19 @@ const AppRouter = () => {
       <Routes>
         {/* Route cho trang đăng nhập */}
         <Route path="/login" element={<Login />} />
-
+        
         {/* Route dành riêng cho CNVH */}
         <Route
           path="/dashboard/mobile"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated} userRole={userRole}>
-              <MainLayout2>
-                <Dashboard2 /> {/* Hiển thị Dashboard2 cho CNVH */}
-              </MainLayout2>
+              {checkUserRole(userRole, 'CNVH') ? (
+                <MainLayout2>
+                  <Dashboard2 /> 
+                </MainLayout2>
+              ) : (
+                <Navigate to="/dashboard" replace />
+              )}
             </ProtectedRoute>
           }
         />
@@ -66,14 +75,10 @@ const AppRouter = () => {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated} userRole={userRole} >
-              {userRole === 'CNVH' ? (
-                <Navigate to="/dashboard/mobile" replace /> // Điều hướng đến mobile nếu user là CNVH
-              ) : (
+            <ProtectedRoute isAuthenticated={isAuthenticated} userRole={userRole}>
                 <MainLayout>
-                  <Dashboard1 /> {/* Hiển thị Dashboard1 cho các role khác */}
+                  <Dashboard1 /> 
                 </MainLayout>
-              )}
             </ProtectedRoute>
           }
         />
@@ -84,12 +89,51 @@ const AppRouter = () => {
           element={
             <ProtectedRoute
               isAuthenticated={isAuthenticated}
-              requiredRole="Admin" // Yêu cầu role là Admin
+              requiredRole="Admin"
               userRole={userRole}
             >
               <MainLayout>
                 <UserManagement />
               </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        
+        {/* Route cho CNVH, ví dụ: Respone Issue */}
+        <Route
+          path="/dashboard/mobile/issue"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isAuthenticated}
+              userRole={userRole}
+              requiredRole="CNVH"
+            >
+              {checkUserRole(userRole, 'CNVH') ? (
+                <MainLayout2>
+                  <ResponeIssue />
+                </MainLayout2>
+              ) : (
+                <Navigate to="/dashboard" replace />
+              )}
+            </ProtectedRoute>
+          }
+        />
+
+<Route
+          path="/dashboard/mobile/issue/respone"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isAuthenticated}
+              userRole={userRole}
+              requiredRole="CNVH"
+            >
+              {checkUserRole(userRole, 'CNVH') ? (
+                <MainLayout2>
+                  <ResponeSubmbit />
+                </MainLayout2>
+              ) : (
+                <Navigate to="/dashboard" replace />
+              )}
             </ProtectedRoute>
           }
         />
@@ -117,7 +161,6 @@ const AppRouter = () => {
             </ProtectedRoute>
           }
         />
-
 
         {/* Route cho Error Report Catalog */}
         <Route
@@ -179,7 +222,7 @@ const AppRouter = () => {
           }
         />
 
-      <Route
+        <Route
           path="/QCS/analysis"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated} userRole={userRole}>
@@ -191,19 +234,15 @@ const AppRouter = () => {
         />
 
         <Route
-                  path="/QCS/reports"
-                  element={
-                    <ProtectedRoute isAuthenticated={isAuthenticated} userRole={userRole}>
-                      <MainLayout>
-                        <DeviceReport/>
-                      </MainLayout>
-                    </ProtectedRoute>
-                  }
-                />
-
-     
-
-        
+          path="/QCS/reports"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated} userRole={userRole}>
+              <MainLayout>
+                <DeviceReport/>
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
 
         {/* Fallback route */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

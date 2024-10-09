@@ -127,9 +127,9 @@ const ErrorReportCatalog = () => {
           {filteredReports.map((report, index) => (
             <tr key={report._id} className="hover:bg-gray-50">
               <td className="border px-4 py-2 text-sm text-center">{index + 1}</td>
-              <td className="border px-4 py-2 text-sm text-center">{report.reasonCode}</td>
-              <td className="border px-4 py-2 text-sm text-center">{report.reasonName}</td>
-              <td className="border px-4 py-2 text-sm text-center">
+              <td className="border px-4 py-2 text-sm text-center w-44">{report.reasonCode}</td>
+              <td className="border px-4 py-2 text-sm  text-center  w-44">{report.reasonName}</td>
+              <td className="border px-4 py-2 text-sm text-center w-86 text-wrap">
                 {report.deviceNames && report.deviceNames.join(', ')}
               </td>
               <td className="py-2 px-2 text-center border">
