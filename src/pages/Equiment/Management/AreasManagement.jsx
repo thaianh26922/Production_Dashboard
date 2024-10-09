@@ -23,7 +23,7 @@ const AreasManagement = () => {
   // Fetch areas from the back-end API
   const fetchAreas = async () => {
     try {
-      const response = await axios.get('http://192.168.1.13:5000/api/areas'); // Your API URL
+      const response = await axios.get('http://172.19.200.193:5000/api/areas'); // Your API URL
       setAreas(response.data);
       setFilteredAreas(response.data);
     } catch (error) {
@@ -51,11 +51,11 @@ const AreasManagement = () => {
     try {
       if (selectedArea) {
         // Update Area
-        await axios.put(`http://192.168.1.13:5000/api/areas/${selectedArea._id}`, areaData);
+        await axios.put(`http://172.19.200.193:5000/api/areas/${selectedArea._id}`, areaData);
         toast.success('Cập nhật khu vực thành công!');
       } else {
         // Create New Area
-        await axios.post('http://192.168.1.13:5000/api/areas', areaData);
+        await axios.post('http://172.19.200.193:5000/api/areas', areaData);
         toast.success('Thêm khu vực thành công!');
       }
 
@@ -71,7 +71,7 @@ const AreasManagement = () => {
   // Delete area by ID
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://192.168.1.13:5000/api/areas/${id}`);
+      await axios.delete(`http://172.19.200.193:5000/api/areas/${id}`);
       toast.success('Xóa khu vực thành công!');
       fetchAreas(); // Refresh area list after delete
     } catch (error) {

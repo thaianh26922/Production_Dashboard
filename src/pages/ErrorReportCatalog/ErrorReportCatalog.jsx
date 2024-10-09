@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
-import { Modal, Form, Input, Select, Button } from 'antd';  // Import các thành phần cần thiết từ Ant Design
+import { Modal, Form, Input, Button ,Select} from 'antd';  // Import các thành phần cần thiết từ Ant Design
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SearchButton from '../../Components/Button/SearchButton';
@@ -9,8 +9,6 @@ import ExportExcelButton from '../../Components/Button/ExportExcelButton';
 import axios from 'axios';  // Import axios để gọi API
 import FormSample from '../../Components/Button/FormSample';
 import ImportButton from '../../Components/Button/ImportButton';
-
-const { Option } = Select; // Sử dụng Option từ Select
 
 const ErrorReportCatalog = () => {
   const [errorReports, setErrorReports] = useState([]);
@@ -23,7 +21,7 @@ const ErrorReportCatalog = () => {
   // Gọi API để lấy danh sách issue
   const fetchErrorReports = async () => {
     try {
-      const response = await axios.get('http://192.168.1.13:5000/api/issue');
+      const response = await axios.get('http://172.19.200.193:5000/api/issue');
       setErrorReports(response.data);
     } catch (error) {
       toast.error('Lỗi khi tải báo cáo lỗi');
@@ -33,7 +31,7 @@ const ErrorReportCatalog = () => {
   // Gọi API để lấy danh sách deviceName từ model Device
   const fetchDeviceSuggestions = async () => {
     try {
-      const response = await axios.get('http://192.168.1.13:5000/api/device');
+      const response = await axios.get('http://172.19.200.193:5000/api/device');
       setDeviceSuggestions(response.data); // Giả định rằng response trả về danh sách thiết bị
     } catch (error) {
       toast.error('Lỗi khi tải danh sách thiết bị');
@@ -52,11 +50,11 @@ const ErrorReportCatalog = () => {
       const values = await form.validateFields(); // Lấy và validate dữ liệu từ form
       if (selectedReport) {
         // Cập nhật issue
-        await axios.put(`http://192.168.1.13:5000/api/issue/${selectedReport._id}`, values);
+        await axios.put(`http://172.19.200.193:5000/api/issue/${selectedReport._id}`, values);
         toast.success('Cập nhật nguyên nhân lỗi thành công!');
       } else {
         // Thêm mới issue
-        await axios.post('http://192.168.1.13:5000/api/issue', values);
+        await axios.post('http://172.19.200.193:5000/api/issue', values);
         toast.success('Thêm nguyên nhân lỗi thành công!');
       }
       fetchErrorReports();  // Tải lại dữ liệu sau khi thêm/cập nhật
@@ -71,7 +69,7 @@ const ErrorReportCatalog = () => {
   // Hàm xóa issue
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://192.168.1.13:5000/api/issue/${id}`);
+      await axios.delete(`http://172.19.200.193:5000/api/issue/${id}`);
       toast.success('Xóa báo cáo lỗi thành công!');
       fetchErrorReports();  // Tải lại dữ liệu sau khi xóa
     } catch (error) {
@@ -119,6 +117,7 @@ const ErrorReportCatalog = () => {
             <th className="border px-4 py-2 text-xs">STT</th>
             <th className="border px-4 py-2 text-xs">Mã Nguyên Nhân</th>
             <th className="border px-4 py-2 text-xs">Tên Nguyên Nhân</th>
+            <th className="border px-4 py-2 text-xs">Trạng thái thiết bị</th>
             <th className="border px-4 py-2 text-xs">Tên Thiết Bị</th>
             <th className="border px-4 py-2 text-xs">Thao Tác</th>
           </tr>
@@ -129,6 +128,7 @@ const ErrorReportCatalog = () => {
               <td className="border px-4 py-2 text-sm text-center">{index + 1}</td>
               <td className="border px-4 py-2 text-sm text-center w-44">{report.reasonCode}</td>
               <td className="border px-4 py-2 text-sm  text-center  w-44">{report.reasonName}</td>
+              <td className="border px-4 py-2 text-sm  text-center  w-44">{report.deviceStatus}</td>
               <td className="border px-4 py-2 text-sm text-center w-86 text-wrap">
                 {report.deviceNames && report.deviceNames.join(', ')}
               </td>
@@ -197,6 +197,14 @@ const ErrorReportCatalog = () => {
                 </Option>
               ))}
             </Select>
+          </Form.Item>
+          {/* Trường nhập deviceStatus */}
+          <Form.Item
+            label="Trạng thái thiết bị"
+            name="deviceStatus"
+            rules={[{ required: true, message: 'Trạng thái thiết bị là bắt buộc' }]}
+          >
+            <Input placeholder="Nhập trạng thái thiết bị" />
           </Form.Item>
         </Form>
       </Modal>

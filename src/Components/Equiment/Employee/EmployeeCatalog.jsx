@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Modal, Form, Input, Button } from 'antd';  // Sử dụng Modal và Form từ Ant Design
+import { Modal, Form, Input, Select, Button } from 'antd'; // Sử dụng Select cho gợi ý khu vực
 import SearchButton from '../../Button/SearchButton';
 import AddButton from '../../Button/AddButton';
 import ExportExcelButton from '../../Button/ExportExcelButton';
@@ -10,18 +10,21 @@ import FormSample from '../../Button/FormSample';
 import ImportButton from '../../Button/ImportButton';
 import axios from 'axios'; // Thêm axios để gọi API
 
+const { Option } = Select; // Ant Design Select
+
 const EmployeeCatalog = () => {
   const [employees, setEmployees] = useState([]);
   const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [areas, setAreas] = useState([]); // State cho danh sách khu vực
   const [form] = Form.useForm(); // Ant Design Form
   const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch employees from API on component mount
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get('http://192.168.1.13:5000/api/employees'); // API GET để lấy danh sách nhân viên
+      const response = await axios.get('http://172.19.200.193:5000/api/employees'); // API GET để lấy danh sách nhân viên
       setEmployees(response.data);
       setFilteredEmployees(response.data);
     } catch (error) {
@@ -29,8 +32,19 @@ const EmployeeCatalog = () => {
     }
   };
 
+  // Fetch areas from API on component mount
+  const fetchAreas = async () => {
+    try {
+      const response = await axios.get('http://172.19.200.193:5000/api/areas'); // API GET để lấy danh sách khu vực
+      setAreas(response.data);
+    } catch (error) {
+      toast.error('Lỗi khi tải danh sách khu vực');
+    }
+  };
+
   useEffect(() => {
     fetchEmployees(); // Gọi API khi component được mount
+    fetchAreas(); // Gọi API để lấy khu vực khi component được mount
   }, []);
 
   // Handle search input change
@@ -48,11 +62,11 @@ const EmployeeCatalog = () => {
     try {
       if (selectedEmployee) {
         // Update employee
-        await axios.put(`http://192.168.1.13:5000/api/employees/${selectedEmployee._id}`, values);
+        await axios.put(`http://172.19.200.193:5000/api/employees/${selectedEmployee._id}`, values);
         toast.success('Cập nhật nhân viên thành công!');
       } else {
         // Create new employee
-        await axios.post('http://192.168.1.13:5000/api/employees', values);
+        await axios.post('http://172.19.200.193:5000/api/employees', values);
         toast.success('Thêm nhân viên thành công!');
       }
 
@@ -68,7 +82,7 @@ const EmployeeCatalog = () => {
   // Handle delete employee by ID
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://192.168.1.13:5000/api/employees/${id}`);
+      await axios.delete(`http://172.19.200.193:5000/api/employees/${id}`);
       toast.success('Xóa nhân viên thành công!');
       fetchEmployees(); // Refresh employee list after delete
     } catch (error) {
@@ -110,7 +124,7 @@ const EmployeeCatalog = () => {
             <th className="border px-4 py-2 text-xs">STT</th>
             <th className="border px-4 py-2 text-xs">Mã Nhân Viên</th>
             <th className="border px-4 py-2 text-xs">Tên Nhân Viên</th>
-            <th className="border px-4 py-2 text-xs">Tổ</th>
+            <th className="border px-4 py-2 text-xs">Khu Vực</th> {/* Thay đổi từ Tổ sang Khu vực */}
             <th className="border px-4 py-2 text-xs">Thao Tác</th>
           </tr>
         </thead>
@@ -120,7 +134,7 @@ const EmployeeCatalog = () => {
               <td className="border px-4 py-2 text-sm text-center">{index + 1}</td>
               <td className="border px-4 py-2 text-sm text-center">{employee.employeeCode}</td>
               <td className="border px-4 py-2 text-sm text-center">{employee.employeeName}</td>
-              <td className="border px-4 py-2 text-sm text-center">{employee.team}</td>
+              <td className="border px-4 py-2 text-sm text-center">{employee.areaName}</td> {/* Hiển thị Khu vực */}
               <td className="py-2 px-2 text-center border">
                 <button
                   className="mr-2 text-blue-500 hover:text-blue-700"
@@ -169,11 +183,17 @@ const EmployeeCatalog = () => {
           </Form.Item>
 
           <Form.Item
-            label="Tổ"
-            name="team"
-            rules={[{ required: true, message: 'Tổ là bắt buộc' }]}
+            label="Khu Vực"
+            name="areaName"
+            rules={[{ required: true, message: 'Khu Vực là bắt buộc' }]}
           >
-            <Input placeholder="Nhập tổ của nhân viên" />
+            <Select placeholder="Chọn khu vực">
+              {areas.map((area) => (
+                <Option key={area._id} value={area.areaName}>
+                  {area.areaName}
+                </Option>
+              ))}
+            </Select>
           </Form.Item>
         </Form>
       </Modal>

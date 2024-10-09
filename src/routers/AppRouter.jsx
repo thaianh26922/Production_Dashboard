@@ -31,7 +31,7 @@ const ProtectedRoute = ({ children, isAuthenticated, requiredRole, userRole }) =
   return children;
 };
 
-// Hàm kiểm tra vai trò người dùng
+
 const checkUserRole = (userRole, requiredRole) => {
   return userRole === requiredRole;
 };
@@ -43,6 +43,7 @@ const AppRouter = () => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
+    console.log('Token:', token, 'Role:', role); 
     if (token && role) {
       setIsAuthenticated(true);
       setUserRole(role);

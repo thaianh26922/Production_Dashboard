@@ -154,9 +154,8 @@ const ResponeIssue = () => {
         Phản hồi
       </button>
 
-      {/* Nút gọi trợ giúp */}
       <button
-        onClick={handleOpenModal} // Gọi hàm mở modal
+        onClick={handleOpenModal} 
         className="bg-red-600 w-[90%] hover:bg-red-900 p-8 rounded-lg shadow-lg text-white text-center ml-8 mt-2 text-4xl font-bold transition duration-300 ease-in-out"
       >
         Gọi trợ giúp

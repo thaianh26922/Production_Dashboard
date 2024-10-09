@@ -21,7 +21,7 @@ function Login() {
     setIsLoading(true); // Bắt đầu loading
   
     try {
-      const response = await axios.post('http://192.168.1.13:5000/api/login', {
+      const response = await axios.post('http://172.19.200.193:5000/api/login', {
         username,
         password,
       });
@@ -47,7 +47,7 @@ function Login() {
         toast.success('Đăng nhập thành công!');
 
         // Log router nhận được trước khi điều hướng
-        if (role === 'CNVH') {
+        if (role ==='CNVH') {
           console.log('Điều hướng tới: /dashboard/mobile');
           navigate('/dashboard/mobile'); // Điều hướng tới dashboard mobile cho CNVH
         } else {

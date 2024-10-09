@@ -44,13 +44,13 @@ const DeviceManagement = () => {
   const fetchDevicesAndAreas = async () => {
     try {
       // Fetch devices
-      const deviceResponse = await axios.get('http://192.168.1.13:5000/api/device');
+      const deviceResponse = await axios.get('http://172.19.200.193:5000/api/device');
       const sortedDevices = sortDevicesAlphabetically(deviceResponse.data);
       setDevices(sortedDevices);
       setFilteredDevices(sortedDevices);
 
       // Fetch areas for dropdown
-      const areaResponse = await axios.get('http://192.168.1.13:5000/api/areas');
+      const areaResponse = await axios.get('http://172.19.200.193:5000/api/areas');
       setAreas(areaResponse.data); // Store areas from API
     } catch (error) {
       toast.error('Failed to fetch devices or areas');
@@ -96,11 +96,11 @@ const DeviceManagement = () => {
     try {
       if (selectedDevice) {
         // Update device
-        await axios.put(`http://192.168.1.13:5000/api/device/${selectedDevice._id}`, deviceData);
+        await axios.put(`http://172.19.200.193:5000/api/device/${selectedDevice._id}`, deviceData);
         toast.success('Cập nhật thiết bị thành công!');
       } else {
         // Create new device
-        await axios.post('http://192.168.1.13:5000/api/device', deviceData);
+        await axios.post('http://172.19.200.193:5000/api/device', deviceData);
         toast.success('Thêm thiết bị thành công!');
       }
 
@@ -118,7 +118,7 @@ const DeviceManagement = () => {
   // Delete device by ID
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://192.168.1.13:5000/api/device/${id}`);
+      await axios.delete(`http://172.19.200.193:5000/api/device/${id}`);
       toast.success('Xóa thiết bị thành công!');
       fetchDevicesAndAreas(); // Refresh device list after delete
     } catch (error) {

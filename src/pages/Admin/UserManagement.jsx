@@ -17,7 +17,7 @@ const UserManagement = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://192.168.1.13:5000/api/users', {
+        const response = await axios.get('http://172.19.200.193:5000/api/users', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
@@ -40,7 +40,7 @@ const UserManagement = () => {
   const handleSave = async (data) => {
     try {
       if (selectedUser) {
-        await axios.put(`http://192.168.1.13:5000/api/users/${selectedUser._id}`, data, {
+        await axios.put(`http://172.19.200.193:5000/api/users/${selectedUser._id}`, data, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
@@ -48,7 +48,7 @@ const UserManagement = () => {
         setUsers(users.map(user => (user._id === selectedUser._id ? { ...user, ...data } : user)));
         toast.success('User updated successfully');
       } else {
-        const response = await axios.post('http://192.168.1.13:5000/api/users', data, {
+        const response = await axios.post('http://172.19.200.193:5000/api/users', data, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
@@ -67,7 +67,7 @@ const UserManagement = () => {
   // Delete user
   const handleDeleteUser = async (id) => {
     try {
-      await axios.delete(`http://192.168.1.13:5000/api/users/${id}`, {
+      await axios.delete(`http://172.19.200.193:5000/api/users/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
@@ -82,7 +82,7 @@ const UserManagement = () => {
   // Toggle user lock status
   const handleToggleLockUser = async (id) => {
     try {
-      const response = await axios.put(`http://192.168.1.13:5000/api/users/${id}/lock`, {}, {
+      const response = await axios.put(`http://172.19.200.193:5000/api/users/${id}/lock`, {}, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
