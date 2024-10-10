@@ -1,121 +1,92 @@
 import React, { useEffect, useRef, useState } from 'react';
-import axios from 'axios';
 import * as d3 from 'd3';
-import moment from 'moment-timezone';
-
-// Định nghĩa màu sắc và trạng thái cho các giá trị PLC:STATUS
-const statusMapping = {
-  1: { label: "Chạy", color: "#4bc0c0" },   // Chạy (Xanh)
-  0: { label: "Dừng", color: "#ff0137" },   // Dừng (Đỏ)
-};
+import moment from 'moment';
+import axios from 'axios';
 
 const TimelineChart = ({ selectedDate }) => {
+
   const svgRef = useRef();
   const wrapperRef = useRef();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const dimensions = { width: 680, height: 440 }; // Tăng chiều cao để có đủ không gian cho legend
+  const [accessToken, setAccessToken] = useState(''); // Thêm state cho token
+  const [dimensions, setDimensions] = useState({ width: 800, height: 450 });
 
-  // Hàm gọi API
-  const fetchData = async (startDate, endDate) => {
+  const getNewAccessToken = async () => {
+    try {
+      const response = await axios.post('http://cloud.datainsight.vn:8080/api/auth/login', {
+        username: 'oee2024@gmail.com',
+        password: 'Oee@2124'
+      });
+      const newToken = response.data.token;
+      setAccessToken(newToken); 
+      return newToken; 
+    } catch (error) {
+      setError('Error refreshing access token');
+      console.error('Error refreshing access token:', error);
+      return null;
+    }
+  };
+
+  const fetchData = async (startDate, endDate, token) => {
     setLoading(true);
     setError(null);
     try {
       const response = await axios.get(
-        `http://192.168.1.6:5000/api/device-status/543ff470-54c6-11ef-8dd4-b74d24d26b24`, {
-          params: { startDate, endDate },
+        `http://cloud.datainsight.vn:8080/api/plugins/telemetry/DEVICE/543ff470-54c6-11ef-8dd4-b74d24d26b24/values/timeseries?keys=status&interval=36000&limit=10000&startTs=${startDate}&endTs=${endDate}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
-      setData(response.data.statuses); // Lưu dữ liệu từ API
+      setData(response.data.status);
     } catch (error) {
-      setError(error.message);
+      if (error.response && error.response.status === 401) {
+        const newToken = await getNewAccessToken();
+        if (newToken) {
+          await fetchData(startDate, endDate, newToken);
+        }
+      } else {
+        setError(error.message);
+      }
     } finally {
       setLoading(false);
     }
   };
-  console.log(fetchData)
 
   useEffect(() => {
     if (selectedDate && selectedDate.length === 2) {
       const startDate = Math.min(selectedDate[0].valueOf(), selectedDate[1].valueOf());
       const endDate = Math.max(selectedDate[0].valueOf(), selectedDate[1].valueOf());
-      fetchData(startDate, endDate); // Gọi API khi có ngày được chọn
+      fetchData(startDate, endDate, accessToken);
     }
-  }, [selectedDate]);
+  }, [selectedDate, accessToken]);
 
-  // Hàm xử lý dữ liệu thô từ API thành dữ liệu lịch sử máy
-  const formatHistoryData = (rawData) => {
-    const formattedData = [];
-
-    // Sắp xếp dữ liệu theo timestamp
-    const sortedData = rawData.sort((a, b) => a.ts - b.ts);
-
-    // Duyệt qua dữ liệu và tính duration giữa các trạng thái liên tiếp
-    for (let i = 0; i < sortedData.length - 1; i++) {
-      const telemetryData = sortedData[i];
-      const nextTelemetryData = sortedData[i + 1];  // Lấy dữ liệu tiếp theo
-
-      // Lấy timestamp của trạng thái hiện tại và tiếp theo
-      const startTime = moment(telemetryData.ts).tz('Asia/Bangkok');
-      const endTime = moment(nextTelemetryData.ts).tz('Asia/Bangkok');
-
-      const duration = endTime.diff(startTime, 'minutes');  // Tính thời gian kéo dài (phút)
-
-      // Parse key để đảm bảo giá trị đúng
-      const key = parseInt(telemetryData.value);
-      
-      // Thêm dữ liệu đã xử lý vào mảng formattedData
-      formattedData.push({
-        date: startTime.format('YYYY-MM-DD'),
-        startTime: startTime.format('HH:mm'),
-        endTime: endTime.format('HH:mm'),
-        key: !isNaN(key) && statusMapping[key] ? key : 'default',
-        duration,
-      });
-    }
-
-    // Xử lý trạng thái cuối cùng (không có trạng thái tiếp theo để tính duration)
-    const lastTelemetryData = sortedData[sortedData.length - 1];
-    const lastStartTime = moment(lastTelemetryData.ts).tz('Asia/Bangkok');
-    const lastKey = parseInt(lastTelemetryData.value);
-
-    if (!isNaN(lastKey) && statusMapping[lastKey]) {
-      formattedData.push({
-        date: lastStartTime.format('YYYY-MM-DD'),
-        startTime: lastStartTime.format('HH:mm'),
-        endTime: '23:59', // Kết thúc cuối ngày
-        key: lastKey,
-        duration: moment('23:59', 'HH:mm').diff(lastStartTime, 'minutes'),
-      });
-    }
-
-    return formattedData;
-  };
+  useEffect(() => {
+    const fetchInitialToken = async () => {
+      const token = await getNewAccessToken();
+      setAccessToken(token);
+    };
+    fetchInitialToken();
+  }, []);
 
   useEffect(() => {
     if (!data || data.length === 0) return;
 
     const svg = d3.select(svgRef.current);
     const { width, height } = dimensions;
-    const margin = { top: 20, right: 30, bottom: 50, left: 35 };
+    const margin = { top: 20, right: 35, bottom: 50, left: 50 };
 
-    // Chuẩn bị dữ liệu với thời gian liên tiếp (tính duration giữa các trạng thái)
-    const processedData = formatHistoryData(data);
+    const processedData = data.map(d => ({
+      date: moment(d.ts).format('YYYY-MM-DD'),
+      startTime: moment(d.ts).format('HH:mm'),
+      endTime: moment(d.ts + 3600000).format('HH:mm'),
+      status: d.value === '1' ? 'Chạy' : 'Dừng',
+    }));
 
-    // Thêm điểm bắt đầu 00:00 nếu dữ liệu không bắt đầu từ đầu ngày
-    if (processedData.length > 0 && processedData[0].startTime !== '00:00') {
-      const firstDate = moment(processedData[0].date, 'YYYY-MM-DD').tz('Asia/Bangkok');
-      processedData.unshift({
-        date: firstDate.format('YYYY-MM-DD'),
-        startTime: '00:00',
-        endTime: processedData[0].startTime,
-        key: 'default',
-        duration: moment(processedData[0].startTime, 'HH:mm').diff(moment('00:00', 'HH:mm'), 'minutes'),
-      });
-    }
-
-    svg.selectAll('*').remove(); // Xóa biểu đồ cũ
+    svg.selectAll('*').remove();
 
     const timeParse = d3.timeParse('%H:%M');
     const timeFormat = d3.timeFormat('%H:%M');
@@ -132,83 +103,141 @@ const TimelineChart = ({ selectedDate }) => {
       .scaleBand()
       .domain(uniqueDates.sort())
       .range([height - margin.bottom - 40, margin.top])
-      .padding(0.6); // Giảm padding nếu cần để không gian giữa các thanh bar hẹp hơn
+      .padding(0.1);
 
-    // Đảm bảo ánh xạ chính xác nhãn "Chạy" và "Dừng" vào `colorScale`
-    const colorScale = d3.scaleOrdinal()
-      .domain(['Chạy', 'Dừng']) // Đảm bảo đúng nhãn
-      .range(['#2cce00', '#ff0137']); // Màu sắc tương ứng
+    const colorScale = d3
+      .scaleOrdinal()
+      .domain(['Chạy', 'Dừng', 'Offline'])
+      .range(['#00f600', '#f60000', '#d3d3d3']);
 
-    // Vẽ trục X (thời gian)
+    const OfflineData = [];
+    uniqueDates.forEach(date => {
+      const dateData = processedData.filter(d => d.date === date);
+      dateData.sort((a, b) => timeParse(a.startTime) - timeParse(b.startTime));
+
+      for (let i = 0; i < dateData.length - 1; i++) {
+        const currentEnd = timeParse(dateData[i].endTime);
+        const nextStart = timeParse(dateData[i + 1].startTime);
+        if (nextStart - currentEnd > 0) {
+          OfflineData.push({
+            date: date,
+            startTime: timeFormat(currentEnd),
+            endTime: timeFormat(nextStart),
+            status: 'Offline',
+          });
+        }
+      }
+
+      const firstStart = timeParse(dateData[0].startTime);
+      const lastEnd = timeParse(dateData[dateData.length - 1].endTime);
+
+      if (firstStart > timeParse('00:00')) {
+        OfflineData.push({
+          date: date,
+          startTime: timeFormat(timeParse('00:00')),
+          endTime: timeFormat(firstStart),
+          status: 'Offline',
+        });
+      }
+      if (lastEnd < timeParse('23:59')) {
+        OfflineData.push({
+          date: date,
+          startTime: timeFormat(lastEnd),
+          endTime: timeFormat(timeParse('23:59')),
+          status: 'Offline',
+        });
+      }
+    });
+
+    svg
+      .selectAll('rect.Offline')
+      .data(OfflineData)
+      .enter()
+      .append('rect')
+      .attr('class', 'Offline')
+      .attr('x', d => xScale(timeParse(d.startTime)) + 1)
+      .attr('y', d => yScale(d.date) + yScale.bandwidth() / 4) // Đặt giữa các tick date
+      .attr('width', d => {
+        const width = xScale(timeParse(d.endTime)) - xScale(timeParse(d.startTime));
+        return width > 0 ? width : 0;
+      })
+      .attr('height', Math.min(yScale.bandwidth() / 2, 20))
+      .attr('fill', d => colorScale(d.status));
+
     svg
       .append('g')
       .attr('transform', `translate(0,${height - margin.bottom - 40})`)
       .call(d3.axisBottom(xScale).ticks(d3.timeHour.every(2)).tickFormat(timeFormat))
       .selectAll("text")
-      .attr("transform", "translate(0,0)rotate(0)")
-      .style("text-anchor", "middle");
+      .attr("transform", "translate(-10,0)rotate(-45)")
+      .style("text-anchor", "end");
 
-    // Vẽ trục Y (ngày tháng)
     svg
       .append('g')
-      .attr('transform', `translate(${margin.left-1},0)`)
+      .attr('transform', `translate(${margin.left},0)`)
       .call(d3.axisLeft(yScale).tickFormat(d => dateFormat(dateParse(d))));
 
-    // Vẽ các thanh ngang (horizontal bars) dựa trên thời gian giữa các timestamp
     svg
-      .selectAll('rect')
+      .selectAll('rect.data')
       .data(processedData)
       .enter()
       .append('rect')
-      .attr('x', d => xScale(timeParse(d.startTime))) // Bắt đầu từ xScale, không đè lên trục Y
-      .attr('y', d => yScale(d.date))
+      .attr('class', 'data')
+      .attr('x', d => xScale(timeParse(d.startTime)) + 1)
+      .attr('y', d => yScale(d.date) + yScale.bandwidth() / 4) // Đặt giữa các tick date
       .attr('width', d => {
         const width = xScale(timeParse(d.endTime)) - xScale(timeParse(d.startTime));
         return width > 0 ? width : 0;
       })
-      .attr('height', yScale.bandwidth())
-      .attr('fill', d => {
-        const label = statusMapping[d.key]?.label;
-        return colorScale(label); // Sử dụng nhãn để ánh xạ vào `colorScale`
-      })
+      .attr('height', Math.min(yScale.bandwidth() / 2, 20))
+      .attr('fill', d => colorScale(d.status))
       .append('title')
-      .text(d => `${statusMapping[d.key]?.label || 'Unknown'}: ${d.startTime} - ${d.endTime}`);
+      .text(d => `${d.status}: ${d.startTime} - ${d.endTime}`);
 
-    // Thêm Legend giống StackedBarChart
+    const legendData = ['Chạy', 'Dừng', 'Offline'];
+
     const legend = svg
-      .append('g')
-      .attr('transform', `translate(${margin.left}, ${height - margin.bottom + 5})`);
-
-    const legendData = ['Chạy', 'Dừng'];
-
-    // Sắp xếp lại legend với khoảng cách giữa các phần tử
-    legend
-      .selectAll('g')
+      .selectAll('.legend')
       .data(legendData)
       .enter()
       .append('g')
-      .attr('transform', (d, i) => `translate(${i * 100}, 0)`) // Khoảng cách giữa các phần tử legend
-      .call(g => {
-        // Hình chữ nhật cho legend
-        g.append('rect')
-          .attr('width', 18)
-          .attr('height', 5)
-          .attr('fill', d => colorScale(d)); // Dùng nhãn "Chạy", "Dừng" để ánh xạ màu
+      .attr('class', 'legend')
+      .attr('transform', (d, i) => `translate(${margin.left + i * 100},${height - margin.bottom + 20})`);
 
-        // Văn bản trong legend
-        g.append('text')
-          .attr('x', 24)
-          .attr('y', 3)
-          .attr('dy', '0.1em')
-          .attr('font-size', '10px')
-          .text(d => d);
-      });
+    legend
+      .append('rect')
+      .attr('x', 0)
+      .attr('y', 0)
+      .attr('width', 18)
+      .attr('height', 5)
+      .style('fill', d => colorScale(d));
 
-  }, [data]);
+    legend
+      .append('text')
+      .attr('x', 25)
+      .attr('y', 5)
+      .text(d => d)
+      .style('font-size', '12px')
+      .style('text-anchor', 'start');
+  }, [data, dimensions]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (wrapperRef.current) {
+        const { clientWidth, clientHeight } = wrapperRef.current;
+        setDimensions({ width: clientWidth, height: clientHeight });
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
-  // if (data.length === 0) return <p>No data available for the selected date range.</p>;
+  if (data.length === 0) return <p>No data available for the selected date range.</p>;
 
   return (
     <div ref={wrapperRef} style={{ width: '100%', height: '100%' }}>
