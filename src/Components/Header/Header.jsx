@@ -1,27 +1,36 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import NotificationDropdown from './NotificationDropdown';
 import UserDropdown from './UserDropdown';
+import ThemeDropdown from './ThemeDropdown'; // Import ThemeDropdown
 import logo from '../../assets/image/logo.png'; 
-
+import { HiOutlineMenu } from "react-icons/hi";
+import { Menu, Transition } from '@headlessui/react';
+import MobileMenuDropdown from './MobileMenuDropdown';
 
 const Header = () => {
   return (
-    <header className="bg-slate-100 shadow lg:h-16 px-4 flex sm:h-32  justify-between items-center">
-        <div className="flex items-center">
-         {/* Hiển thị Logo */}
-         <img src={logo} alt="Logo" className="w-[180px] h-auto object-contain lg:hidden " />
-         <h2 className="font-bold lg:text-2xl sm:hidden lg:block sm:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 from-10% via-sky-500 via-30% to-emerald-500 to-90%">Nhà máy cơ khí Q.C.S</h2>
-        </div>
+    <header className="bg-slate-100 dark:bg-[#305680] shadow lg:h-16 px-4 flex sm:h-32 justify-between items-center">
+      <div className="flex items-center">
+        {/* Hiển thị Logo */}
+        <img src={logo} alt="Logo" className="w-[180px] h-auto object-contain lg:hidden" />
+        <h2 className="font-bold lg:text-2xl sm:hidden lg:block sm:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-blue-500 dark:text-white">
+          Nhà máy cơ khí Q.C.S
+        </h2>
+      </div>
 
-      <div className="lg:flex lg:items-center lg:space-x-6 sm:hidden md:hidden ">
+      <div className="lg:flex lg:items-center lg:justify-center lg:space-x-6 sm:hidden md:hidden">
+        {/* Thêm dropdown cho Light/Dark mode */}
+        <ThemeDropdown />
+
         {/* Notification Dropdown */}
         <NotificationDropdown />
+
         {/* User Dropdown */}
         <UserDropdown />
       </div>
-      <div className="lg:items-center lg:space-x-6 lg:hidden sm:flex ">
-        <div className="mr-2 text-xl">AAA</div>
-      </div>
+
+      {/* Menu thu gọn trên mobile */}
+      <MobileMenuDropdown/>
     </header>
   );
 };

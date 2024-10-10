@@ -133,7 +133,7 @@ const MachineWorkScheduleList = () => {
   return (
     <>
       {/* Area Selection */}
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-4 p-4">
        <Button className="ml-2 bg-gray-400 text-white " onClick={toggleCalendar}>
             Lịch Sản xuất
           </Button>
@@ -177,7 +177,7 @@ const MachineWorkScheduleList = () => {
           <div
             key={machine.id}
             onClick={() => handleMachineClick(machine)} // Xử lý khi click vào máy
-            className={`relative cursor-pointer transition duration-300 ease-in-out h-full
+            className={`relative cursor-pointer transition duration-300 ease-in-out h-full p-2
               ${isSelecting && selectedMachines.some((m) => m.id === machine.id) ? 'border-2 border-blue-700 round-lg bg-gray-600 ' : ''}`}
           >
             <MachineWorkScheduleCard

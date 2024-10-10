@@ -19,12 +19,12 @@ function MainLayout({ children, className }) {
       </aside>
 
       <div className="flex flex-col flex-grow">
-        <header className="flex-shrink-0 lg:ml-2">
+        <header className="flex-shrink-0 lg:ml-1">
           <Header />
         </header>
 
         {/* Nội dung chính */}
-        <main className="lg:flex-grow  lg:bg-gray-100 sm:bg-transparent  lg:rounded-lg overflow-auto mt-2 lg:ml-2">
+        <main className="lg:flex-grow p-4 lg:bg-gray-100 sm:bg-transparent  lg:rounded-lg overflow-auto mt-1 lg:ml-1">
           {children}
         </main>
       </div>

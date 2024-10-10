@@ -21,7 +21,7 @@ function Login() {
     setIsLoading(true); // Bắt đầu loading
   
     try {
-      const response = await axios.post('http://172.19.200.193:5000/api/login', {
+      const response = await axios.post('http://192.168.1.13:5000/api/login', {
         username,
         password,
       });
@@ -30,8 +30,8 @@ function Login() {
         const { token } = response.data;
         localStorage.setItem('token', token);
   
-        const decodedToken = jwtDecode(token); // Giải mã token
-        const role = decodedToken.user.role; // Lấy vai trò từ token
+        const decodedToken = jwtDecode(token); 
+        const role = decodedToken.user.role; 
         localStorage.setItem('role', role);  
         setUserRole(role);
 
@@ -49,7 +49,7 @@ function Login() {
         // Log router nhận được trước khi điều hướng
         if (role ==='CNVH') {
           console.log('Điều hướng tới: /dashboard/mobile');
-          navigate('/dashboard/mobile'); // Điều hướng tới dashboard mobile cho CNVH
+          navigate('/dashboard/mobile'); 
         } else {
           console.log('Điều hướng tới: /dashboard');
           navigate('/dashboard'); // Điều hướng tới dashboard chính cho các vai trò khác

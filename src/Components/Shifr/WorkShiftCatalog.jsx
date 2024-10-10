@@ -27,7 +27,7 @@ const WorkShiftCatalog = () => {
   // Fetch work shifts from backend
   const fetchWorkShifts = async () => {
     try {
-      const response = await axios.get('http://172.19.200.193:5000/api/workShifts');
+      const response = await axios.get('http://192.168.1.13:5000/api/workShifts');
       setWorkShifts(response.data);
     } catch (error) {
       toast.error('Lỗi khi tải danh sách ca làm việc');
@@ -69,12 +69,12 @@ const WorkShiftCatalog = () => {
       if (selectedShift) {
         // Update work shift
         console.log('Updating work shift:', selectedShift._id);
-        await axios.put(`http://172.19.200.193:5000/api/workShifts/${selectedShift._id}`, shiftData);
+        await axios.put(`http://192.168.1.13:5000/api/workShifts/${selectedShift._id}`, shiftData);
         toast.success('Cập nhật ca làm việc thành công!');
       } else {
         // Create new work shift
         console.log('Creating new work shift', shiftData.breakTimeData);
-        await axios.post('http://172.19.200.193:5000/api/workShifts', shiftData);
+        await axios.post('http://192.168.1.13:5000/api/workShifts', shiftData);
         toast.success('Thêm ca làm việc thành công!');
       }
       fetchWorkShifts();
@@ -91,7 +91,7 @@ const WorkShiftCatalog = () => {
   // Handle delete work shift
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://172.19.200.193:5000/api/workShifts/${id}`);
+      await axios.delete(`http://192.168.1.13:5000/api/workShifts/${id}`);
       toast.success('Xóa ca làm việc thành công!');
       fetchWorkShifts();
     } catch (error) {
