@@ -1,119 +1,103 @@
 import React, { useState } from 'react';
+import { FaGoogle, FaFacebook, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { FaUserAlt, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa'; // Thêm các icon show/hide password
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { jwtDecode } from 'jwt-decode'; // Import đúng jwtDecode
-import { useAuth } from '../context/AuthContext'; // Đảm bảo đường dẫn này chính xác
+import { jwtDecode } from 'jwt-decode';
+import logo from '../../src/assets/image/logo.png' 
+import { useAuth } from '../context/AuthContext';
 
 function Login() {
   const navigate = useNavigate();
   const { setUserRole } = useAuth();
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // Loading state
-  const [showPassword, setShowPassword] = useState(false); // Trạng thái để hiển thị/ẩn mật khẩu
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async (event) => {
-    event.preventDefault(); // Ngăn form reload lại trang
-    console.log('Nút Đăng nhập được nhấn'); // Log sự kiện nhấn nút
-  
-    setIsLoading(true); // Bắt đầu loading
-  
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
     try {
-      const response = await axios.post('http://192.168.1.13:5000/api/login', {
-        username,
-        password,
-      });
-  
+      const response = await axios.post('http://192.168.1.13:5000/api/login', { username: email, password });
       if (response.status === 200) {
         const { token } = response.data;
         localStorage.setItem('token', token);
-  
         const decodedToken = jwtDecode(token); 
         const role = decodedToken.user.role; 
         localStorage.setItem('role', role);  
         setUserRole(role);
-
-        // Log router trước khi điều hướng
-        console.log('Vai trò nhận được:', role);
-
-        // Đợi cho đến khi vai trò được cập nhật xong
-        await new Promise((resolve) => setTimeout(resolve, 100)); 
-
-        console.log('Token:', localStorage.getItem('token'));
-        console.log('Role:', localStorage.getItem('role'));
-  
         toast.success('Đăng nhập thành công!');
-
-        // Log router nhận được trước khi điều hướng
-        if (role ==='CNVH') {
-          console.log('Điều hướng tới: /dashboard/mobile');
-          navigate('/dashboard/mobile'); 
-        } else {
-          console.log('Điều hướng tới: /dashboard');
-          navigate('/dashboard'); // Điều hướng tới dashboard chính cho các vai trò khác
-        }
+        navigate(role === 'CNVH' ? '/dashboard/mobile' : '/dashboard');
       }
     } catch (error) {
-      console.error('Login Error:', error); 
-      toast.error('Sai tên đăng nhập hoặc mật khẩu!', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      toast.error('Sai tên đăng nhập hoặc mật khẩu!');
     } finally {
-      setIsLoading(false); // Kết thúc loading dù thành công hay thất bại
+      setIsLoading(false);
     }
   };
   
-
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-cyan-500 to-blue-700 px-4 sm:px-0">
-      <div className="w-full max-w-lg sm:w-3/4 md:w-1/2 lg:w-1/3 p-8 bg-white rounded-lg shadow-xl">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">Đăng nhập tài khoản của bạn</h2>
+    <div className="min-h-screen flex flex-col lg:flex-row">
+            <div 
+                  className="lg:w-1/2 bg-cover bg-center  bg-no-repeat text-white flex flex-col justify-center items-center p-16"
+                  style={{ backgroundImage: 'url(/src/assets/image/QCS.jpg)' }}  // Thay thế bằng đường dẫn ảnh của bạn
+                >
+                  
+      </div>
+      {/* Left section - Form */}
+      <div className="lg:w-1/2 bg-gradient-to-r from-blue-100 to-blue-200  flex flex-col justify-center items-center px-8 py-4 shadow-lg">
+        {/* Logo */}
+        <div className="flex flex-rows items-center ">
+          <img src={logo} alt="Logo" className="w-[480px] h-auto object-contain " />
+          
+        </div>
+        <h2 className="text-2xl font-bold ml-2 text-blue-600 mb-8">DI.OEE</h2>
+
         
-        <form className="space-y-6" onSubmit={handleLogin}>
+       
+        
+        <form onSubmit={handleLogin} className="w-full max-w-sm space-y-4">
           <div className="relative">
-            <FaUserAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"/>
             <input
-              id="username"
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              placeholder="username"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full py-3 px-4 border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
-              className="w-full py-3 pl-10 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              placeholder="Tên đăng nhập"
             />
           </div>
           
           <div className="relative">
-            <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"/>
             <input
-              id="password"
-              type={showPassword ? "text" : "password"} // Chuyển đổi giữa hiển thị và ẩn mật khẩu
+              type={showPassword ? 'text' : 'password'}
+              placeholder="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="w-full py-3 px-4  border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
-              className="w-full py-3 pl-10 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              placeholder="Mật khẩu"
             />
             <span
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer"
               onClick={() => setShowPassword(!showPassword)}
             >
-              {showPassword ? <FaEye /> : <FaEyeSlash />}
+              {showPassword ? <FaEye />:<FaEyeSlash />  }
             </span>
+          </div>
+
+          <div className="flex justify-between items-center p-2 text-sm text-gray-600 mb-2 ">
+            <label className="flex items-center space-x-2">
+              <input type="checkbox" className="form-checkbox" />
+              <span>Ghi nhớ đăng nhập</span>
+            </label>
+            <a href="#" className="text-blue-500 hover:underline">Quên mật khẩu?</a>
           </div>
 
           <button 
             type="submit" 
+            className={`w-full py-3 text-white bg-blue-600 rounded-lg ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
             disabled={isLoading} 
-            className={`w-full py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {isLoading ? (
               <span className="flex items-center justify-center">
