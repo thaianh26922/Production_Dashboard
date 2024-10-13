@@ -41,7 +41,7 @@ const TimelineChart = ({ selectedDate }) => {
       }
 
       const response = await axios.get(
-        `http://192.168.127.254:5000/api/telemetry?deviceId=${deviceId}&startDate=${formattedStartDate}&endDate=${formattedEndDate}`
+        `http://192.168.1.13:5000/api/telemetry?deviceId=${deviceId}&startDate=${formattedStartDate}&endDate=${formattedEndDate}`
       );
       setData(response.data);
     } catch (error) {
