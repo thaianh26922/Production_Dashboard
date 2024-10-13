@@ -1,19 +1,80 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Select, DatePicker, Button } from 'antd';
+import axios from 'axios'; // Import axios để gọi API
 import MachineWorkScheduleCard from '../../../Components/Equiment/MachineSchedule/MachineWorkScheduleCard';
 import CustomUpdateModal from '../../../Components/Modal/CustomUpdateModal'; // Import custom modal component
 import CustomCalendar from '../../../Components/Calendar/CustomCalendar'; // Import CustomCalendar component
-
+import MachineScheduleModal from '../../../Components/Modal/MachineScheduleModal';
+import dayjs from 'dayjs';
 const { Option } = Select;
 
 const MachineWorkScheduleList = () => {
-  const [selectedArea, setSelectedArea] = useState('all'); // State to store selected area
-  const [selectedDates, setSelectedDates] = useState([new Date().toISOString().split('T')[0]]); // Track selected dates (default to today)
+  const [areas, setAreas] = useState([]); // State để lưu danh sách khu vực từ API
+  const [devices, setDevices] = useState([]);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [productionTasks, setProductionTasks] = useState([]);
+  const [filteredDevices, setFilteredDevices] = useState([]);
+  const [selectedArea, setSelectedArea] = useState('all'); // State để lưu khu vực được chọn
+  const [selectedDates, setSelectedDates] = useState([dayjs().format('YYYY-MM-DD')]); // Track selected dates (default to today)
   const [selectedMachines, setSelectedMachines] = useState([]); // Track selected machines
+  
   const [isSelecting, setIsSelecting] = useState(false); // Track if the user is selecting devices
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // Modal visibility for update confirmation
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false); // Custom modal visibility for the final confirmation
   const [isCalendarVisible, setIsCalendarVisible] = useState(false); // Track if calendar is visible
+
+  // Gọi API để lấy danh sách khu vực
+  useEffect(() => {
+    const fetchAreasAndDevices = async () => {
+      try {
+        // Lấy danh sách khu vực
+        const areasResponse = await axios.get('http://192.168.127.254:5000/api/areas');
+        setAreas(areasResponse.data);
+
+        // Lấy danh sách thiết bị
+        const devicesResponse = await axios.get('http://192.168.127.254:5000/api/device');
+        setDevices(devicesResponse.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchAreasAndDevices();
+  }, []);
+
+  useEffect(() => {
+    if (selectedArea === 'all') {
+      setFilteredDevices(devices); // Nếu chọn "Toàn bộ khu vực", hiển thị tất cả thiết bị
+    } else {
+      // Ensure comparison is done based on the `areaName`
+      const selectedAreaName = areas.find(area => area._id === selectedArea)?.areaName.trim().toLowerCase();
+  
+      const filtered = devices.filter(device => device.areaName.trim().toLowerCase() === selectedAreaName); // Lọc theo khu vực
+      console.log("Filtered Devices:", filtered); // Log filtered devices
+      setFilteredDevices(filtered);
+    }
+  }, [selectedArea, devices]);
+  useEffect(() => {
+    const fetchProductionTasks = async () => {
+      try {
+        const response = await axios.get('http://192.168.127.254:5000/api/productiontask');
+        setProductionTasks(response.data); // Lưu dữ liệu nhiệm vụ sản xuất vào state
+      } catch (error) {
+        console.error('Error fetching production tasks:', error);
+      }
+    };
+  
+    fetchProductionTasks(); // Gọi API khi component được mount
+  }, []);
+  
+  
+  const getTasksForDevice = (deviceName) => {
+    return productionTasks.filter(task => {
+      const taskDate = new Date(task.date).toISOString().split('T')[0]; // Lấy ngày từ task
+      return task.deviceName === deviceName && taskDate === selectedDates[0]; // So sánh ngày và thiết bị
+    });
+  };
+   
 
   // Handle saving the selected dates
   const handleSaveDates = () => {
@@ -44,7 +105,13 @@ const MachineWorkScheduleList = () => {
     // Kiểm tra xem máy đã được chọn chưa
     if (selectedMachines.some((m) => m.id === machine.id)) {
       // Nếu đã được chọn, bỏ chọn máy
-      setSelectedMachines(prevMachines => prevMachines.filter((m) => m.id !== machine.id));
+      const updatedMachines = selectedMachines.filter((m) => m.id !== machine.id);
+      setSelectedMachines(updatedMachines);
+
+      // Kiểm tra nếu không còn máy nào được chọn, thì chuyển lại trạng thái về "Chọn Thiết Bị"
+      if (updatedMachines.length === 0) {
+        setIsSelecting(false);
+      }
     } else {
       // Nếu chưa được chọn, thêm máy vào danh sách
       setSelectedMachines(prevMachines => [...prevMachines, machine]);
@@ -58,51 +125,15 @@ const MachineWorkScheduleList = () => {
 
   // Handle date selection from DatePicker
   const handleDateChange = (date, dateString) => {
-    setSelectedDates([dateString]); // Update selected date to the selected date string
-  };
-
-  // Dynamic machines generation based on selected area
-  const generateMachines = () => {
-    if (selectedArea === 'area1') {
-      return Array.from({ length: 17 }, (_, index) => ({
-        id: index + 1,
-        name: `CNC - ${index + 1}`,
-        status: 'Chạy',
-        area: 'area1',
-        shift: 'Ca Sáng',
-        employees: ['nv1', 'nv2'],
-      }));
-    } else if (selectedArea === 'area2') {
-      return Array.from({ length: 18 }, (_, index) => ({
-        id: index + 1,
-        name: `PHAY - ${index + 1}`,
-        status: 'Chờ',
-        area: 'area2',
-        shift: 'Ca Chiều',
-        employees: ['nv3', 'nv4'],
-      }));
+    if (date && dayjs(date).isValid()) { // Sử dụng dayjs để kiểm tra ngày hợp lệ
+      console.log("Selected date:", dateString);
+      setSelectedDates([dateString]); // Cập nhật selectedDates với ngày đã chọn
     } else {
-      const cncMachines = Array.from({ length: 17 }, (_, index) => ({
-        id: index + 1,
-        name: `CNC - ${index + 1}`,
-        status: 'Chạy',
-        area: 'area1',
-        shift: 'Ca Sáng',
-        employees: ['nv1', 'nv2'],
-      }));
-      const phayMachines = Array.from({ length: 18 }, (_, index) => ({
-        id: index + 18 + 1,
-        name: `PHAY - ${index + 1}`,
-        status: 'Chờ',
-        area: 'area2',
-        shift: 'Ca Chiều',
-        employees: ['nv3', 'nv4'],
-      }));
-      return [...cncMachines, ...phayMachines];
+      console.log("Invalid date selected");
+      setSelectedDates([dayjs().format('YYYY-MM-DD')]); // Đặt lại về ngày hôm nay nếu không hợp lệ
     }
   };
-
-  // Handle form submission to save the edited details
+   // Handle form submission to save the edited details
   const handleSave = () => {
     console.log('Updated machine details:', selectedMachines);
     setIsUpdateModalOpen(false); // Close the modal after saving
@@ -124,7 +155,15 @@ const MachineWorkScheduleList = () => {
     setIsUpdateModalOpen(false); // Close the update confirmation modal
     setSelectedMachines([]); // Clear selected machines on cancel
   };
+  // Hàm mở modal
+  const handleOpenScheduleModal = () => {
+    setIsScheduleModalOpen(true);
+  };
 
+  // Hàm đóng modal
+  const handleCloseScheduleModal = () => {
+    setIsScheduleModalOpen(false);
+  };
   // Toggle calendar visibility
   const toggleCalendar = () => {
     setIsCalendarVisible(!isCalendarVisible); // Toggle calendar visibility
@@ -134,9 +173,16 @@ const MachineWorkScheduleList = () => {
     <>
       {/* Area Selection */}
       <div className="flex justify-between items-center mb-4 p-4">
-       <Button className="ml-2 bg-gray-400 text-white " onClick={toggleCalendar}>
-            Lịch Sản xuất
-          </Button>
+       
+      <Button className="ml-2 bg-gray-400 text-white " onClick={handleOpenScheduleModal}>
+        Lịch Sản xuất
+      </Button>
+
+        <MachineScheduleModal
+          open={isScheduleModalOpen}
+          onClose={handleCloseScheduleModal}
+          selectedMachines={selectedMachines}
+        />
         <div className="flex items-center space-x-1">
           {/* Select Dropdown for Area */}
           <Select
@@ -146,18 +192,25 @@ const MachineWorkScheduleList = () => {
             style={{ width: 160 }}
           >
             {/* Area options */}
-            <Option value="all">Toàn nhà máy</Option>
-            <Option value="area1">KHU VỰC TIỆN</Option>
-            <Option value="area2">KHU VỰC PHAY</Option>
+            <Option key="all" value="all">Toàn nhà máy</Option>
+            {areas && areas.map((area) => (
+              // Đảm bảo key là giá trị duy nhất (ví dụ: id)
+              area._id ? (
+                <Option key={area._id} value={area._id}>{area.areaName}</Option>
+              ) : null
+            ))}
           </Select>
+
 
           {/* Toggle "Chọn Thiết Bị" or "Bỏ Chọn Thiết Bị" */}
           <Button onClick={toggleSelecting}>
             {isSelecting ? 'Bỏ Chọn Thiết Bị' : 'Chọn Thiết Bị'}
           </Button>
-
-          {/* DatePicker */}
-          <DatePicker onChange={handleDateChange} />
+          <DatePicker 
+        onChange={handleDateChange} 
+        value={dayjs(selectedDates[0])} // Hiển thị ngày từ selectedDates, ngày đầu tiên luôn là hôm nay
+        defaultValue={dayjs()} // Đặt giá trị mặc định là hôm nay nếu chưa có gì được chọn
+      />
 
           {/* Conditionally render "Cập nhật nhiệm vụ sản xuất" */}
           {selectedMachines.length > 0 && (
@@ -173,36 +226,23 @@ const MachineWorkScheduleList = () => {
 
       {/* Machine List */}
       <div className="grid grid-cols-4 gap-2">
-        {generateMachines().map((machine) => (
-          <div
-            key={machine.id}
-            onClick={() => handleMachineClick(machine)} // Xử lý khi click vào máy
-            className={`relative cursor-pointer transition duration-300 ease-in-out h-full p-2
-              ${isSelecting && selectedMachines.some((m) => m.id === machine.id) ? 'border-2 border-blue-700 round-lg bg-gray-600 ' : ''}`}
-          >
-            <MachineWorkScheduleCard
-              machine={machine}
-              shiftOptions={[
-                { value: 'Ca Sáng', label: 'Ca Sáng' },
-                { value: 'Ca Chiều', label: 'Ca Chiều' },
-                { value: 'Ca Tối', label: 'Ca Tối' },
-              ]}
-              employeeOptions={[
-                { value: 'nv1', label: 'Nhân viên 1' },
-                { value: 'nv2', label: 'Nhân viên 2' },
-                { value: 'nv3', label: 'Nhân viên 3' },
-                { value: 'nv4', label: 'Nhân viên 4' },
-              ]}
-            />
-            {/* Green tick for selected machines, only visible when a machine is selected */}
-            {isSelecting && selectedMachines.some((m) => m.id === machine.id) && (
-              <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1">
-                ✓
-              </div>
-            )}
-          </div>
-        ))}
+    {filteredDevices.map((machine) => (
+      <div
+        key={machine._id}
+        onClick={() => handleMachineClick(machine)}
+        className={`relative cursor-pointer transition duration-300 ease-in-out h-full p-2
+          ${isSelecting && selectedMachines.some((m) => m.id === machine._id) ? 'border-2 border-blue-700 round-lg bg-gray-600 ' : ''}`}
+      >
+        <MachineWorkScheduleCard
+          machine={machine}
+          tasks={getTasksForDevice(machine.deviceName)} // Truyền nhiệm vụ theo thiết bị
+        />
+        {isSelecting && selectedMachines.some((m) => m.id === machine.id) && (
+          <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1">✓</div>
+        )}
       </div>
+    ))}
+  </div>
 
       {/* Update Confirmation Modal */}
       <Modal
@@ -224,6 +264,7 @@ const MachineWorkScheduleList = () => {
         onSave={handleSaveDates} // Save the selected dates
         selectedDates={selectedDates} // Pass selected dates to modal
         setSelectedDates={setSelectedDates}
+        setSelectedMachines={setSelectedMachines}
         selectedMachines={selectedMachines} // Allow modal to update dates if necessary
       />
 

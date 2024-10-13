@@ -19,7 +19,7 @@ function Login() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await axios.post('http://192.168.1.13:5000/api/login', { username: email, password });
+      const response = await axios.post('http://192.168.127.254:5000/api/login', { username: email, password });
       if (response.status === 200) {
         const { token } = response.data;
         localStorage.setItem('token', token);
@@ -40,13 +40,13 @@ function Login() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
             <div 
-                  className="lg:w-1/2 bg-cover bg-center  bg-no-repeat text-white flex flex-col justify-center items-center p-16"
+                  className="lg:w-2/3 bg-cover bg-center  bg-no-repeat text-white flex flex-col justify-center items-center p-16"
                   style={{ backgroundImage: 'url(/src/assets/image/QCS.jpg)' }}  // Thay thế bằng đường dẫn ảnh của bạn
                 >
                   
       </div>
       {/* Left section - Form */}
-      <div className="lg:w-1/2 bg-gradient-to-r from-blue-100 to-blue-200  flex flex-col justify-center items-center px-8 py-4 shadow-lg">
+      <div className="lg:w-1/3 bg-gradient-to-r from-blue-100 to-blue-200  flex flex-col justify-center items-center px-8 py-4 shadow-lg">
         {/* Logo */}
         <div className="flex flex-rows items-center ">
           <img src={logo} alt="Logo" className="w-[480px] h-auto object-contain " />
@@ -57,14 +57,14 @@ function Login() {
         
        
         
-        <form onSubmit={handleLogin} className="w-full max-w-sm space-y-4">
+        <form onSubmit={handleLogin} className="w-full max-w-sm p-6 ">
           <div className="relative">
             <input
               type="text"
               placeholder="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full py-3 px-4 border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full mb-6 py-3 px-4 border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
@@ -86,7 +86,7 @@ function Login() {
             </span>
           </div>
 
-          <div className="flex justify-between items-center p-2 text-sm text-gray-600 mb-2 ">
+          <div className="flex justify-between items-center p-2 text-sm text-gray-600 mb-4 mt-4 ">
             <label className="flex items-center space-x-2">
               <input type="checkbox" className="form-checkbox" />
               <span>Ghi nhớ đăng nhập</span>
@@ -111,14 +111,6 @@ function Login() {
               'Đăng nhập'
             )}
           </button>
-
-          <div className="flex items-center justify-between mt-4">
-            <label className="flex items-center">
-              <input type="checkbox" className="form-checkbox text-blue-600" />
-              <span className="ml-2 text-sm text-gray-600">Ghi nhớ đăng nhập</span>
-            </label>
-            <a href="#" className="text-sm text-blue-600 hover:underline">Quên mật khẩu?</a>
-          </div>
         </form>
       </div>
     </div>

@@ -11,7 +11,7 @@ function App() {
     <Provider store={store}>
       <AuthProvider>
         <AppRouter />
-        <ToastContainer // Thêm ToastContainer để hiển thị thông báo
+        <ToastContainer 
           position="top-right"
           autoClose={3000}
           hideProgressBar={false}

@@ -25,16 +25,26 @@ const ResponeSubmit = () => {
 
   // Hàm xử lý khi nhấn vào nút phản hồi
   const handleResponse = () => {
-    toast.success('Phản hồi thành công!', {
-      position: "top-center",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      style: { fontSize: '1.6rem', padding: '1rem', width: '90%' }, // Kích thước phù hợp cho điện thoại
-    });
+    if (selectedReason) {
+      toast.success('Phản hồi thành công!', {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        style: { fontSize: '1.6rem', padding: '1rem', width: '90%' }, // Kích thước phù hợp cho điện thoại
+      });
+  
+      // Điều hướng sau một thời gian ngắn (ví dụ 100ms)
+      setTimeout(() => {
+        navigate('/dashboard/mobile/issue');
+      }, 500);
+    }
   };
+  
+  
+  
 
   // Hàm xử lý quay lại trang trước khi hủy bỏ
   const handleCancel = () => {
@@ -72,9 +82,10 @@ const ResponeSubmit = () => {
       {/* Nút phản hồi */}
       <button
         onClick={handleResponse}
+      
         disabled={!isResponseEnabled} // Nút chỉ hoạt động khi isResponseEnabled = true
         className={`w-[90%] p-8 rounded-lg shadow-lg text-white text-center ml-6 mt-2 text-4xl font-bold transition duration-300 ease-in-out ${
-          isResponseEnabled ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-400 cursor-not-allowed'
+          isResponseEnabled ? 'bg-blue-500 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'
         }`}
       >
         Phản hồi

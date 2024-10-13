@@ -13,6 +13,7 @@ import moment from 'moment';
 
 // Import sample template and data for devices
 import sampleTemplate from '../../../assets/form/Thiết bị.xlsx';
+import Breadcrumb from '../../../Components/Breadcrumb/Breadcrumb';
 
 const DeviceManagement = () => {
   const [devices, setDevices] = useState([]);
@@ -44,13 +45,13 @@ const DeviceManagement = () => {
   const fetchDevicesAndAreas = async () => {
     try {
       // Fetch devices
-      const deviceResponse = await axios.get('http://192.168.1.13:5000/api/device');
+      const deviceResponse = await axios.get('http://192.168.127.254:5000/api/device');
       const sortedDevices = sortDevicesAlphabetically(deviceResponse.data);
       setDevices(sortedDevices);
       setFilteredDevices(sortedDevices);
 
       // Fetch areas for dropdown
-      const areaResponse = await axios.get('http://192.168.1.13:5000/api/areas');
+      const areaResponse = await axios.get('http://192.168.127.254:5000/api/areas');
       setAreas(areaResponse.data); // Store areas from API
     } catch (error) {
       toast.error('Failed to fetch devices or areas');
@@ -62,14 +63,22 @@ const DeviceManagement = () => {
   }, []);
 
   // Handle search input change
-  const handleSearch = (query) => {
+ // Handle search input change
+const handleSearch = (query) => {
+  if (!query) {
+    // Nếu không có nội dung tìm kiếm, reset lại danh sách thiết bị
+    setFilteredDevices(devices);
+  } else {
+    // Thực hiện lọc danh sách thiết bị theo query
     const filtered = devices.filter((device) =>
       device.deviceCode.toLowerCase().includes(query.toLowerCase()) ||
       device.deviceName.toLowerCase().includes(query.toLowerCase()) ||
-      device.area.toLowerCase().includes(query.toLowerCase())
+      device.areaName.toLowerCase().includes(query.toLowerCase()) // Sửa lại 'device.area' thành 'device.areaName'
     );
     setFilteredDevices(filtered);
-  };
+  }
+};
+
 
   // Kiểm tra trùng lặp mã thiết bị hoặc tên thiết bị
   const checkDuplicateDevice = (deviceCode, deviceName) => {
@@ -96,11 +105,11 @@ const DeviceManagement = () => {
     try {
       if (selectedDevice) {
         // Update device
-        await axios.put(`http://192.168.1.13:5000/api/device/${selectedDevice._id}`, deviceData);
+        await axios.put(`http://192.168.127.254:5000/api/device/${selectedDevice._id}`, deviceData);
         toast.success('Cập nhật thiết bị thành công!');
       } else {
         // Create new device
-        await axios.post('http://192.168.1.13:5000/api/device', deviceData);
+        await axios.post('http://192.168.127.254:5000/api/device', deviceData);
         toast.success('Thêm thiết bị thành công!');
       }
 
@@ -118,7 +127,7 @@ const DeviceManagement = () => {
   // Delete device by ID
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://192.168.1.13:5000/api/device/${id}`);
+      await axios.delete(`http://192.168.127.254:5000/api/device/${id}`);
       toast.success('Xóa thiết bị thành công!');
       fetchDevicesAndAreas(); // Refresh device list after delete
     } catch (error) {
@@ -143,7 +152,8 @@ const DeviceManagement = () => {
 
   return (
     <div className="p-8 bg-white shadow-md rounded-md">
-      <div className="flex items-center gap-2 mb-4">
+      <Breadcrumb />
+      <div className="flex items-center gap-2 mb-4 mt-2">
         <SearchButton
           placeholder="Tìm kiếm mã thiết bị, tên thiết bị, khu vực..."
           onSearch={(q) => handleSearch(q)}

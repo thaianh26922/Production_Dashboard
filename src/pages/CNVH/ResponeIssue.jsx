@@ -149,7 +149,7 @@ const ResponeIssue = () => {
       <button
         onClick={handleResponse}
         disabled={!isResponseEnabled} // Nút chỉ hoạt động khi isResponseEnabled = true
-        className={`w-[90%] p-8 rounded-lg shadow-lg text-white text-center ml-8 mt-2 text-4xl font-bold transition duration-300 ease-in-out ${isResponseEnabled ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-400 cursor-not-allowed'}`}
+        className={`w-[90%] p-8 rounded-lg shadow-lg text-white text-center ml-8 mt-2 text-4xl font-bold transition duration-300 ease-in-out ${isResponseEnabled ? 'bg-blue-600 hover:bg-blue-500' : 'bg-gray-400 cursor-not-allowed'}`}
       >
         Phản hồi
       </button>

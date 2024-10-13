@@ -3,7 +3,7 @@ import { Modal, Button } from 'antd';
 import CustomCalendar from '../../Components/Calendar/CustomCalendar';
 import ProductionTaskManagement from './ProductionTaskManagement';
 
-const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelectedDates, selectedMachines }) => {
+const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates,setSelectedMachines,setSelectedDates, selectedMachines }) => {
   const [taskData, setTaskData] = useState({}); // Dữ liệu nhiệm vụ sản xuất lưu theo ngày
 
   // Hàm xử lý khi lưu nhiệm vụ cùng ngày đã chọn
@@ -67,6 +67,7 @@ const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelected
           {/* Quản lý nhiệm vụ sản xuất */}
           <ProductionTaskManagement 
             selectedMachines={selectedMachines}
+            setSelectedMachines={setSelectedMachines}
             setTaskData={setTaskData} // Cập nhật dữ liệu nhiệm vụ khi chỉnh sửa hoặc thêm mới
             taskData={taskData} // Truyền dữ liệu nhiệm vụ hiện tại để cho phép chỉnh sửa/cập nhật
             selectedDates={selectedDates || []}

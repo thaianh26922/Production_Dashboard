@@ -39,6 +39,7 @@ function DeviceReport() {
   const handleDateChange = (dates) => {
     setSelectedDate(dates);
   };
+  console.log(selectedDate);
 
   const runtimeChartData = {
     labels: ['Dừng', 'Chờ', 'Cài đặt', 'Tắt máy'],

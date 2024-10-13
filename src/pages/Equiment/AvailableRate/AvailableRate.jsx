@@ -3,18 +3,17 @@ import { Select, DatePicker } from 'antd';
 import Breadcrumb from '../../../Components/Breadcrumb/Breadcrumb'; // Đường dẫn tới Breadcrumb
 import AvailableGrid from '../../../Components/AvailableRate/AvailableGrid'; // Import AvailableGrid
 import MachineComparisonChart from '../../../Components/AvailableRate/MachineComparisonChart';
+import moment from 'moment'; // Import moment
 
 
-const onChange = (date, dateString) => {
-  console.log(date, dateString);
-};
+
 
 
 const { Option } = Select;
 
 function AvailableRate() {
   const [selectedMachineType, setSelectedMachineType] = useState('CNC'); // State cho loại máy
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(moment());
 
   // Danh sách máy CNC và PHAY
   const cncMachines = Array.from({ length: 17 }, (_, i) => ({ value: `CNC ${i + 1}`, label: `CNC ${i + 1}` }));
@@ -77,11 +76,15 @@ function AvailableRate() {
     setSelectedMachineType(value);
     setData(generateSimulatedData(value)); // Cập nhật dữ liệu biểu đồ khi thay đổi loại máy
   };
+  const handleDateChange = (date, dateString) => {
+    setSelectedDate(date); 
+    console.log(date, dateString);
+  };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <div></div>
+        <div><Breadcrumb /></div>
         <div className="flex items-center space-x-2">
           {/* Lựa chọn loại máy CNC hoặc PHAY */}
           <Select
@@ -93,7 +96,8 @@ function AvailableRate() {
             <Option value="CNC">Tổ Tiện</Option>
             <Option value="PHAY">Tổ Phay</Option>
           </Select>
-          <DatePicker onChange={onChange} needConfirm />
+          <DatePicker onChange={handleDateChange} 
+            value={selectedDate}  needConfirm />
         </div>
       </div>
       {/* Hiển thị AvailableGrid */}

@@ -9,6 +9,7 @@ import ExportExcelButton from '../../Button/ExportExcelButton';
 import FormSample from '../../Button/FormSample';
 import ImportButton from '../../Button/ImportButton';
 import axios from 'axios'; // Thêm axios để gọi API
+import Breadcrumb from '../../Breadcrumb/Breadcrumb';
 
 const { Option } = Select; // Ant Design Select
 
@@ -24,7 +25,7 @@ const EmployeeCatalog = () => {
   // Fetch employees from API on component mount
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get('http://192.168.1.13:5000/api/employees'); // API GET để lấy danh sách nhân viên
+      const response = await axios.get('http://192.168.127.254:5000/api/employees'); // API GET để lấy danh sách nhân viên
       setEmployees(response.data);
       setFilteredEmployees(response.data);
     } catch (error) {
@@ -35,7 +36,7 @@ const EmployeeCatalog = () => {
   // Fetch areas from API on component mount
   const fetchAreas = async () => {
     try {
-      const response = await axios.get('http://192.168.1.13:5000/api/areas'); // API GET để lấy danh sách khu vực
+      const response = await axios.get('http://192.168.127.254:5000/api/areas'); // API GET để lấy danh sách khu vực
       setAreas(response.data);
     } catch (error) {
       toast.error('Lỗi khi tải danh sách khu vực');
@@ -62,11 +63,11 @@ const EmployeeCatalog = () => {
     try {
       if (selectedEmployee) {
         // Update employee
-        await axios.put(`http://192.168.1.13:5000/api/employees/${selectedEmployee._id}`, values);
+        await axios.put(`http://192.168.127.254:5000/api/employees/${selectedEmployee._id}`, values);
         toast.success('Cập nhật nhân viên thành công!');
       } else {
         // Create new employee
-        await axios.post('http://192.168.1.13:5000/api/employees', values);
+        await axios.post('http://192.168.127.254:5000/api/employees', values);
         toast.success('Thêm nhân viên thành công!');
       }
 
@@ -82,7 +83,7 @@ const EmployeeCatalog = () => {
   // Handle delete employee by ID
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://192.168.1.13:5000/api/employees/${id}`);
+      await axios.delete(`http://192.168.127.254:5000/api/employees/${id}`);
       toast.success('Xóa nhân viên thành công!');
       fetchEmployees(); // Refresh employee list after delete
     } catch (error) {
@@ -104,6 +105,7 @@ const EmployeeCatalog = () => {
 
   return (
     <div className="p-4 bg-white shadow-md rounded-md">
+      <Breadcrumb/>
       {/* Các nút tìm kiếm, thêm mới và xuất Excel */}
       <div className="flex items-center gap-2 mb-4">
         <SearchButton

@@ -1,91 +1,78 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import moment from 'moment';
 import axios from 'axios';
+import moment from 'moment';
 
 const TimelineChart = ({ selectedDate }) => {
-
   const svgRef = useRef();
   const wrapperRef = useRef();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [accessToken, setAccessToken] = useState(''); // Thêm state cho token
   const [dimensions, setDimensions] = useState({ width: 800, height: 450 });
 
-  const getNewAccessToken = async () => {
-    try {
-      const response = await axios.post('http://cloud.datainsight.vn:8080/api/auth/login', {
-        username: 'oee2024@gmail.com',
-        password: 'Oee@2124'
-      });
-      const newToken = response.data.token;
-      setAccessToken(newToken); 
-      return newToken; 
-    } catch (error) {
-      setError('Error refreshing access token');
-      console.error('Error refreshing access token:', error);
+  const deviceId = '543ff470-54c6-11ef-8dd4-b74d24d26b24'; // deviceId của ThingBoard
+
+  // Hàm định dạng ngày tháng thành 'YYYY-MM-DD'
+  const formatDateForAPI = (date) => {
+    if (!date) {
+      console.error('Date is not defined or invalid:', date);
       return null;
     }
+    return moment(date).format('YYYY-MM-DD'); // Định dạng thành YYYY-MM-DD
   };
 
-  const fetchData = async (startDate, endDate, token) => {
+  // Fetch data từ API với deviceId đã cứng và selectedDate là ngày
+  const fetchData = async (startDate, endDate) => {
+    if (!startDate || !endDate) {
+      console.error('Invalid startDate or endDate:', startDate, endDate);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(
-        `http://cloud.datainsight.vn:8080/api/plugins/telemetry/DEVICE/543ff470-54c6-11ef-8dd4-b74d24d26b24/values/timeseries?keys=status&interval=36000&limit=10000&startTs=${startDate}&endTs=${endDate}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setData(response.data.status);
-    } catch (error) {
-      if (error.response && error.response.status === 401) {
-        const newToken = await getNewAccessToken();
-        if (newToken) {
-          await fetchData(startDate, endDate, newToken);
-        }
-      } else {
-        setError(error.message);
+      const formattedStartDate = formatDateForAPI(startDate);
+      const formattedEndDate = formatDateForAPI(endDate);
+
+      if (!formattedStartDate || !formattedEndDate) {
+        console.error('Formatted dates are invalid:', formattedStartDate, formattedEndDate);
+        return;
       }
+
+      const response = await axios.get(
+        `http://192.168.127.254:5000/api/telemetry?deviceId=${deviceId}&startDate=${formattedStartDate}&endDate=${formattedEndDate}`
+      );
+      setData(response.data);
+    } catch (error) {
+      setError(error.message);
     } finally {
       setLoading(false);
     }
   };
 
+  // Kiểm tra xem `selectedDate` có hợp lệ không (mảng gồm 2 phần tử)
   useEffect(() => {
-    if (selectedDate && selectedDate.length === 2) {
-      const startDate = Math.min(selectedDate[0].valueOf(), selectedDate[1].valueOf());
-      const endDate = Math.max(selectedDate[0].valueOf(), selectedDate[1].valueOf());
-      fetchData(startDate, endDate, accessToken);
+    if (Array.isArray(selectedDate) && selectedDate.length === 2) {
+      const [startDate, endDate] = selectedDate.map(d => d.toDate()); // Chuyển từ Moment object sang Date object
+      if (startDate && endDate) {
+        fetchData(startDate, endDate);
+      } else {
+        console.error('Start date or end date is invalid:', selectedDate);
+      }
+    } else {
+      console.error('Selected date array is invalid:', selectedDate);
     }
-  }, [selectedDate, accessToken]);
+  }, [selectedDate]);
 
   useEffect(() => {
-    const fetchInitialToken = async () => {
-      const token = await getNewAccessToken();
-      setAccessToken(token);
-    };
-    fetchInitialToken();
-  }, []);
-
-  useEffect(() => {
-    if (!data || data.length === 0) return;
+    if (!data || Object.keys(data).length === 0) return;
 
     const svg = d3.select(svgRef.current);
     const { width, height } = dimensions;
     const margin = { top: 20, right: 35, bottom: 50, left: 50 };
 
-    const processedData = data.map(d => ({
-      date: moment(d.ts).format('YYYY-MM-DD'),
-      startTime: moment(d.ts).format('HH:mm'),
-      endTime: moment(d.ts + 3600000).format('HH:mm'),
-      status: d.value === '1' ? 'Chạy' : 'Dừng',
-    }));
-
+    // Làm sạch SVG trước khi vẽ
     svg.selectAll('*').remove();
 
     const timeParse = d3.timeParse('%H:%M');
@@ -93,12 +80,28 @@ const TimelineChart = ({ selectedDate }) => {
     const dateParse = d3.timeParse('%Y-%m-%d');
     const dateFormat = d3.timeFormat('%d/%m');
 
+    // Xử lý dữ liệu trước khi vẽ
+    const flattenedData = data.flatMap((item) => {
+      if (item.intervals) {
+        return item.intervals.map((interval) => ({
+          date: item.date,
+          startTime: interval.startTime,
+          endTime: interval.endTime,
+          status: interval.status,
+        }));
+      }
+      return [];
+    });
+
+    if (flattenedData.length === 0) return;
+
+    // Tạo các scale cho trục
     const xScale = d3
       .scaleTime()
       .domain([timeParse('00:00'), timeParse('23:59')])
       .range([margin.left, width - margin.right]);
 
-    const uniqueDates = [...new Set(processedData.map(d => d.date))];
+    const uniqueDates = [...new Set(flattenedData.map(d => d.date))];
     const yScale = d3
       .scaleBand()
       .domain(uniqueDates.sort())
@@ -107,84 +110,20 @@ const TimelineChart = ({ selectedDate }) => {
 
     const colorScale = d3
       .scaleOrdinal()
-      .domain(['Chạy', 'Dừng', 'Offline'])
-      .range(['#00f600', '#f60000', '#d3d3d3']);
+      .domain(['Chạy', 'Dừng'])
+      .range(['#00f600', '#f60000']);
 
-    const OfflineData = [];
-    uniqueDates.forEach(date => {
-      const dateData = processedData.filter(d => d.date === date);
-      dateData.sort((a, b) => timeParse(a.startTime) - timeParse(b.startTime));
-
-      for (let i = 0; i < dateData.length - 1; i++) {
-        const currentEnd = timeParse(dateData[i].endTime);
-        const nextStart = timeParse(dateData[i + 1].startTime);
-        if (nextStart - currentEnd > 0) {
-          OfflineData.push({
-            date: date,
-            startTime: timeFormat(currentEnd),
-            endTime: timeFormat(nextStart),
-            status: 'Offline',
-          });
-        }
-      }
-
-      const firstStart = timeParse(dateData[0].startTime);
-      const lastEnd = timeParse(dateData[dateData.length - 1].endTime);
-
-      if (firstStart > timeParse('00:00')) {
-        OfflineData.push({
-          date: date,
-          startTime: timeFormat(timeParse('00:00')),
-          endTime: timeFormat(firstStart),
-          status: 'Offline',
-        });
-      }
-      if (lastEnd < timeParse('23:59')) {
-        OfflineData.push({
-          date: date,
-          startTime: timeFormat(lastEnd),
-          endTime: timeFormat(timeParse('23:59')),
-          status: 'Offline',
-        });
-      }
-    });
-
-    svg
-      .selectAll('rect.Offline')
-      .data(OfflineData)
-      .enter()
-      .append('rect')
-      .attr('class', 'Offline')
-      .attr('x', d => xScale(timeParse(d.startTime)) + 1)
-      .attr('y', d => yScale(d.date) + yScale.bandwidth() / 4) // Đặt giữa các tick date
-      .attr('width', d => {
-        const width = xScale(timeParse(d.endTime)) - xScale(timeParse(d.startTime));
-        return width > 0 ? width : 0;
-      })
-      .attr('height', Math.min(yScale.bandwidth() / 2, 20))
-      .attr('fill', d => colorScale(d.status));
-
-    svg
-      .append('g')
-      .attr('transform', `translate(0,${height - margin.bottom - 40})`)
-      .call(d3.axisBottom(xScale).ticks(d3.timeHour.every(2)).tickFormat(timeFormat))
-      .selectAll("text")
-      .attr("transform", "translate(-10,0)rotate(-45)")
-      .style("text-anchor", "end");
-
-    svg
-      .append('g')
-      .attr('transform', `translate(${margin.left},0)`)
-      .call(d3.axisLeft(yScale).tickFormat(d => dateFormat(dateParse(d))));
-
-    svg
+    // Chỉ cập nhật những phần tử cần thiết thay vì vẽ lại toàn bộ
+    const rects = svg
       .selectAll('rect.data')
-      .data(processedData)
-      .enter()
+      .data(flattenedData);
+
+    // Enter: Thêm phần tử mới
+    rects.enter()
       .append('rect')
       .attr('class', 'data')
       .attr('x', d => xScale(timeParse(d.startTime)) + 1)
-      .attr('y', d => yScale(d.date) + yScale.bandwidth() / 4) // Đặt giữa các tick date
+      .attr('y', d => yScale(d.date) + yScale.bandwidth() / 4)
       .attr('width', d => {
         const width = xScale(timeParse(d.endTime)) - xScale(timeParse(d.startTime));
         return width > 0 ? width : 0;
@@ -194,7 +133,36 @@ const TimelineChart = ({ selectedDate }) => {
       .append('title')
       .text(d => `${d.status}: ${d.startTime} - ${d.endTime}`);
 
-    const legendData = ['Chạy', 'Dừng', 'Offline'];
+    // Update: Cập nhật những phần tử đã có
+    rects.attr('x', d => xScale(timeParse(d.startTime)) + 1)
+      .attr('y', d => yScale(d.date) + yScale.bandwidth() / 4)
+      .attr('width', d => {
+        const width = xScale(timeParse(d.endTime)) - xScale(timeParse(d.startTime));
+        return width > 0 ? width : 0;
+      })
+      .attr('height', Math.min(yScale.bandwidth() / 2, 20))
+      .attr('fill', d => colorScale(d.status));
+
+    // Exit: Xóa những phần tử không còn cần thiết
+    rects.exit().remove();
+
+    // Vẽ trục thời gian ở dưới cùng
+    svg
+      .append('g')
+      .attr('transform', `translate(0,${height - margin.bottom - 40})`)
+      .call(d3.axisBottom(xScale).ticks(d3.timeHour.every(2)).tickFormat(timeFormat))
+      .selectAll("text")
+      .attr("transform", "translate(-10,0)rotate(-45)")
+      .style("text-anchor", "end");
+
+    // Vẽ trục dọc đại diện cho ngày
+    svg
+      .append('g')
+      .attr('transform', `translate(${margin.left},0)`)
+      .call(d3.axisLeft(yScale).tickFormat(d => dateFormat(dateParse(d))));
+
+    // Thêm legend cho màu sắc trạng thái
+    const legendData = ['Chạy', 'Dừng'];
 
     const legend = svg
       .selectAll('.legend')
@@ -221,6 +189,7 @@ const TimelineChart = ({ selectedDate }) => {
       .style('text-anchor', 'start');
   }, [data, dimensions]);
 
+  // Đảm bảo vẽ lại khi kích thước thay đổi
   useEffect(() => {
     const handleResize = () => {
       if (wrapperRef.current) {
@@ -235,13 +204,17 @@ const TimelineChart = ({ selectedDate }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
-  if (data.length === 0) return <p>No data available for the selected date range.</p>;
-
   return (
-    <div ref={wrapperRef} style={{ width: '100%', height: '100%' }}>
-      <svg ref={svgRef} width={dimensions.width} height={dimensions.height}></svg>
+    <div>
+      {loading ? (
+        <p>Loading...</p>
+      ) : error ? (
+        <p>Error: {error}</p>
+      ) : (
+        <div ref={wrapperRef} style={{ width: '100%', height: '100%' }}>
+          <svg ref={svgRef} width={dimensions.width} height={dimensions.height}></svg>
+        </div>
+      )}
     </div>
   );
 };

@@ -9,7 +9,7 @@ import MobileMenuDropdown from './MobileMenuDropdown';
 
 const Header = () => {
   return (
-    <header className="bg-slate-100 dark:bg-[#305680] shadow lg:h-16 px-4 flex sm:h-32 justify-between items-center">
+    <header className="bg-slate-100 dark:bg-[#35393c] shadow lg:h-16 px-4 flex sm:h-32 justify-between items-center">
       <div className="flex items-center">
         {/* Hiển thị Logo */}
         <img src={logo} alt="Logo" className="w-[180px] h-auto object-contain lg:hidden" />

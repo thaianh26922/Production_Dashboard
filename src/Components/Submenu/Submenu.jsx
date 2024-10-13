@@ -34,11 +34,11 @@ const Submenu = ({ title, items, isCollapsed, mainLink, setIsCollapsed }) => {
         {/* Hiển thị icon tùy theo trạng thái của submenu */}
         <span>
           {isCollapsed ? (
-            <FiChevronRight onClick={() => setIsCollapsed(false)} /> // Khi bị collapsed, click để mở rộng sidebar
+            <FiChevronRight  onClick={() => setIsCollapsed(false)} /> // Khi bị collapsed, click để mở rộng sidebar
           ) : isOpen ? (
-            <FiChevronDown />
+            <FiChevronDown className="dark:text-white" />
           ) : (
-            <FiChevronRight />
+            <FiChevronRight className="dark:text-white"/>
           )}
         </span>
       </div>
@@ -49,7 +49,7 @@ const Submenu = ({ title, items, isCollapsed, mainLink, setIsCollapsed }) => {
           <Link
             key={index}
             to={item.link}
-            className="block py-1 px-1 ml-6 text-gray-500 hover:text-black"
+            className="block py-1 px-1 ml-6 text-gray-500 dark:text-white hover:text-blue-500"
           >
             {item.name}
           </Link>

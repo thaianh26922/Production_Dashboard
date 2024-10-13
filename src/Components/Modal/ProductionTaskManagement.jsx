@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dropdown, Button, Menu, Select, message } from 'antd';
 import { UserOutlined, PlusOutlined, CloseOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
+import axios from 'axios';
 
 const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, selectedDates }) => {
   const availableEmployees = [
@@ -16,11 +17,34 @@ const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, sel
     { label: "Ca phụ 1 giờ", value: "Ca phụ 1 giờ" },
     { label: "Ca phụ 2 giờ", value: "Ca phụ 2 giờ" },
     { label: "Ca phụ 3 giờ", value: "Ca phụ 3 giờ" },
-    
   ];
 
-  const [tasks, setTasks] = useState([]);
-  const [isMachineListOpen, setIsMachineListOpen] = useState(false);
+  const [tasks, setTasks] = useState([]); // State để lưu nhiệm vụ
+  const [devices, setDevices] = useState([]); // State để lưu thiết bị từ API
+  const [filteredDevices, setFilteredDevices] = useState([]); // State để lưu danh sách máy lọc theo selectedMachines
+  const [isMachineListOpen, setIsMachineListOpen] = useState(false); // Để mở/đóng danh sách máy
+
+  // Gọi API để lấy danh sách thiết bị khi component được mount
+  useEffect(() => {
+    const fetchDevices = async () => {
+      try {
+        const response = await axios.get('http://192.168.127.254:5000/api/productiontask'); // Gọi API lấy danh sách máy
+        setDevices(response.data); // Lưu thiết bị vào state devices
+      } catch (error) {
+        console.error('Lỗi khi lấy danh sách thiết bị từ API:', error);
+      }
+    };
+
+    fetchDevices(); // Gọi hàm lấy danh sách thiết bị
+  }, []);
+
+  // Lọc danh sách thiết bị theo selectedMachines
+  useEffect(() => {
+    const filtered = devices.filter((device) => {
+      return selectedMachines.some((selectedMachine) => selectedMachine.deviceName === device.deviceName);
+    });
+    setFilteredDevices(filtered); // Lưu danh sách thiết bị đã lọc
+  }, [devices, selectedMachines]); // Chạy khi devices hoặc selectedMachines thay đổi
 
   // Hàm để thêm nhiệm vụ mới
   const addTask = () => {
@@ -69,18 +93,23 @@ const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, sel
     setIsMachineListOpen(!isMachineListOpen);
   };
 
-  // Xử lý khi click vào các div màu
+  // Xử lý khi click vào các div màu (trạng thái nhiệm vụ)
   const handleDivClick = (index, status) => {
     const updatedTasks = [...tasks];
-    updatedTasks[index].status = status; // Cập nhật trạng thái nhiệm vụ (status)
+    updatedTasks[index].status = status; // Cập nhật trạng thái nhiệm vụ
     setTasks(updatedTasks);
   };
 
   // Xử lý khi ấn nút Xác nhận (Hiển thị nhiệm vụ trên Calendar)
   const handleConfirm = () => {
+    if (tasks.length === 0) {
+      message.error('Vui lòng thêm ít nhất một nhiệm vụ trước khi xác nhận!');
+      return;
+    }
+
     // Sao chép dữ liệu nhiệm vụ hiện tại
     const updatedTaskData = { ...taskData };
-  
+
     // Kiểm tra nếu `selectedDates` là một mảng hợp lệ
     if (Array.isArray(selectedDates) && selectedDates.length > 0) {
       // Nếu `selectedDates` là mảng hợp lệ, xử lý
@@ -90,7 +119,7 @@ const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, sel
           machines: selectedMachines, // Lưu các máy đã chọn
         };
       });
-  
+
       // Cập nhật `taskData` với dữ liệu mới
       setTaskData(updatedTaskData);
       message.success('Nhiệm vụ đã được xác nhận!');
@@ -100,7 +129,6 @@ const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, sel
       message.error('Vui lòng chọn ít nhất một ngày!');
     }
   };
-  
 
   // Xử lý khi ấn nút Hủy bỏ (Xóa các task)
   const handleCancel = () => {
@@ -109,7 +137,7 @@ const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, sel
   };
 
   return (
-    <div className="w-full p-2 ">
+    <div className="w-full p-2">
       <h2 className="font-semibold mb-4">Quản lý nhiệm vụ sản xuất</h2>
 
       <div className="flex items-center justify-between p-4 bg-gray-100 rounded-md mb-4">
@@ -121,30 +149,30 @@ const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, sel
         </div>
       </div>
 
-      {/* Hiển thị danh sách máy đã chọn */}
-      <div className="overflow-y-scroll "> 
-      
-      {isMachineListOpen && (
-        <div className="bg-white p-4 rounded-lg shadow-lg w-full max-h-60 overflow-x-scroll mb-4">
-          <h2 className="font-semibold mb-2">Thiết bị đã chọn</h2>
-          <ul className="list-disc pl-5">
-            {selectedMachines.length > 0 ? (
-              selectedMachines.map((machine) => (
-                <li key={machine.id} className="mb-1 flex justify-between items-center">
-                  <span>{machine.name}</span>
-                  <CloseOutlined className="text-red-500 cursor-pointer" onClick={() => removeMachine(machine.id)} />
-                </li>
-              ))
-            ) : (
-              <p>Chưa có thiết bị nào được chọn.</p>
-            )}
-          </ul>
-        </div>
-      )}
+      {/* Hiển thị danh sách máy đã lọc */}
+      <div className="overflow-y-scroll">
+        {isMachineListOpen && (
+          <div className="bg-white p-4 rounded-lg shadow-lg w-full max-h-60 overflow-x-scroll mb-4">
+            <h2 className="font-semibold mb-2">Thiết bị đã chọn</h2>
+            <ul className="list-disc pl-5">
+              {filteredDevices.length > 0 ? (
+                filteredDevices.map((device) => (
+                  <li key={device._id} className="mb-1 flex justify-between items-center">
+                    <span>{device.deviceName}</span>
+                    <CloseOutlined className="text-red-500 cursor-pointer" />
+                  </li>
+                ))
+              ) : (
+                <p>Chưa có thiết bị nào được chọn.</p>
+              )}
+            </ul>
+          </div>
+        )}
+      </div>
 
       {/* Nhiệm vụ sản xuất */}
       {tasks.map((task, index) => (
-        <div key={index} className="bg-gray-100 rounded-md p-3 mb-4  ">
+        <div key={index} className="bg-gray-100 rounded-md p-3 mb-4">
           <div className="flex justify-between items-center mb-2">
             <span className="font-semibold">Ca làm việc</span>
             <CloseOutlined
@@ -154,7 +182,7 @@ const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, sel
           </div>
 
           {/* Dropdown button for selecting shifts */}
-          <div className="mb-2 flex justify-between ">
+          <div className="mb-2 flex justify-between">
             <Dropdown overlay={
               <Menu>
                 {shiftOptions.map((shift) => (
@@ -164,7 +192,18 @@ const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, sel
                 ))}
               </Menu>
             }>
-              <Button style={{ background: task.status === 'Dừng' ? 'red' : task.status === 'Chờ' ? '#fafa98' : '#8ff28f' }}>
+              <Button
+                className="bg-white"
+                style={{
+                  background: task.selectedShift
+                    ? task.status === 'Dừng'
+                      ? 'red'
+                      : task.status === 'Chờ'
+                      ? '#fafa98'
+                      : '#8ff28f'
+                    : 'white',
+                }}
+              >
                 {task.selectedShift || 'Chọn ca làm việc'}
               </Button>
             </Dropdown>
@@ -216,15 +255,14 @@ const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, sel
               onClick={() => handleDivClick(index, 'Chạy')}
             />
           </div>
-        </div> 
+        </div>
       ))}
 
       {/* Nút để thêm nhiệm vụ sản xuất mới */}
       <Button className="w-full bg-gray-100 text-gray-600 flex items-center justify-center" onClick={addTask}>
         <PlusOutlined className="mr-2" />
         Thêm nhiệm vụ sản xuất
-      </Button>  
-      </div>
+      </Button>
 
       {/* Nút Xác nhận và Hủy bỏ */}
       <div className="grid grid-cols-2 mt-2">

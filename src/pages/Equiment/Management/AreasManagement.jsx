@@ -12,6 +12,7 @@ import axios from 'axios';
 
 // Import sample template and data for areas
 import sampleTemplate from '../../../assets/form/Khu vực sản xuất.xlsx';
+import Breadcrumb from '../../../Components/Breadcrumb/Breadcrumb';
 
 const AreasManagement = () => {
   const [areas, setAreas] = useState([]); // Initialize empty areas array
@@ -23,7 +24,7 @@ const AreasManagement = () => {
   // Fetch areas from the back-end API
   const fetchAreas = async () => {
     try {
-      const response = await axios.get('http://192.168.1.13:5000/api/areas'); // Your API URL
+      const response = await axios.get('http://192.168.127.254:5000/api/areas'); // Your API URL
       setAreas(response.data);
       setFilteredAreas(response.data);
     } catch (error) {
@@ -51,11 +52,11 @@ const AreasManagement = () => {
     try {
       if (selectedArea) {
         // Update Area
-        await axios.put(`http://192.168.1.13:5000/api/areas/${selectedArea._id}`, areaData);
+        await axios.put(`http://192.168.127.254:5000/api/areas/${selectedArea._id}`, areaData);
         toast.success('Cập nhật khu vực thành công!');
       } else {
         // Create New Area
-        await axios.post('http://192.168.1.13:5000/api/areas', areaData);
+        await axios.post('http://192.168.127.254:5000/api/areas', areaData);
         toast.success('Thêm khu vực thành công!');
       }
 
@@ -71,7 +72,7 @@ const AreasManagement = () => {
   // Delete area by ID
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://192.168.1.13:5000/api/areas/${id}`);
+      await axios.delete(`http://192.168.127.254:5000/api/areas/${id}`);
       toast.success('Xóa khu vực thành công!');
       fetchAreas(); // Refresh area list after delete
     } catch (error) {
@@ -92,8 +93,11 @@ const AreasManagement = () => {
   };
 
   return (
+    
     <div className="p-4 bg-white shadow-md rounded-md">
-      <div className="flex items-center gap-2 mb-4">
+      <Breadcrumb  />
+      <hr />
+      <div className="flex items-center gap-2 mb-4 mt-2">
         <SearchButton
           placeholder="Tìm kiếm mã khu vực, tên khu vực..."
           onSearch={(q) => handleSearch(q)}
