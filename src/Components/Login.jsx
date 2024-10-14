@@ -19,7 +19,7 @@ function Login() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await axios.post('http://192.168.127.254:5000/api/login', { username: email, password });
+      const response = await axios.post('http://192.168.1.19:5000/api/login', { username: email, password });
       if (response.status === 200) {
         const { token } = response.data;
         localStorage.setItem('token', token);

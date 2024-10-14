@@ -1,29 +1,50 @@
 import React, { useState } from 'react';
-import { Modal, Button } from 'antd';
+import { Modal, Button, message } from 'antd';
 import CustomCalendar from '../../Components/Calendar/CustomCalendar';
 import ProductionTaskManagement from './ProductionTaskManagement';
 
-const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates,setSelectedMachines,setSelectedDates, selectedMachines }) => {
+const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelectedMachines, setSelectedDates, selectedMachines }) => {
   const [taskData, setTaskData] = useState({}); // Dữ liệu nhiệm vụ sản xuất lưu theo ngày
 
   // Hàm xử lý khi lưu nhiệm vụ cùng ngày đã chọn
   const handleSave = () => {
     const updatedTaskData = { ...taskData };
 
-    // Lưu thông tin nhiệm vụ cho từng ngày được chọn
+    // Kiểm tra xem có nhiệm vụ nào được thêm hay không
+    let isTaskAdded = false;
+
     selectedDates.forEach(date => {
       if (selectedMachines.length > 0) {
-        updatedTaskData[date] = {
-          machines: selectedMachines, // Lưu các thiết bị đã chọn cho ngày đó
-          tasks: updatedTaskData[date]?.tasks || [], // Đảm bảo thông tin nhiệm vụ được lưu kèm ngày
-        };
+        if (!updatedTaskData[date]) {
+          updatedTaskData[date] = {
+            machines: selectedMachines,
+            tasks: [], // Bắt buộc phải có ít nhất một nhiệm vụ
+          };
+        }
+        // Đảm bảo có ít nhất một nhiệm vụ cho ngày được chọn
+        if (updatedTaskData[date].tasks.length > 0) {
+          isTaskAdded = true; // Có nhiệm vụ được thêm
+        }
       }
     });
 
-    setTaskData(updatedTaskData); // Lưu thông tin nhiệm vụ với các ngày đã chọn
+    // Nếu không có nhiệm vụ nào được thêm, thông báo lỗi
+    if (!isTaskAdded) {
+      message.error('Vui lòng thêm ít nhất một nhiệm vụ trước khi lưu.');
+      return;
+    }
+
+    // Cập nhật dữ liệu nhiệm vụ và lưu
+    setTaskData(updatedTaskData);
     console.log('Dữ liệu nhiệm vụ đã lưu:', updatedTaskData);
-    setSelectedDates([]); // Xóa các ngày đã chọn sau khi lưu
-    onClose(); // Đóng modal sau khi lưu
+    
+    // Xóa các thiết bị đã chọn và các ngày đã chọn sau khi lưu
+    setSelectedDates([]); 
+    setSelectedMachines([]); 
+    
+    // Thông báo thành công và đóng modal
+    message.success('Kế hoạch đã được lưu thành công!');
+    onClose(); 
   };
 
   // Hàm xử lý khi nhấn nút Hủy bỏ
@@ -31,12 +52,12 @@ const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates,setSelectedM
     setSelectedDates([]); // Xóa các ngày đã chọn
     onCancel(); // Gọi hàm onCancel nếu được truyền vào
     onClose();
-    setTaskData([]) // Đóng modal
+    setTaskData([]); // Xóa dữ liệu nhiệm vụ
   };
 
   // Hàm để lấy thông tin nhiệm vụ đã lưu cho một ngày cụ thể
-  const getTaskForDate = (selectedDates) => taskData[selectedDates] || null;
-  console.log (taskData)
+  const getTaskForDate = (selectedDate) => taskData[selectedDate] || null;
+  console.log(taskData);
 
   return (
     <Modal
@@ -71,7 +92,6 @@ const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates,setSelectedM
             setTaskData={setTaskData} // Cập nhật dữ liệu nhiệm vụ khi chỉnh sửa hoặc thêm mới
             taskData={taskData} // Truyền dữ liệu nhiệm vụ hiện tại để cho phép chỉnh sửa/cập nhật
             selectedDates={selectedDates || []}
-            
           />
         </div>
       </div>

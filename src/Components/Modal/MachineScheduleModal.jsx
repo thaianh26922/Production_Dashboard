@@ -16,16 +16,16 @@ const MachineScheduleModal = ({ open, onClose }) => {
     const fetchData = async () => {
       try {
         // Lấy dữ liệu nhiệm vụ sản xuất
-        const tasksResponse = await axios.get('http://192.168.127.254:5000/api/productiontask');
+        const tasksResponse = await axios.get('http://192.168.1.19:5000/api/productiontask');
         setProductionTasks(tasksResponse.data);
 
         // Lấy dữ liệu thiết bị
-        const devicesResponse = await axios.get('http://192.168.127.254:5000/api/device');
+        const devicesResponse = await axios.get('http://192.168.1.19:5000/api/device');
         setDevices(devicesResponse.data);
         setFilteredDevices(devicesResponse.data); // Hiển thị tất cả thiết bị lúc đầu
 
         // Lấy dữ liệu khu vực
-        const areasResponse = await axios.get('http://192.168.127.254:5000/api/areas');
+        const areasResponse = await axios.get('http://192.168.1.19:5000/api/areas');
         setAreas(areasResponse.data);
       } catch (error) {
         console.error('Error fetching data:', error);

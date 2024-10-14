@@ -28,11 +28,11 @@ const MachineWorkScheduleList = () => {
     const fetchAreasAndDevices = async () => {
       try {
         // Lấy danh sách khu vực
-        const areasResponse = await axios.get('http://192.168.127.254:5000/api/areas');
+        const areasResponse = await axios.get('http://192.168.1.19:5000/api/areas');
         setAreas(areasResponse.data);
 
         // Lấy danh sách thiết bị
-        const devicesResponse = await axios.get('http://192.168.127.254:5000/api/device');
+        const devicesResponse = await axios.get('http://192.168.1.19:5000/api/device');
         setDevices(devicesResponse.data);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -57,7 +57,7 @@ const MachineWorkScheduleList = () => {
   useEffect(() => {
     const fetchProductionTasks = async () => {
       try {
-        const response = await axios.get('http://192.168.127.254:5000/api/productiontask');
+        const response = await axios.get('http://192.168.1.19:5000/api/productiontask');
         setProductionTasks(response.data); // Lưu dữ liệu nhiệm vụ sản xuất vào state
       } catch (error) {
         console.error('Error fetching production tasks:', error);
@@ -89,10 +89,26 @@ const MachineWorkScheduleList = () => {
   };
 
   // Toggle machine selection mode
-  const toggleSelecting = () => {
-    if (isSelecting) {
-      setSelectedMachines([]); // Clear selected machines when switching to "Bỏ Chọn"
+  const toggleSelectDevicesByArea = () => {
+    const machinesInArea = filteredDevices; // Lấy tất cả thiết bị trong khu vực được chọn
+
+    // Kiểm tra xem tất cả thiết bị trong khu vực đã được chọn chưa
+    const allSelected = machinesInArea.every(machine => selectedMachines.some(selected => selected._id === machine._id));
+
+    if (allSelected) {
+      // Nếu tất cả thiết bị đã được chọn, bỏ chọn tất cả thiết bị trong khu vực
+      const remainingMachines = selectedMachines.filter(selected => !machinesInArea.some(machine => machine._id === selected._id));
+      setSelectedMachines(remainingMachines);
+    } else {
+      // Nếu chưa chọn hết, thêm tất cả thiết bị trong khu vực vào danh sách
+      const newSelectedMachines = [
+        ...selectedMachines,
+        ...machinesInArea.filter(machine => !selectedMachines.some(selected => selected._id === machine._id)) // Chỉ thêm các thiết bị chưa được chọn
+      ];
+      setSelectedMachines(newSelectedMachines);
     }
+
+    // Toggle trạng thái isSelecting
     setIsSelecting(!isSelecting);
   };
 
@@ -203,8 +219,8 @@ const MachineWorkScheduleList = () => {
 
 
           {/* Toggle "Chọn Thiết Bị" or "Bỏ Chọn Thiết Bị" */}
-          <Button onClick={toggleSelecting}>
-            {isSelecting ? 'Bỏ Chọn Thiết Bị' : 'Chọn Thiết Bị'}
+          <Button onClick={toggleSelectDevicesByArea}>
+            {isSelecting ? 'Bỏ Chọn Tất Cả': 'Chọn Tất Cả'  }
           </Button>
           <DatePicker 
         onChange={handleDateChange} 
