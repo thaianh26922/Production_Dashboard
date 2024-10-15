@@ -188,7 +188,7 @@ const MachineWorkScheduleList = () => {
   return (
     <>
       {/* Area Selection */}
-      <div className="flex justify-between items-center mb-4 p-4">
+      <div className="flex justify-between items-center mb-4 p-2">
        
       <Button className="ml-2 bg-gray-400 text-white " onClick={handleOpenScheduleModal}>
         Lịch Sản xuất
@@ -241,24 +241,29 @@ const MachineWorkScheduleList = () => {
       </div>
 
       {/* Machine List */}
-      <div className="grid grid-cols-4 gap-2">
-    {filteredDevices.map((machine) => (
-      <div
-        key={machine._id}
-        onClick={() => handleMachineClick(machine)}
-        className={`relative cursor-pointer transition duration-300 ease-in-out h-full p-2
-          ${isSelecting && selectedMachines.some((m) => m.id === machine._id) ? 'border-2 border-blue-700 round-lg bg-gray-600 ' : ''}`}
-      >
-        <MachineWorkScheduleCard
-          machine={machine}
-          tasks={getTasksForDevice(machine.deviceName)} // Truyền nhiệm vụ theo thiết bị
-        />
-        {isSelecting && selectedMachines.some((m) => m.id === machine.id) && (
-          <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1">✓</div>
-        )}
+      <div className="grid grid-cols-4 gap-1 lg:grid-cols-4">
+          {filteredDevices.map((machine) => (
+            // Với mỗi thiết bị (machine), lặp qua các nhiệm vụ và render thành từng thẻ riêng biệt
+            getTasksForDevice(machine.deviceName).map((task, index) => (
+              <div
+                key={`${machine._id}-${index}`} // Sử dụng id thiết bị + chỉ số để đảm bảo key là duy nhất
+                onClick={() => handleMachineClick(machine)}
+                className={`relative cursor-pointer transition duration-300 ease-in-out h-full p-2
+                  ${isSelecting && selectedMachines.some((m) => m.id === machine._id) ? 'border-2 border-blue-700 round-lg bg-gray-600 ' : ''}`}
+              >
+                <MachineWorkScheduleCard
+                  machine={machine} // Truyền thông tin máy vào card
+                  tasks={[task]} // Chỉ truyền một nhiệm vụ (task) vào thẻ
+                  selectedDate={selectedDates[0]} // Truyền ngày đã chọn
+                />
+                {isSelecting && selectedMachines.some((m) => m.id === machine.id) && (
+                  <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1">✓</div>
+                )}
       </div>
-    ))}
-  </div>
+    ))
+  ))}
+</div>
+
 
       {/* Update Confirmation Modal */}
       <Modal

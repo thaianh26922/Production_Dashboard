@@ -83,16 +83,22 @@ const MachineCard = ({ machine }) => {
             <span className="text-4xl font-bold mb-2">{`${machine.oee}%`}</span>
             <span className=" text-sm text-wrap font-bold">{changeIcon} {Math.abs(changePercent).toFixed(2)}% hôm qua</span>
           </div>
-        </div>
+          <div className="  absolute mt-2 font-bold text-xl -translate-x-1/4 ml-3 ">
+            {machine.employee}
       </div>
+        </div>
+        
+      </div>
+    
+      
 
       {/* 3. Time Labels Section */}
-      <div className="flex justify-between bg-white text-black px-2 ">
+      <div className="flex justify-between bg-white text-black px-2 py-1 ">
         <span className="text-sm">
-          Total Run: {machine.totalTimeToday} giờ
+          <span>8AM</span>-<span>5PM</span>
         </span>
-        <span className={`text-sm ${timeChangeColor} -ml-1 `}>
-          {timeChangeIcon} {Math.abs(timeChangePercent).toFixed(2)}% hôm qua
+        <span className={`text-sm -ml-1 `}>
+        Total Run: {machine.totalTimeToday} giờ
         </span>
       </div>
     </div>

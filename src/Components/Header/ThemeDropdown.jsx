@@ -59,14 +59,14 @@ const ThemeDropdown = () => {
         <div className="absolute mt-2 right-0 ml-2 w-[132px] bg-white dark:bg-[#35393c] border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-10">
           <ul>
             <li
-              className="flex items-center px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
+              className="flex items-center px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer dark:text-white"
               onClick={() => toggleDarkMode('light')}
             >
               <FaSun className="h-4 w-4 mr-2 text-yellow-500" />
               Light Mode
             </li>
             <li
-              className="flex items-center px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
+              className="flex items-center px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer dark:hover:text-white dark:text-white rounded-lg"
               onClick={() => toggleDarkMode('dark')}
             >
               <FaMoon className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-300" />
