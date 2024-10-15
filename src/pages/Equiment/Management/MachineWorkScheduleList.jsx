@@ -28,11 +28,11 @@ const MachineWorkScheduleList = () => {
     const fetchAreasAndDevices = async () => {
       try {
         // Lấy danh sách khu vực
-        const areasResponse = await axios.get('http://192.168.1.19:5000/api/areas');
+        const areasResponse = await axios.get('http://192.168.1.9:5001/api/areas');
         setAreas(areasResponse.data);
 
         // Lấy danh sách thiết bị
-        const devicesResponse = await axios.get('http://192.168.1.19:5000/api/device');
+        const devicesResponse = await axios.get('http://192.168.1.9:5001/api/device');
         setDevices(devicesResponse.data);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -57,7 +57,7 @@ const MachineWorkScheduleList = () => {
   useEffect(() => {
     const fetchProductionTasks = async () => {
       try {
-        const response = await axios.get('http://192.168.1.19:5000/api/productiontask');
+        const response = await axios.get('http://192.168.1.9:5001/api/productiontask');
         setProductionTasks(response.data); // Lưu dữ liệu nhiệm vụ sản xuất vào state
       } catch (error) {
         console.error('Error fetching production tasks:', error);

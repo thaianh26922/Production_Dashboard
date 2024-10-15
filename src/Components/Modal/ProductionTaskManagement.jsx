@@ -28,7 +28,7 @@ const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, sel
   useEffect(() => {
     const fetchDevices = async () => {
       try {
-        const response = await axios.get('http://192.168.1.19:5000/api/productiontask'); // Gọi API lấy danh sách máy
+        const response = await axios.get('http://192.168.1.9:5001/api/productiontask'); // Gọi API lấy danh sách máy
         setDevices(response.data); // Lưu thiết bị vào state devices
       } catch (error) {
         console.error('Lỗi khi lấy danh sách thiết bị từ API:', error);

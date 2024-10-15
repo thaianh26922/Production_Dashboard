@@ -22,7 +22,7 @@ const ErrorReportCatalog = () => {
   // Gọi API để lấy danh sách issue
   const fetchErrorReports = async () => {
     try {
-      const response = await axios.get('http://192.168.1.19:5000/api/issue');
+      const response = await axios.get('http://192.168.1.9:5001/api/issue');
       setErrorReports(response.data);
     } catch (error) {
       toast.error('Lỗi khi tải báo cáo lỗi');
@@ -32,7 +32,7 @@ const ErrorReportCatalog = () => {
   // Gọi API để lấy danh sách deviceName từ model Device
   const fetchDeviceSuggestions = async () => {
     try {
-      const response = await axios.get('http://192.168.1.19:5000/api/device');
+      const response = await axios.get('http://192.168.1.9:5001/api/device');
       setDeviceSuggestions(response.data); // Giả định rằng response trả về danh sách thiết bị
     } catch (error) {
       toast.error('Lỗi khi tải danh sách thiết bị');
@@ -51,11 +51,11 @@ const ErrorReportCatalog = () => {
       const values = await form.validateFields(); // Lấy và validate dữ liệu từ form
       if (selectedReport) {
         // Cập nhật issue
-        await axios.put(`http://192.168.1.19:5000/api/issue/${selectedReport._id}`, values);
+        await axios.put(`http://192.168.1.9:5001/api/issue/${selectedReport._id}`, values);
         toast.success('Cập nhật nguyên nhân lỗi thành công!');
       } else {
         // Thêm mới issue
-        await axios.post('http://192.168.1.19:5000/api/issue', values);
+        await axios.post('http://192.168.1.9:5001/api/issue', values);
         toast.success('Thêm nguyên nhân lỗi thành công!');
       }
       fetchErrorReports();  // Tải lại dữ liệu sau khi thêm/cập nhật
@@ -70,7 +70,7 @@ const ErrorReportCatalog = () => {
   // Hàm xóa issue
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://192.168.1.19:5000/api/issue/${id}`);
+      await axios.delete(`http://192.168.1.9:5001/api/issue/${id}`);
       toast.success('Xóa báo cáo lỗi thành công!');
       fetchErrorReports();  // Tải lại dữ liệu sau khi xóa
     } catch (error) {

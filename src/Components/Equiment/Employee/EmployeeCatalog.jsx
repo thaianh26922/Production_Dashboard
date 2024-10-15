@@ -25,7 +25,7 @@ const EmployeeCatalog = () => {
   // Fetch employees from API on component mount
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get('http://192.168.1.19:5000/api/employees'); // API GET để lấy danh sách nhân viên
+      const response = await axios.get('http://192.168.1.9:5001/api/employees'); // API GET để lấy danh sách nhân viên
       setEmployees(response.data);
       setFilteredEmployees(response.data);
     } catch (error) {
@@ -36,7 +36,7 @@ const EmployeeCatalog = () => {
   // Fetch areas from API on component mount
   const fetchAreas = async () => {
     try {
-      const response = await axios.get('http://192.168.1.19:5000/api/areas'); // API GET để lấy danh sách khu vực
+      const response = await axios.get('http://192.168.1.9:5001/api/areas'); // API GET để lấy danh sách khu vực
       setAreas(response.data);
     } catch (error) {
       toast.error('Lỗi khi tải danh sách khu vực');
@@ -63,11 +63,11 @@ const EmployeeCatalog = () => {
     try {
       if (selectedEmployee) {
         // Update employee
-        await axios.put(`http://192.168.1.19:5000/api/employees/${selectedEmployee._id}`, values);
+        await axios.put(`http://192.168.1.9:5001/api/employees/${selectedEmployee._id}`, values);
         toast.success('Cập nhật nhân viên thành công!');
       } else {
         // Create new employee
-        await axios.post('http://192.168.1.19:5000/api/employees', values);
+        await axios.post('http://192.168.1.9:5001/api/employees', values);
         toast.success('Thêm nhân viên thành công!');
       }
 
@@ -83,7 +83,7 @@ const EmployeeCatalog = () => {
   // Handle delete employee by ID
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://192.168.1.19:5000/api/employees/${id}`);
+      await axios.delete(`http://192.168.1.9:5001/api/employees/${id}`);
       toast.success('Xóa nhân viên thành công!');
       fetchEmployees(); // Refresh employee list after delete
     } catch (error) {
