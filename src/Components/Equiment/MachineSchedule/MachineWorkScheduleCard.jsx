@@ -10,6 +10,24 @@ const getSignalLightColors = (status) => {
   if (status === 'Vệ Sinh') return { red: 'white', yellow: 'white', green: '#807e7e' }; // Xám cho trạng thái "Vệ Sinh"
   return { red: 'white', yellow: 'white', green: 'white' }; // Mặc định màu trắng cho tất cả
 };
+const getShiftBackgroundColor = (status) => {
+  switch (status) {
+    case 'Chạy':
+      return '#8ff28f'; // Màu xanh cho trạng thái "Chạy"
+    case 'Chờ':
+    case 'Cài Đặt':
+      return '#fafa98'; // Màu vàng cho trạng thái "Chờ" hoặc "Cài đặt"
+    case 'Dừng':
+      return '#ffcccc'; // Màu đỏ nhạt cho trạng thái "Dừng"
+    case 'Tắt':
+      return '#f0f0f0'; // Màu xám nhạt cho trạng thái "Tắt"
+    case 'Vệ Sinh':
+      return '#dcdcdc'; // Màu xám cho trạng thái "Vệ Sinh"
+    default:
+      return '#ffffff'; // Mặc định màu trắng
+  }
+};
+
 
 const MachineWorkScheduleCard = ({ machine, tasks, selectedDate }) => {
   // Lọc nhiệm vụ theo ngày đã chọn
@@ -44,32 +62,42 @@ const MachineWorkScheduleCard = ({ machine, tasks, selectedDate }) => {
 
                 {/* Kế hoạch sản xuất */}
                 <div className="bg-white p-4 rounded-lg shadow-md mb-4 mr-2 mt-2 flex-grow">
-                  <h3 className="font-semibold text-gray-700">Kế hoạch sản xuất</h3>
-                  {task.shifts.length > 0 ? (
-                    task.shifts.map((shift, shiftIndex) => (
-                      <div key={shiftIndex} className="rounded-lg mb-4 p-2 bg-gray-100">
-                        <div className="flex justify-between">
-                          <div className="text-sm font-semibold">{shift.shiftName}</div> {/* Hiển thị tên ca */}
-                           </div>
+                      <h3 className="font-semibold text-gray-700">Kế hoạch sản xuất</h3>
+                      {task.shifts.length > 0 ? (
+                        task.shifts.map((shift, shiftIndex) => {
+                          // Lấy màu nền dựa trên trạng thái của ca làm việc
+                          const shiftBackgroundColor = getShiftBackgroundColor(shift.status);
 
-                        {/* Hiển thị danh sách nhân viên */}
-                        <div className="mt-2">
-                          {shift.employeeName.length > 0 ? (
-                            shift.employeeName.map((employee, empIndex) => (
-                              <div key={empIndex} className="text-sm ml-4">
-                                {typeof employee === 'string' ? employee : employee._id} {/* Hiển thị tên nhân viên hoặc _id */}
+                          return (
+                            <div key={shiftIndex} className="rounded-lg mb-4 p-2" >
+                              {/* Ca làm việc */}
+                              <div className="flex justify-between p-2 rounded-lg " style={{ backgroundColor: shiftBackgroundColor }}>
+                                <div className="text-sm font-semibold" >{shift.shiftName}</div> {/* Hiển thị tên ca */}
                               </div>
-                            ))
-                          ) : (
-                            <div className="text-sm text-gray-600">Không có nhân viên</div>
-                          )}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-gray-600 mt-4">Không có thông tin ca làm việc</div>
-                  )}
-                </div>
+
+                              {/* Nhân viên */}
+                              <div className="bg-gray-100 p-2 rounded-lg mt-2">
+                                <h4 className="font-semibold text-gray-700">Nhân viên</h4>
+                                <div className="mt-2">
+                                  {shift.employeeName.length > 0 ? (
+                                    shift.employeeName.map((employee, empIndex) => (
+                                      <div key={empIndex} className="text-sm ml-4">
+                                        {typeof employee === 'string' ? employee : employee._id} {/* Hiển thị tên nhân viên hoặc _id */}
+                                      </div>
+                ))
+              ) : (
+                <div className="text-sm text-gray-600">Không có nhân viên</div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    })
+  ) : (
+    <div className="text-gray-600 mt-4">Không có thông tin ca làm việc</div>
+  )}
+</div>
+
               </div>
             </div>
           );

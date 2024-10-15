@@ -83,34 +83,39 @@ const MachineWorkScheduleList = () => {
   };
 
   // Handle canceling the selected dates
-  const handleCancelDates = () => {
-    setSelectedDates([new Date().toISOString().split('T')[0]]); // Clear selected dates on cancel (set to today)
-    setIsCustomModalOpen(false); // Close the modal
-  };
+ // Handle canceling the selected dates
+const handleCancelDates = () => {
+  setSelectedDates([new Date().toISOString().split('T')[0]]); // Clear selected dates on cancel (set to today)
+  setIsCustomModalOpen(false); // Close the modal
+  setSelectedMachines([]); // Clear selected machines when cancelling
+  setIsSelecting(false); // Reset trạng thái chọn thiết bị
+};
+
 
   // Toggle machine selection mode
-  const toggleSelectDevicesByArea = () => {
-    const machinesInArea = filteredDevices; // Lấy tất cả thiết bị trong khu vực được chọn
+ // Toggle machine selection mode
+const toggleSelectDevicesByArea = () => {
+  const machinesInArea = filteredDevices; // Lấy tất cả thiết bị trong khu vực được chọn
 
-    // Kiểm tra xem tất cả thiết bị trong khu vực đã được chọn chưa
-    const allSelected = machinesInArea.every(machine => selectedMachines.some(selected => selected._id === machine._id));
+  // Kiểm tra xem tất cả thiết bị trong khu vực đã được chọn chưa
+  const allSelected = machinesInArea.every(machine => selectedMachines.some(selected => selected._id === machine._id));
 
-    if (allSelected) {
-      // Nếu tất cả thiết bị đã được chọn, bỏ chọn tất cả thiết bị trong khu vực
-      const remainingMachines = selectedMachines.filter(selected => !machinesInArea.some(machine => machine._id === selected._id));
-      setSelectedMachines(remainingMachines);
-    } else {
-      // Nếu chưa chọn hết, thêm tất cả thiết bị trong khu vực vào danh sách
-      const newSelectedMachines = [
-        ...selectedMachines,
-        ...machinesInArea.filter(machine => !selectedMachines.some(selected => selected._id === machine._id)) // Chỉ thêm các thiết bị chưa được chọn
-      ];
-      setSelectedMachines(newSelectedMachines);
-    }
+  if (allSelected) {
+    // Nếu tất cả thiết bị đã được chọn, bỏ chọn tất cả thiết bị trong khu vực
+    const remainingMachines = selectedMachines.filter(selected => !machinesInArea.some(machine => machine._id === selected._id));
+    setSelectedMachines(remainingMachines);
+    setIsSelecting(false); // Reset trạng thái chọn khi tất cả máy đã bị bỏ chọn
+  } else {
+    // Nếu chưa chọn hết, thêm tất cả thiết bị trong khu vực vào danh sách
+    const newSelectedMachines = [
+      ...selectedMachines,
+      ...machinesInArea.filter(machine => !selectedMachines.some(selected => selected._id === machine._id)) // Chỉ thêm các thiết bị chưa được chọn
+    ];
+    setSelectedMachines(newSelectedMachines);
+    setIsSelecting(true); // Chọn thiết bị
+  }
+};
 
-    // Toggle trạng thái isSelecting
-    setIsSelecting(!isSelecting);
-  };
 
   // Handle machine click
   const handleMachineClick = (machine) => {
@@ -167,10 +172,13 @@ const MachineWorkScheduleList = () => {
   };
 
   // Handle canceling the update (close modal and clear selections)
-  const handleCancelUpdate = () => {
-    setIsUpdateModalOpen(false); // Close the update confirmation modal
-    setSelectedMachines([]); // Clear selected machines on cancel
-  };
+  // Handle canceling the update (close modal and clear selections)
+const handleCancelUpdate = () => {
+  setIsUpdateModalOpen(false); // Close the update confirmation modal
+  setSelectedMachines([]); // Clear selected machines on cancel
+  setIsSelecting(false); // Reset trạng thái chọn thiết bị
+};
+
   // Hàm mở modal
   const handleOpenScheduleModal = () => {
     setIsScheduleModalOpen(true);
@@ -242,27 +250,51 @@ const MachineWorkScheduleList = () => {
 
       {/* Machine List */}
       <div className="grid grid-cols-4 gap-1 lg:grid-cols-4">
-          {filteredDevices.map((machine) => (
-            // Với mỗi thiết bị (machine), lặp qua các nhiệm vụ và render thành từng thẻ riêng biệt
-            getTasksForDevice(machine.deviceName).map((task, index) => (
-              <div
-                key={`${machine._id}-${index}`} // Sử dụng id thiết bị + chỉ số để đảm bảo key là duy nhất
-                onClick={() => handleMachineClick(machine)}
-                className={`relative cursor-pointer transition duration-300 ease-in-out h-full p-2
-                  ${isSelecting && selectedMachines.some((m) => m.id === machine._id) ? 'border-2 border-blue-700 round-lg bg-gray-600 ' : ''}`}
-              >
-                <MachineWorkScheduleCard
-                  machine={machine} // Truyền thông tin máy vào card
-                  tasks={[task]} // Chỉ truyền một nhiệm vụ (task) vào thẻ
-                  selectedDate={selectedDates[0]} // Truyền ngày đã chọn
-                />
-                {isSelecting && selectedMachines.some((m) => m.id === machine.id) && (
-                  <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1">✓</div>
-                )}
-      </div>
-    ))
-  ))}
+  {filteredDevices.map((machine) => {
+    const tasksForDevice = getTasksForDevice(machine.deviceName);
+    
+    // Nếu máy có nhiệm vụ sản xuất, lặp qua từng nhiệm vụ và hiển thị card riêng cho mỗi nhiệm vụ
+    if (tasksForDevice.length > 0) {
+      return tasksForDevice.map((task, index) => (
+        <div
+          key={`${machine._id}-${index}`} // Đảm bảo key là duy nhất
+          onClick={() => handleMachineClick(machine)}
+          className={`relative cursor-pointer transition duration-300 ease-in-out h-full p-2
+            ${isSelecting && selectedMachines.some((m) => m.id === machine._id) ? 'border-2 border-blue-700 round-lg bg-gray-600 ' : ''}`}
+        >
+          <MachineWorkScheduleCard
+            machine={machine} // Truyền thông tin máy vào card
+            tasks={[task]} // Truyền nhiệm vụ vào thẻ
+            selectedDate={selectedDates[0]} // Truyền ngày đã chọn
+          />
+          {isSelecting && selectedMachines.some((m) => m.id === machine.id) && (
+            <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1">✓</div>
+          )}
+        </div>
+      ));
+    } else {
+      // Nếu máy không có nhiệm vụ sản xuất, hiển thị thông báo "Không có thông tin sản xuất"
+      return (
+        <div
+          key={machine._id}
+          onClick={() => handleMachineClick(machine)}
+          className={`relative cursor-pointer transition duration-300 ease-in-out h-full p-1
+            ${isSelecting && selectedMachines.some((m) => m.id === machine._id) ? 'border-2 border-blue-700 round-lg bg-gray-600 ' : ''}`}
+        >
+          <MachineWorkScheduleCard
+            machine={machine} // Truyền thông tin máy vào card
+            tasks={[]} // Truyền một mảng rỗng nếu không có nhiệm vụ
+            selectedDate={selectedDates[0]} // Truyền ngày đã chọn
+          />
+          {isSelecting && selectedMachines.some((m) => m.id === machine.id) && (
+            <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1">✓</div>
+          )}
+        </div>
+      );
+    }
+  })}
 </div>
+
 
 
       {/* Update Confirmation Modal */}

@@ -4,38 +4,31 @@ import { UserOutlined, PlusOutlined, CloseOutlined, DownOutlined, UpOutlined } f
 import axios from 'axios';
 
 const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, selectedDates }) => {
-  const availableEmployees = [
-    "Nguyễn Văn A",
-    "Trần Thị B",
-    "Lê Văn C",
-    "Phạm Thị D",
-    "Hoàng Văn E",
-  ];
-
-  const shiftOptions = [
-    { label: "Ca chính", value: "Ca chính" },
-    { label: "Ca phụ 1 giờ", value: "Ca phụ 1 giờ" },
-    { label: "Ca phụ 2 giờ", value: "Ca phụ 2 giờ" },
-    { label: "Ca phụ 3 giờ", value: "Ca phụ 3 giờ" },
-  ];
-
   const [tasks, setTasks] = useState([]); // State để lưu nhiệm vụ
-  const [devices, setDevices] = useState([]); // State để lưu thiết bị từ API
-  const [filteredDevices, setFilteredDevices] = useState([]); // State để lưu danh sách máy lọc theo selectedMachines
+  const [employees, setEmployees] = useState([]); // State để lưu danh sách nhân viên từ API
+  const [shifts, setShifts] = useState([]); // State để lưu danh sách ca làm việc từ API
+  const [devices, setDevices] = useState([]); // State để lưu danh sách thiết bị từ API
+  const [filteredDevices, setFilteredDevices] = useState([]); // State để lưu danh sách thiết bị đã lọc
   const [isMachineListOpen, setIsMachineListOpen] = useState(false); // Để mở/đóng danh sách máy
 
-  // Gọi API để lấy danh sách thiết bị khi component được mount
+  // Gọi API để lấy danh sách nhân viên, ca làm việc và thiết bị
   useEffect(() => {
-    const fetchDevices = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get('http://192.168.1.9:5001/api/productiontask'); // Gọi API lấy danh sách máy
-        setDevices(response.data); // Lưu thiết bị vào state devices
+        const employeesResponse = await axios.get('http://192.168.1.9:5001/api/employees');
+        setEmployees(employeesResponse.data);
+
+        const shiftsResponse = await axios.get('http://192.168.1.9:5001/api/workShifts');
+        setShifts(shiftsResponse.data);
+
+        const devicesResponse = await axios.get('http://192.168.1.9:5001/api/device');
+        setDevices(devicesResponse.data);
       } catch (error) {
-        console.error('Lỗi khi lấy danh sách thiết bị từ API:', error);
+        console.error('Lỗi khi lấy dữ liệu từ API:', error);
       }
     };
 
-    fetchDevices(); // Gọi hàm lấy danh sách thiết bị
+    fetchData(); // Gọi hàm để lấy dữ liệu
   }, []);
 
   // Lọc danh sách thiết bị theo selectedMachines
@@ -44,7 +37,7 @@ const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, sel
       return selectedMachines.some((selectedMachine) => selectedMachine.deviceName === device.deviceName);
     });
     setFilteredDevices(filtered); // Lưu danh sách thiết bị đã lọc
-  }, [devices, selectedMachines]); // Chạy khi devices hoặc selectedMachines thay đổi
+  }, [devices, selectedMachines]);
 
   // Hàm để thêm nhiệm vụ mới
   const addTask = () => {
@@ -107,12 +100,8 @@ const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, sel
       return;
     }
 
-    // Sao chép dữ liệu nhiệm vụ hiện tại
     const updatedTaskData = { ...taskData };
-
-    // Kiểm tra nếu `selectedDates` là một mảng hợp lệ
     if (Array.isArray(selectedDates) && selectedDates.length > 0) {
-      // Nếu `selectedDates` là mảng hợp lệ, xử lý
       selectedDates.forEach(date => {
         updatedTaskData[date] = {
           tasks: [...(updatedTaskData[date]?.tasks || []), ...tasks], // Lưu các nhiệm vụ mới
@@ -120,12 +109,10 @@ const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, sel
         };
       });
 
-      // Cập nhật `taskData` với dữ liệu mới
       setTaskData(updatedTaskData);
       message.success('Nhiệm vụ đã được xác nhận!');
       setTasks([]); // Reset các nhiệm vụ sau khi xác nhận
     } else {
-      // Hiển thị thông báo nếu không có ngày nào được chọn
       message.error('Vui lòng chọn ít nhất một ngày!');
     }
   };
@@ -172,90 +159,100 @@ const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, sel
 
       {/* Nhiệm vụ sản xuất */}
       {tasks.map((task, index) => (
-        <div key={index} className="bg-gray-100 rounded-md p-3 mb-4">
-          <div className="flex justify-between items-center mb-2">
-            <span className="font-semibold">Ca làm việc</span>
-            <CloseOutlined
-              className="text-gray-600 cursor-pointer"
-              onClick={() => removeTask(index)} // Xóa nhiệm vụ
-            />
-          </div>
-
-          {/* Dropdown button for selecting shifts */}
-          <div className="mb-2 flex justify-between">
-            <Dropdown overlay={
-              <Menu>
-                {shiftOptions.map((shift) => (
-                  <Menu.Item key={shift.value} onClick={() => updateShift(index, shift.value)}>
-                    {shift.label}
-                  </Menu.Item>
-                ))}
-              </Menu>
-            }>
-              <Button
-                className="bg-white"
-                style={{
-                  background: task.selectedShift
-                    ? task.status === 'Dừng'
-                      ? 'red'
-                      : task.status === 'Chờ'
-                      ? '#fafa98'
-                      : '#8ff28f'
-                    : 'white',
-                }}
-              >
-                {task.selectedShift || 'Chọn ca làm việc'}
-              </Button>
-            </Dropdown>
-          </div>
-
-          <div className="mb-2 flex">
-            <Select
-              placeholder="Chọn nhân viên"
-              value={task.selectedEmployee}
-              onChange={(value) => updateEmployee(index, value)}
-              style={{ width: '100%', marginRight: '8px' }}
-            >
-              {availableEmployees.map((employee, idx) => (
-                <Select.Option key={idx} value={employee}>
-                  {employee}
-                </Select.Option>
-              ))}
-            </Select>
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => addEmployee(index)} />
-          </div>
-
-          <div className="max-h-32 overflow-y-auto mb-2">
-            {task.selectedEmployees.map((employee, idx) => (
-              <div key={idx} className="flex items-center justify-between bg-white p-2 rounded mb-1">
-                <div className="flex items-center">
-                  <UserOutlined className="mr-2" />
-                  <span>{employee}</span>
-                </div>
-                <CloseOutlined
-                  className="text-gray-600 cursor-pointer"
-                  onClick={() => removeEmployee(index, employee)}
-                />
-              </div>
+        <div className="bg-gray-100 rounded-md p-3 mb-4">
+        <div className="flex justify-between items-center mb-2">
+          <span className="font-semibold">Ca làm việc</span>
+          <CloseOutlined className="text-gray-600 cursor-pointer" onClick={() => removeTask(index)} />
+        </div>
+      
+        {/* Dropdown cho việc chọn ca làm việc */}
+        <div className="mb-2">
+          <Select
+            placeholder="Chọn ca làm việc"
+            value={task.selectedShift}
+            onChange={(value) => updateShift(index, value)}
+            style={{ width: '100%' }}
+          >
+            {shifts.map((shift) => (
+              <Select.Option key={shift._id} value={shift.shiftName}>
+                {shift.shiftName}
+              </Select.Option>
             ))}
+          </Select>
+        </div>
+      
+        {/* Dropdown cho việc chọn nhân viên */}
+        <div className="mb-2 flex">
+          <Select
+            placeholder="Chọn nhân viên"
+            value={task.selectedEmployee}
+            onChange={(value) => updateEmployee(index, value)}
+            style={{ width: '100%', marginRight: '8px' }}
+          >
+            {employees.map((employee) => (
+              <Select.Option key={employee._id} value={employee.employeeName}>
+                {employee.employeeName}
+              </Select.Option>
+            ))}
+          </Select>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => addEmployee(index)} />
+        </div>
+      
+        {/* Hiển thị danh sách nhân viên đã chọn */}
+        <div className="max-h-32 overflow-y-auto mb-2">
+          {task.selectedEmployees.map((employee, idx) => (
+            <div key={idx} className="flex items-center justify-between bg-white p-2 rounded mb-1">
+              <div className="flex items-center">
+                <UserOutlined className="mr-2" />
+                <span>{employee}</span>
+              </div>
+              <CloseOutlined
+                className="text-gray-600 cursor-pointer"
+                onClick={() => removeEmployee(index, employee)}
+              />
+            </div>
+          ))}
+        </div>
+      
+        {/* Divs for status colors */}
+        <div className="h-12 bg-white border border-black rounded-lg overflow-hidden flex m-2">
+          <div
+            className={`w-1/3 border-l-4 border-l-red-600 cursor-pointer ${task.status === 'Dừng' ? 'bg-red-600' : ''}`}
+            onClick={() => handleDivClick(index, 'Dừng')}
+          />
+          <div
+            className={`w-1/3 border-l-4 border-l-yellow-600 cursor-pointer ${task.status === 'Chờ' ? 'bg-yellow-500' : ''}`}
+            onClick={() => handleDivClick(index, 'Chờ')}
+          />
+          <div
+            className={`w-1/3 cursor-pointer border-l-4 border-l-green-600 ${task.status === 'Chạy' ? 'bg-green-500' : ''}`}
+            onClick={() => handleDivClick(index, 'Chạy')}
+          />
+        </div>
+      
+        {/* Nền của ca làm việc thay đổi theo trạng thái */}
+        <div
+          className={`rounded-lg mb-4 p-2 mt-2 ${task.status === 'Dừng' ? 'bg-red-100' : task.status === 'Chờ' ? 'bg-yellow-100' : 'bg-green-100'}`}
+        >
+          <div className="flex justify-between">
+            <div className="text-sm font-semibold">{task.selectedShift || 'Chưa chọn ca làm việc'}</div>
           </div>
-
-          {/* Divs for status colors */}
-          <div className="h-12 bg-white border border-black rounded-lg overflow-hidden flex m-2">
-            <div
-              className={`w-1/3 border-l-4 border-l-red-600 cursor-pointer ${task.status === 'Dừng' ? 'bg-red-600' : ''}`}
-              onClick={() => handleDivClick(index, 'Dừng')}
-            />
-            <div
-              className={`w-1/3 border-l-4 border-l-yellow-600 cursor-pointer ${task.status === 'Chờ' ? 'bg-yellow-500' : ''}`}
-              onClick={() => handleDivClick(index, 'Chờ')}
-            />
-            <div
-              className={`w-1/3 cursor-pointer border-l-4 border-l-green-600 ${task.status === 'Chạy' ? 'bg-green-500' : ''}`}
-              onClick={() => handleDivClick(index, 'Chạy')}
-            />
+      
+          {/* Hiển thị danh sách nhân viên */}
+          <div className="mt-2">
+            {task.selectedEmployees.length > 0 ? (
+              task.selectedEmployees.map((employee, idx) => (
+                <div key={idx} className="text-sm ml-4">
+                  {employee}
+                </div>
+              ))
+            ) : (
+              <div className="text-sm text-gray-600">Không có nhân viên</div>
+            )}
           </div>
         </div>
+      </div>
+      
       ))}
 
       {/* Nút để thêm nhiệm vụ sản xuất mới */}
