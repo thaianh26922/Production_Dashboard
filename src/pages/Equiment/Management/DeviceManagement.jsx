@@ -135,50 +135,63 @@ const handleSearch = (query) => {
       toast.error('Failed to delete device');
     }
   };
- 
-
-const handleImport = (file) => {
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, { type: 'array' });
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-    // Chuyển đổi dữ liệu thành định dạng phù hợp
-    const formattedData = jsonData.map((item) => ({
-      deviceCode: item["Mã thiết bị"],
-      deviceName: item["Tên thiết bị"],
-      areaName: item["Khu vực sản xuất"],
-      model: item["Model thiết bị"],
-      technicalSpecifications: item["Thông số kỹ thuật"],
-      purchaseDate: moment(item["Ngày mua"], "DD-MM-YYYY").format("YYYY-MM-DD"),
-    }));
-
-    // Gửi từng thiết bị lên API và cập nhật state
-    const promises = formattedData.map(async (device) => {
-      try {
-        const response = await axios.post('http://192.168.1.9:5001/api/device', device);
-        return response.data;
-      } catch (error) {
-        toast.error('Failed to save device');
-        return null;
-      }
-    });
-
-    // Đợi tất cả các yêu cầu hoàn tất và cập nhật bảng
-    Promise.all(promises).then((results) => {
-      const addedDevices = results.filter((device) => device !== null);
-      setDevices((prevDevices) => [...prevDevices, ...addedDevices]);
-      setFilteredDevices((prevFiltered) => [...prevFiltered, ...addedDevices]);
-      if (addedDevices.length) {
-        toast.success('Thêm thiết bị thành công!');
-      }
-    });
+  const convertExcelDate = (excelDate) => {
+    // Excel's serial date format offset
+    const date = new Date(Math.round((excelDate - 25569) * 86400 * 1000));
+    return moment(date).format("DD-MM-YYYY");
   };
-  reader.readAsArrayBuffer(file);
-};
+  const handleImport = (file) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+  
+      const formattedData = jsonData.map((item) => {
+        let purchaseDate = item["Ngày mua"];
+        
+        // Kiểm tra nếu giá trị ngày là số thì chuyển đổi
+        if (!isNaN(purchaseDate)) {
+          purchaseDate = convertExcelDate(purchaseDate);
+        } else {
+          // Sử dụng moment nếu giá trị là chuỗi
+          purchaseDate = moment(purchaseDate, ["DD-MM-YYYY", "MM/DD/YYYY", "YYYY-MM-DD"]).format("DD-MM-YYYY");
+        }
+  
+        return {
+          deviceCode: item["Mã thiết bị"],
+          deviceName: item["Tên thiết bị"],
+          areaName: item["Khu vực sản xuất"],
+          model: item["Model thiết bị"],
+          technicalSpecifications: item["Thông số kĩ thuật"],
+          purchaseDate: purchaseDate,
+        };
+      });
+  
+      const promises = formattedData.map(async (device) => {
+        try {
+          const response = await axios.post('http://192.168.1.9:5001/api/device', device);
+          return response.data;
+        } catch (error) {
+          toast.error('Failed to save device');
+          return null;
+        }
+      });
+  
+      Promise.all(promises).then((results) => {
+        const addedDevices = results.filter((device) => device !== null);
+        setDevices((prevDevices) => [...prevDevices, ...addedDevices]);
+        setFilteredDevices((prevFiltered) => [...prevFiltered, ...addedDevices]);
+        if (addedDevices.length) {
+          toast.success('Thêm thiết bị thành công!');
+        }
+      });
+    };
+    reader.readAsArrayBuffer(file);
+  };
+  
 
 
   // Open modal to add or edit device
@@ -332,7 +345,7 @@ const handleImport = (file) => {
         </Form>
       </Modal>
 
-      <ToastContainer />
+      
     </div>
   );
 };

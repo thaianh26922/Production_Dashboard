@@ -92,52 +92,56 @@ const handleCancelDates = () => {
 };
 
 
-  // Toggle machine selection mode
+  
  // Toggle machine selection mode
-const toggleSelectDevicesByArea = () => {
+ const toggleSelectDevicesByArea = () => {
   const machinesInArea = filteredDevices; // Lấy tất cả thiết bị trong khu vực được chọn
 
   // Kiểm tra xem tất cả thiết bị trong khu vực đã được chọn chưa
   const allSelected = machinesInArea.every(machine => selectedMachines.some(selected => selected._id === machine._id));
 
   if (allSelected) {
-    // Nếu tất cả thiết bị đã được chọn, bỏ chọn tất cả thiết bị trong khu vực
-    const remainingMachines = selectedMachines.filter(selected => !machinesInArea.some(machine => machine._id === selected._id));
-    setSelectedMachines(remainingMachines);
-    setIsSelecting(false); // Reset trạng thái chọn khi tất cả máy đã bị bỏ chọn
+      // Nếu tất cả thiết bị đã được chọn, bỏ chọn các thiết bị trong khu vực
+      const updatedSelectedMachines = selectedMachines.filter(selected => !machinesInArea.some(machine => machine._id === selected._id));
+      setSelectedMachines(updatedSelectedMachines);
   } else {
-    // Nếu chưa chọn hết, thêm tất cả thiết bị trong khu vực vào danh sách
-    const newSelectedMachines = [
-      ...selectedMachines,
-      ...machinesInArea.filter(machine => !selectedMachines.some(selected => selected._id === machine._id)) // Chỉ thêm các thiết bị chưa được chọn
-    ];
-    setSelectedMachines(newSelectedMachines);
-    setIsSelecting(true); // Chọn thiết bị
+      // Nếu chưa chọn hết, thêm tất cả thiết bị trong khu vực vào danh sách
+      const newSelectedMachines = [
+          ...selectedMachines,
+          ...machinesInArea.filter(machine => !selectedMachines.some(selected => selected._id === machine._id)) // Chỉ thêm các thiết bị chưa được chọn
+      ];
+      setSelectedMachines(newSelectedMachines);
   }
+
+  // Điều chỉnh trạng thái chọn thiết bị
+  setIsSelecting(!allSelected);
 };
+
+
 
 
   // Handle machine click
   const handleMachineClick = (machine) => {
-    if (!isSelecting) {
-      setIsSelecting(true); // Tự động bật chế độ chọn nếu chưa bật
-    }
+    // Kiểm tra xem thiết bị đã được chọn chưa
+    const isSelected = selectedMachines.some((m) => m._id === machine._id);
 
-    // Kiểm tra xem máy đã được chọn chưa
-    if (selectedMachines.some((m) => m.id === machine.id)) {
-      // Nếu đã được chọn, bỏ chọn máy
-      const updatedMachines = selectedMachines.filter((m) => m.id !== machine.id);
-      setSelectedMachines(updatedMachines);
+    if (isSelected) {
+        // Nếu đã được chọn, bỏ chọn thiết bị đó
+        const updatedMachines = selectedMachines.filter((m) => m._id !== machine._id);
+        setSelectedMachines(updatedMachines);
 
-      // Kiểm tra nếu không còn máy nào được chọn, thì chuyển lại trạng thái về "Chọn Thiết Bị"
-      if (updatedMachines.length === 0) {
-        setIsSelecting(false);
-      }
+        // Kiểm tra nếu không còn máy nào được chọn, thì chuyển lại trạng thái về "Chọn Thiết Bị"
+        if (updatedMachines.length === 0) {
+            setIsSelecting(false);
+        }
     } else {
-      // Nếu chưa được chọn, thêm máy vào danh sách
-      setSelectedMachines(prevMachines => [...prevMachines, machine]);
+        // Nếu chưa được chọn, thêm thiết bị vào danh sách
+        setSelectedMachines((prevMachines) => [...prevMachines, machine]);
+        setIsSelecting(true);
     }
-  };
+};
+
+
 
   // Sử dụng useEffect để theo dõi thay đổi của selectedMachines
   useEffect(() => {
@@ -228,7 +232,7 @@ const handleCancelUpdate = () => {
 
           {/* Toggle "Chọn Thiết Bị" or "Bỏ Chọn Thiết Bị" */}
           <Button onClick={toggleSelectDevicesByArea}>
-            {isSelecting ? 'Bỏ Chọn Tất Cả': 'Chọn Tất Cả'  }
+            {isSelecting ?  'Bỏ Chọn Tất Cả' : 'Chọn Tất Cả'   }
           </Button>
           <DatePicker 
         onChange={handleDateChange} 

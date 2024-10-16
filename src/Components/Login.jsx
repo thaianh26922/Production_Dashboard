@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaGoogle, FaFacebook, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { toast,ToastContainer } from 'react-toastify';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import logo from '../../src/assets/image/logo.png' 
@@ -23,10 +23,12 @@ function Login() {
       if (response.status === 200) {
         const { token } = response.data;
         localStorage.setItem('token', token);
-        const decodedToken = jwtDecode(token); 
-        const role = decodedToken.user.role; 
-        localStorage.setItem('role', role);  
+        const decodedToken = jwtDecode(token);
+        const role = decodedToken.user.role;
+        localStorage.setItem('role', role);
         setUserRole(role);
+  
+        // Hiển thị toast khi đăng nhập thành công
         toast.success('Đăng nhập thành công!');
         navigate(role === 'CNVH' ? '/dashboard/mobile' : '/dashboard');
       }
@@ -36,6 +38,7 @@ function Login() {
       setIsLoading(false);
     }
   };
+  
   
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
@@ -113,6 +116,7 @@ function Login() {
           </button>
         </form>
       </div>
+    
     </div>
   );
 }
