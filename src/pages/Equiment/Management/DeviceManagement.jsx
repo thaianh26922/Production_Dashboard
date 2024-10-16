@@ -24,7 +24,7 @@ const DeviceManagement = () => {
   const [areas, setAreas] = useState([]); // To store area names from Area model
   const [form] = Form.useForm();
   const [sortOrderDate, setSortOrderDate] = useState('asc'); // 'asc' cho tăng dần, 'desc' cho giảm dần
-
+  const apiUrl =import.meta.env.VITE_API_BASE_URL;
   const sortDevicesByDate = () => {
     const sortedDevices = [...filteredDevices].sort((a, b) => {
       if (sortOrderDate === 'asc') {
@@ -46,13 +46,13 @@ const DeviceManagement = () => {
   const fetchDevicesAndAreas = async () => {
     try {
       // Fetch devices
-      const deviceResponse = await axios.get('http://192.168.1.9:5001/api/device');
+      const deviceResponse = await axios.get(`${apiUrl}/device`);
       const sortedDevices = sortDevicesAlphabetically(deviceResponse.data);
       setDevices(sortedDevices);
       setFilteredDevices(sortedDevices);
 
       // Fetch areas for dropdown
-      const areaResponse = await axios.get('http://192.168.1.9:5001/api/areas');
+      const areaResponse = await axios.get(`${apiUrl}/areas`);
       setAreas(areaResponse.data); // Store areas from API
     } catch (error) {
       toast.error('Failed to fetch devices or areas');
@@ -114,11 +114,11 @@ const handleSearch = (query) => {
     try {
       if (selectedDevice) {
         // Update device
-        await axios.put(`http://192.168.1.9:5001/api/device/${selectedDevice._id}`, deviceData);
+        await axios.put(`${apiUrl}/device/${selectedDevice._id}`, deviceData);
         toast.success('Cập nhật thiết bị thành công!');
       } else {
         // Create new device
-        await axios.post('http://192.168.1.9:5001/api/device', deviceData);
+        await axios.post(`${apiUrl}/device`, deviceData);
         toast.success('Thêm thiết bị thành công!');
       }
   
@@ -138,7 +138,7 @@ const handleSearch = (query) => {
   // Delete device by ID
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://192.168.1.9:5001/api/device/${id}`);
+      await axios.delete(`${apiUrl}/device/${id}`);
       toast.success('Xóa thiết bị thành công!');
       fetchDevicesAndAreas(); // Refresh device list after delete
     } catch (error) {
@@ -182,7 +182,7 @@ const handleSearch = (query) => {
   
       const promises = formattedData.map(async (device) => {
         try {
-          const response = await axios.post('http://192.168.1.9:5001/api/device', device);
+          const response = await axios.post(`${apiUrl}/device`, device);
           return response.data;
         } catch (error) {
           toast.error('Failed to save device');

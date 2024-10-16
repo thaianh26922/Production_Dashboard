@@ -10,22 +10,22 @@ const MachineScheduleModal = ({ open, onClose }) => {
   const [selectedArea, setSelectedArea] = useState('all'); // Khu vực được chọn
   const [checkedDevices, setCheckedDevices] = useState([]); // Thiết bị có lịch trong ngày
   const [selectedDate, setSelectedDate] = useState(null); // Ngày được chọn trên lịch
-
+  const apiUrl =import.meta.env.VITE_API_BASE_URL;
   // Gọi API để lấy dữ liệu lịch sản xuất và thiết bị
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Lấy dữ liệu nhiệm vụ sản xuất
-        const tasksResponse = await axios.get('http://192.168.1.9:5001/api/productiontask');
+        const tasksResponse = await axios.get(`${apiUrl}/productiontask`);
         setProductionTasks(tasksResponse.data);
 
         // Lấy dữ liệu thiết bị
-        const devicesResponse = await axios.get('http://192.168.1.9:5001/api/device');
+        const devicesResponse = await axios.get(`${apiUrl}/device`);
         setDevices(devicesResponse.data);
         setFilteredDevices(devicesResponse.data); // Hiển thị tất cả thiết bị lúc đầu
 
         // Lấy dữ liệu khu vực
-        const areasResponse = await axios.get('http://192.168.1.9:5001/api/areas');
+        const areasResponse = await axios.get(`${apiUrl}/areas`);
         setAreas(areasResponse.data);
       } catch (error) {
         console.error('Error fetching data:', error);

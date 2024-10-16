@@ -10,18 +10,18 @@ const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, sel
   const [devices, setDevices] = useState([]); // State để lưu danh sách thiết bị từ API
   const [filteredDevices, setFilteredDevices] = useState([]); // State để lưu danh sách thiết bị đã lọc
   const [isMachineListOpen, setIsMachineListOpen] = useState(false); // Để mở/đóng danh sách máy
-
+  const apiUrl =import.meta.env.VITE_API_BASE_URL;
   // Gọi API để lấy danh sách nhân viên, ca làm việc và thiết bị
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const employeesResponse = await axios.get('http://192.168.1.9:5001/api/employees');
+        const employeesResponse = await axios.get('${apiUrl}/employees');
         setEmployees(employeesResponse.data);
 
-        const shiftsResponse = await axios.get('http://192.168.1.9:5001/api/workShifts');
+        const shiftsResponse = await axios.get(`${apiUrl}/workShifts'`);
         setShifts(shiftsResponse.data);
 
-        const devicesResponse = await axios.get('http://192.168.1.9:5001/api/device');
+        const devicesResponse = await axios.get(`${apiUrl}/device`);
         setDevices(devicesResponse.data);
       } catch (error) {
         console.error('Lỗi khi lấy dữ liệu từ API:', error);

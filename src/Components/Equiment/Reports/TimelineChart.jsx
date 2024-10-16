@@ -10,6 +10,7 @@ const TimelineChart = ({ selectedDate }) => {
   const [dates, setDate] = useState([]);
   const [zoomLevel, setZoomLevel] = useState(1); // Zoom level state
   const [configDate , setConfigDate] = ''
+  const apiUrl = import.meta.env.VITE_API_BASE_URL
   const deviceId = '543ff470-54c6-11ef-8dd4-b74d24d26b24';
 
   const formatDateForAPI = (date) => moment(date).format('YYYY-MM-DD');
@@ -62,7 +63,7 @@ const TimelineChart = ({ selectedDate }) => {
     setError(null);
     try {
       const response = await axios.get(
-        `http://192.168.1.9:5001/api/telemetry?deviceId=${deviceId}&startDate=${formatDateForAPI(startDate)}&endDate=${formatDateForAPI(endDate)}`
+        `${apiUrl}/telemetry?deviceId=${deviceId}&startDate=${formatDateForAPI(startDate)}&endDate=${formatDateForAPI(endDate)}`
       );
 
       const processedData = response.data.map(entry => {

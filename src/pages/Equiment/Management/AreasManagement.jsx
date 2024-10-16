@@ -21,11 +21,12 @@ const AreasManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedArea, setSelectedArea] = useState(null); // Area for editing
   const [form] = Form.useForm(); // Ant Design form instance
+  const apiUrl = import.meta.env.VITE_API_BASE_URL
 
   // Fetch areas from the back-end API
   const fetchAreas = async () => {
     try {
-      const response = await axios.get('http://192.168.1.9:5001/api/areas'); // Your API URL
+      const response = await axios.get(`${apiUrl}/areas`); // Your API URL
       setAreas(response.data);
       setFilteredAreas(response.data);
     } catch (error) {
@@ -53,11 +54,11 @@ const AreasManagement = () => {
     try {
       if (selectedArea) {
         // Update Area
-        await axios.put(`http://192.168.1.9:5001/api/areas/${selectedArea._id}`, areaData);
+        await axios.put(`${apiUrl}/areas/${selectedArea._id}`, areaData);
         toast.success('Cập nhật khu vực thành công!');
       } else {
         // Create New Area
-        await axios.post('http://192.168.1.9:5001/api/areas', areaData);
+        await axios.post(`${apiUrl}/areas`, areaData);
         toast.success('Thêm khu vực thành công!');
       }
 
@@ -73,7 +74,7 @@ const AreasManagement = () => {
   // Delete area by ID
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://192.168.1.9:5001/api/areas/${id}`);
+      await axios.delete(`${apiUrl}/areas/${id}`);
       toast.success('Xóa khu vực thành công!');
       fetchAreas(); // Refresh area list after delete
     } catch (error) {
@@ -98,7 +99,7 @@ const AreasManagement = () => {
       // Gửi từng khu vực lên API và cập nhật state
       const promises = formattedData.map(async (area) => {
         try {
-          const response = await axios.post('http://192.168.1.9:5001/api/areas', area);
+          const response = await axios.post(`${apiUrl}/areas`, area);
           // Cập nhật state ngay sau khi thêm thành công
           return response.data;
         } catch (error) {

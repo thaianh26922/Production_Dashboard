@@ -14,12 +14,14 @@ function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const apiUrl =import.meta.env.VITE_API_BASE_URL
+  console.log(apiUrl)
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await axios.post('http://192.168.1.9:5001/api/login', { username: email, password });
+      const response = await axios.post(`${apiUrl}/login`, { username: email, password });
       if (response.status === 200) {
         const { token } = response.data;
         localStorage.setItem('token', token);

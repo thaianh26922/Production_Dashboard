@@ -17,7 +17,7 @@ const MachineWorkScheduleList = () => {
   const [selectedArea, setSelectedArea] = useState('all'); // State để lưu khu vực được chọn
   const [selectedDates, setSelectedDates] = useState([dayjs().format('YYYY-MM-DD')]); // Track selected dates (default to today)
   const [selectedMachines, setSelectedMachines] = useState([]); // Track selected machines
-  
+  const apiUrl =import.meta.env.VITE_API_BASE_URL;
   const [isSelecting, setIsSelecting] = useState(false); // Track if the user is selecting devices
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // Modal visibility for update confirmation
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false); // Custom modal visibility for the final confirmation
@@ -28,11 +28,11 @@ const MachineWorkScheduleList = () => {
     const fetchAreasAndDevices = async () => {
       try {
         // Lấy danh sách khu vực
-        const areasResponse = await axios.get('http://192.168.1.9:5001/api/areas');
+        const areasResponse = await axios.get(`${apiUrl}/areas`);
         setAreas(areasResponse.data);
 
         // Lấy danh sách thiết bị
-        const devicesResponse = await axios.get('http://192.168.1.9:5001/api/device');
+        const devicesResponse = await axios.get(`${apiUrl}/device`);
         setDevices(devicesResponse.data);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -57,7 +57,7 @@ const MachineWorkScheduleList = () => {
   useEffect(() => {
     const fetchProductionTasks = async () => {
       try {
-        const response = await axios.get('http://192.168.1.9:5001/api/productiontask');
+        const response = await axios.get(`${apiUrl}/productiontask`);
         setProductionTasks(response.data); // Lưu dữ liệu nhiệm vụ sản xuất vào state
       } catch (error) {
         console.error('Error fetching production tasks:', error);

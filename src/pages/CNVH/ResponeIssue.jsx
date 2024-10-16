@@ -36,6 +36,7 @@ const ResponeIssue = () => {
   const [selectedDiv, setSelectedDiv] = useState(null);
   const [isResponseEnabled, setIsResponseEnabled] = useState(false);
   const [telemetryData, setTelemetryData] = useState([]);
+  const apiUrl = import.meta.env.VITE_API_BASE_URL
 
   const { selectedDate, selectedMachine } = location.state || { selectedDate: null, selectedMachine: null };
   const displayDate = selectedDate || getCurrentDate();
@@ -45,7 +46,7 @@ const ResponeIssue = () => {
     if (selectedMachine) {
       const fetchTelemetryData = async () => {
         try {
-          const response = await axios.get(`http://192.168.1.9:5001/api/telemetry?deviceId=543ff470-54c6-11ef-8dd4-b74d24d26b24&startDate=${selectedDate}&endDate=${selectedDate}`);
+          const response = await axios.get(`${apiUrl}/telemetry?deviceId=543ff470-54c6-11ef-8dd4-b74d24d26b24&startDate=${selectedDate}&endDate=${selectedDate}`);
           if (response.data && response.data.length > 0) {
             setTelemetryData(response.data[0].intervals); // Giả sử API trả về một mảng với các khoảng thời gian
           }

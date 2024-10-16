@@ -20,10 +20,10 @@ const Dashboard2 = () => {
   const [areas, setAreas] = useState([]); 
   const [devices, setDevices] = useState([]);
   const navigate = useNavigate();
-
+  const apiUrl =import.meta.env.VITE_API_BASE_URL;
   const fetchAreas = async () => {
     try {
-      const response = await axios.get('http://192.168.1.9:5001/api/areas');
+      const response = await axios.get(`${apiUrl}/areas`);
       setAreas(response.data);
     } catch (error) {
       console.error('Failed to fetch areas:', error);
@@ -32,7 +32,7 @@ const Dashboard2 = () => {
 
   const fetchDevices = async () => {
     try {
-      const response = await axios.get('http://192.168.1.9:5001/api/device');
+      const response = await axios.get(`${apiUrl}/device`);
       setDevices(response.data);
       setData(response.data); // Mặc định hiển thị tất cả các thiết bị
     } catch (error) {

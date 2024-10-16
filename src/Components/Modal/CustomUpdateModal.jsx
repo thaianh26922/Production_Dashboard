@@ -7,7 +7,7 @@ import ProductionTaskManagement from './ProductionTaskManagement';
 const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelectedMachines, setSelectedDates, selectedMachines }) => {
   const [taskData, setTaskData] = useState({}); // Dữ liệu nhiệm vụ sản xuất lưu theo ngày
   const [tasks, setTasks] = useState([]); // Quản lý trạng thái tasks
-
+  const apiUrl =import.meta.env.VITE_API_BASE_URL;
   // Hàm xử lý khi lưu nhiệm vụ cùng ngày đã chọn
   const handleSave = async () => {
     const updatedTaskData = { ...taskData };
@@ -46,7 +46,7 @@ const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelected
         // Gửi từng nhiệm vụ riêng lẻ lên API
         try {
             for (const task of productionTasks) {
-                await axios.post('http://192.168.1.9:5001/api/productiontask', task);
+                await axios.post(`${apiUrl}/productiontask`, task);
             }
             message.success('Kế hoạch đã được lưu thành công!');
 
@@ -72,7 +72,7 @@ const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelected
 // Hàm để lấy dữ liệu mới nhất từ API
 const fetchTaskData = async () => {
     try {
-        const response = await axios.get('http://192.168.1.9:5001/api/productiontask');
+        const response = await axios.get(`${apiUrl}/productiontask`);
         return response.data;
     } catch (error) {
         console.error('Error fetching task data:', error);
