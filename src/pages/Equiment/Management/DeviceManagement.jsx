@@ -10,6 +10,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import moment from 'moment';
+import * as XLSX from 'xlsx';
 
 // Import sample template and data for devices
 import sampleTemplate from '../../../assets/form/Thiết bị.xlsx';
@@ -134,6 +135,51 @@ const handleSearch = (query) => {
       toast.error('Failed to delete device');
     }
   };
+ 
+
+const handleImport = (file) => {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: 'array' });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+    // Chuyển đổi dữ liệu thành định dạng phù hợp
+    const formattedData = jsonData.map((item) => ({
+      deviceCode: item["Mã thiết bị"],
+      deviceName: item["Tên thiết bị"],
+      areaName: item["Khu vực sản xuất"],
+      model: item["Model thiết bị"],
+      technicalSpecifications: item["Thông số kỹ thuật"],
+      purchaseDate: moment(item["Ngày mua"], "DD-MM-YYYY").format("YYYY-MM-DD"),
+    }));
+
+    // Gửi từng thiết bị lên API và cập nhật state
+    const promises = formattedData.map(async (device) => {
+      try {
+        const response = await axios.post('http://192.168.1.9:5001/api/device', device);
+        return response.data;
+      } catch (error) {
+        toast.error('Failed to save device');
+        return null;
+      }
+    });
+
+    // Đợi tất cả các yêu cầu hoàn tất và cập nhật bảng
+    Promise.all(promises).then((results) => {
+      const addedDevices = results.filter((device) => device !== null);
+      setDevices((prevDevices) => [...prevDevices, ...addedDevices]);
+      setFilteredDevices((prevFiltered) => [...prevFiltered, ...addedDevices]);
+      if (addedDevices.length) {
+        toast.success('Thêm thiết bị thành công!');
+      }
+    });
+  };
+  reader.readAsArrayBuffer(file);
+};
+
 
   // Open modal to add or edit device
   const openModal = (device = null) => {
@@ -161,7 +207,7 @@ const handleSearch = (query) => {
         <div className="flex items-center gap-2 ml-auto">
           <AddButton onClick={() => openModal()} /> {/* Open modal for new device */}
           <FormSample href={sampleTemplate} label="Tải Form Mẫu" />
-          <ImportButton />
+          <ImportButton onImport={handleImport}/>
           <ExportExcelButton data={devices} fileName="DanhSachThietBi.xlsx" />
         </div>
       </div>

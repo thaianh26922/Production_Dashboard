@@ -18,7 +18,7 @@ const getShiftBackgroundColor = (status) => {
     case 'Cài Đặt':
       return '#fafa98'; // Màu vàng cho trạng thái "Chờ" hoặc "Cài đặt"
     case 'Dừng':
-      return '#ffcccc'; // Màu đỏ nhạt cho trạng thái "Dừng"
+      return 'red'; // Màu đỏ nhạt cho trạng thái "Dừng"
     case 'Tắt':
       return '#f0f0f0'; // Màu xám nhạt cho trạng thái "Tắt"
     case 'Vệ Sinh':
@@ -37,7 +37,7 @@ const MachineWorkScheduleCard = ({ machine, tasks, selectedDate }) => {
   });
 
   return (
-    <div className="">
+    <div className="flex flex-col">
       {filteredTasks.length > 0 ? (
         filteredTasks.map((task, index) => {
           // Lấy trạng thái của ca đầu tiên trong mảng shifts
@@ -45,15 +45,15 @@ const MachineWorkScheduleCard = ({ machine, tasks, selectedDate }) => {
           const signalLightColors = getSignalLightColors(firstShiftStatus);
 
           return (
-            <div key={index} className="shadow-md bg-gray-100 rounded-md w-full">
+            <div key={index} className="shadow-md bg-gray-100 rounded-md w-full h-full min-h-[300px] flex flex-col">
               <div className="bg-gray-50 p-2 items-center justify-center flex">
                 <h2 className="text-xl font-bold text-[#375BA9]">{machine.deviceName}</h2> {/* Hiển thị tên thiết bị */}
               </div>
 
-              <div className="flex items-start">
+              <div className="flex items-start p-4 flex-grow">
                 {/* Đèn tín hiệu - Màu dựa trên trạng thái của ca đầu tiên */}
-                <div className="flex flex-col justify-center items-center p-4">
-                  <div className="w-14 h-40 border border-black rounded-lg">
+                <div className="flex flex-col justify-center items-center p-2">
+                  <div className="w-16 h-52 border border-black rounded-lg">
                     <div style={{ backgroundColor: signalLightColors.red, height: '33.333%' }} className="rounded-t-lg border-l-4 border-b-2 border-[#cc0000]"></div>
                     <div style={{ backgroundColor: signalLightColors.yellow, height: '33.333%' }} className="border-l-4 border-b-2 border-[#ffff1a]"></div>
                     <div style={{ backgroundColor: signalLightColors.green, height: '33.333%' }} className="rounded-b-lg border-l-4 border-[#04ff06]"></div>
@@ -62,56 +62,54 @@ const MachineWorkScheduleCard = ({ machine, tasks, selectedDate }) => {
 
                 {/* Kế hoạch sản xuất */}
                 <div className="bg-white p-4 rounded-lg shadow-md mb-4 mr-2 mt-2 flex-grow">
-                      <h3 className="font-semibold text-gray-700">Kế hoạch sản xuất</h3>
+                      <h3 className="font-semibold text-gray-700 mb-2">Kế hoạch sản xuất</h3>
                       {task.shifts.length > 0 ? (
                         task.shifts.map((shift, shiftIndex) => {
                           // Lấy màu nền dựa trên trạng thái của ca làm việc
                           const shiftBackgroundColor = getShiftBackgroundColor(shift.status);
 
                           return (
-                            <div key={shiftIndex} className="rounded-lg mb-4 p-2" >
+                            <div key={shiftIndex} className="rounded-lg mb-2 p-1">
                               {/* Ca làm việc */}
-                              <div className="flex justify-between p-2 rounded-lg " style={{ backgroundColor: shiftBackgroundColor }}>
-                                <div className="text-sm font-semibold" >{shift.shiftName}</div> {/* Hiển thị tên ca */}
+                              <div className="flex justify-between p-1 rounded-md -mt-2" style={{ backgroundColor: shiftBackgroundColor }}>
+                                <div className="text-sm">{shift.shiftName}</div> {/* Hiển thị tên ca */}
                               </div>
 
                               {/* Nhân viên */}
-                              <div className="bg-gray-100 p-2 rounded-lg mt-2">
-                                <h4 className="font-semibold text-gray-700">Nhân viên</h4>
+                              <div className="bg-gray-100 rounded-md -mt-1">
                                 <div className="mt-2">
                                   {shift.employeeName.length > 0 ? (
                                     shift.employeeName.map((employee, empIndex) => (
-                                      <div key={empIndex} className="text-sm ml-4">
+                                      <div key={empIndex} className="text-sm ml-32">
                                         {typeof employee === 'string' ? employee : employee._id} {/* Hiển thị tên nhân viên hoặc _id */}
                                       </div>
-                ))
-              ) : (
-                <div className="text-sm text-gray-600">Không có nhân viên</div>
-              )}
-            </div>
-          </div>
-        </div>
-      );
-    })
-  ) : (
-    <div className="text-gray-600 mt-4">Không có thông tin ca làm việc</div>
-  )}
-</div>
-
+                                    ))
+                                  ) : (
+                                    <div className="text-sm text-gray-600">Không có nhân viên</div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="text-gray-600 mt-4 p-9">Không có thông tin ca làm việc</div>
+                      )}
+                </div>
               </div>
             </div>
           );
         })
       ) : (
-        <div className="shadow-md bg-gray-100 rounded-md w-full">
+        <div className="shadow-md bg-gray-100 rounded-md w-full min-h-[300px] flex flex-col">
           <div className="bg-gray-50 p-2 items-center justify-center flex">
             <h2 className="text-xl font-bold text-[#375BA9]">{machine.deviceName}</h2> {/* Hiển thị tên thiết bị */}
           </div>
 
-          <div className="flex items-start">
+          <div className="flex items-start flex-grow mt-2">
             {/* Đèn tín hiệu mặc định */}
             <div className="flex flex-col justify-center items-center p-4">
-              <div className="w-14 h-40 border border-black rounded-lg">
+              <div className="w-16 h-52 border border-black rounded-lg">
                 <div style={{ backgroundColor: 'white', height: '33.333%' }} className="rounded-t-lg border-l-4 border-b-2 border-[#cc0000]"></div>
                 <div style={{ backgroundColor: 'white', height: '33.333%' }} className="border-l-4 border-b-2 border-[#ffff1a]"></div>
                 <div style={{ backgroundColor: 'white', height: '33.333%' }} className="rounded-b-lg border-l-4 border-[#04ff06]"></div>
@@ -119,9 +117,9 @@ const MachineWorkScheduleCard = ({ machine, tasks, selectedDate }) => {
             </div>
 
             {/* Thông báo không có nhiệm vụ */}
-            <div className="bg-white p-4 rounded-lg shadow-md mb-4 mr-2 mt-2 flex-grow">
+            <div className="bg-white p-9 rounded-lg shadow-md mb-4 mr-2 mt-2 flex-grow">
               <h3 className="font-semibold text-gray-700">Kế hoạch sản xuất</h3>
-              <div className="text-gray-600 mt-4">Không có thông tin nhiệm vụ sản xuất cho ngày này</div>
+              <div className="text-gray-600 mt-4 p-4">Không có thông tin nhiệm vụ sản xuất cho ngày này</div>
             </div>
           </div>
         </div>

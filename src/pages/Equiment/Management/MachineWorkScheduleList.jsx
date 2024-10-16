@@ -249,7 +249,7 @@ const handleCancelUpdate = () => {
       </div>
 
       {/* Machine List */}
-      <div className="grid grid-cols-4 gap-1 lg:grid-cols-4">
+      <div className="grid grid-cols-3 gap-1 sm:grid-cols-4 ">
   {filteredDevices.map((machine) => {
     const tasksForDevice = getTasksForDevice(machine.deviceName);
     
@@ -259,7 +259,7 @@ const handleCancelUpdate = () => {
         <div
           key={`${machine._id}-${index}`} // Đảm bảo key là duy nhất
           onClick={() => handleMachineClick(machine)}
-          className={`relative cursor-pointer transition duration-300 ease-in-out h-full p-2
+          className={`relative cursor-pointer transition duration-300 ease-in-out h-full p-1
             ${isSelecting && selectedMachines.some((m) => m.id === machine._id) ? 'border-2 border-blue-700 round-lg bg-gray-600 ' : ''}`}
         >
           <MachineWorkScheduleCard
@@ -315,7 +315,8 @@ const handleCancelUpdate = () => {
         onClose={() => setIsCustomModalOpen(false)}
         onCancel={handleCancelDates} // Clear dates and close modal
         onSave={handleSaveDates} // Save the selected dates
-        selectedDates={selectedDates} // Pass selected dates to modal
+        selectedDates={selectedDates} 
+        
         setSelectedDates={setSelectedDates}
         setSelectedMachines={setSelectedMachines}
         selectedMachines={selectedMachines} // Allow modal to update dates if necessary
