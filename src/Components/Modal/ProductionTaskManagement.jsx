@@ -159,100 +159,77 @@ const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, sel
 
       {/* Nhiệm vụ sản xuất */}
       {tasks.map((task, index) => (
-        <div className="bg-gray-100 rounded-md p-3 mb-4">
-        <div className="flex justify-between items-center mb-2">
-          <span className="font-semibold">Ca làm việc</span>
-          <CloseOutlined className="text-gray-600 cursor-pointer" onClick={() => removeTask(index)} />
-        </div>
-      
-        {/* Dropdown cho việc chọn ca làm việc */}
-        <div className="mb-2">
-          <Select
-            placeholder="Chọn ca làm việc"
-            value={task.selectedShift}
-            onChange={(value) => updateShift(index, value)}
-            style={{ width: '100%' }}
-          >
-            {shifts.map((shift) => (
-              <Select.Option key={shift._id} value={shift.shiftName}>
-                {shift.shiftName}
-              </Select.Option>
-            ))}
-          </Select>
-        </div>
-      
-        {/* Dropdown cho việc chọn nhân viên */}
-        <div className="mb-2 flex">
-          <Select
-            placeholder="Chọn nhân viên"
-            value={task.selectedEmployee}
-            onChange={(value) => updateEmployee(index, value)}
-            style={{ width: '100%', marginRight: '8px' }}
-          >
-            {employees.map((employee) => (
-              <Select.Option key={employee._id} value={employee.employeeName}>
-                {employee.employeeName}
-              </Select.Option>
-            ))}
-          </Select>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => addEmployee(index)} />
-        </div>
-      
-        {/* Hiển thị danh sách nhân viên đã chọn */}
-        <div className="max-h-32 overflow-y-auto mb-2">
-          {task.selectedEmployees.map((employee, idx) => (
-            <div key={idx} className="flex items-center justify-between bg-white p-2 rounded mb-1">
-              <div className="flex items-center">
-                <UserOutlined className="mr-2" />
-                <span>{employee}</span>
-              </div>
-              <CloseOutlined
-                className="text-gray-600 cursor-pointer"
-                onClick={() => removeEmployee(index, employee)}
-              />
-            </div>
-          ))}
-        </div>
-      
-        {/* Divs for status colors */}
-        <div className="h-12 bg-white border border-black rounded-lg overflow-hidden flex m-2">
-          <div
-            className={`w-1/3 border-l-4 border-l-red-600 cursor-pointer ${task.status === 'Dừng' ? 'bg-red-600' : ''}`}
-            onClick={() => handleDivClick(index, 'Dừng')}
-          />
-          <div
-            className={`w-1/3 border-l-4 border-l-yellow-600 cursor-pointer ${task.status === 'Chờ' ? 'bg-yellow-500' : ''}`}
-            onClick={() => handleDivClick(index, 'Chờ')}
-          />
-          <div
-            className={`w-1/3 cursor-pointer border-l-4 border-l-green-600 ${task.status === 'Chạy' ? 'bg-green-500' : ''}`}
-            onClick={() => handleDivClick(index, 'Chạy')}
-          />
-        </div>
-      
-        {/* Nền của ca làm việc thay đổi theo trạng thái */}
-        <div
-          className={`rounded-lg mb-4 p-2 mt-2 ${task.status === 'Dừng' ? 'bg-red-100' : task.status === 'Chờ' ? 'bg-yellow-100' : 'bg-green-100'}`}
-        >
-          <div className="flex justify-between">
-            <div className="text-sm font-semibold">{task.selectedShift || 'Chưa chọn ca làm việc'}</div>
+        <div key={index} className="bg-gray-100 rounded-md p-3 mb-4">
+          <div className="flex justify-between items-center mb-2">
+            <span className="font-semibold">Ca làm việc</span>
+            <CloseOutlined className="text-gray-600 cursor-pointer" onClick={() => removeTask(index)} />
           </div>
-      
-          {/* Hiển thị danh sách nhân viên */}
-          <div className="mt-2">
-            {task.selectedEmployees.length > 0 ? (
-              task.selectedEmployees.map((employee, idx) => (
-                <div key={idx} className="text-sm ml-4">
-                  {employee}
+
+          {/* Dropdown cho việc chọn ca làm việc */}
+          <div className="mb-2">
+            <Select
+              placeholder="Chọn ca làm việc"
+              value={task.selectedShift}
+              onChange={(value) => updateShift(index, value)}
+              style={{ width: '100%' }}
+            >
+              {shifts.map((shift) => (
+                <Select.Option key={shift._id} value={shift.shiftName}>
+                  {shift.shiftName}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+
+          {/* Dropdown cho việc chọn nhân viên */}
+          <div className="mb-2 flex">
+            <Select
+              placeholder="Chọn nhân viên"
+              value={task.selectedEmployee}
+              onChange={(value) => updateEmployee(index, value)}
+              style={{ width: '100%', marginRight: '8px' }}
+            >
+              {employees.map((employee) => (
+                <Select.Option key={employee._id} value={employee.employeeName}>
+                  {employee.employeeName}
+                </Select.Option>
+              ))}
+            </Select>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => addEmployee(index)} />
+          </div>
+
+          {/* Hiển thị danh sách nhân viên đã chọn */}
+          <div className="max-h-32 overflow-y-auto mb-2">
+            {task.selectedEmployees.map((employee, idx) => (
+              <div key={idx} className="flex items-center justify-between bg-white p-2 rounded mb-1 " placeholder="Chọn nhân viên">
+                <div className="flex items-center">
+                  <UserOutlined className="mr-2" />
+                  <span>{employee}</span>
                 </div>
-              ))
-            ) : (
-              <div className="text-sm text-gray-600">Không có nhân viên</div>
-            )}
+                <CloseOutlined
+                  className="text-gray-600 cursor-pointer"
+                  onClick={() => removeEmployee(index, employee)}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Divs for status colors */}
+          <div className="h-12 bg-white border border-black rounded-lg overflow-hidden flex m-2">
+            <div
+              className={`w-1/3 border-l-4 border-l-red-600 cursor-pointer ${task.status === 'Dừng' ? 'bg-red-600' : ''}`}
+              onClick={() => handleDivClick(index, 'Dừng')}
+            />
+            <div
+              className={`w-1/3 border-l-4 border-l-yellow-600 cursor-pointer ${task.status === 'Chờ' ? 'bg-yellow-500' : ''}`}
+              onClick={() => handleDivClick(index, 'Chờ')}
+            />
+            <div
+              className={`w-1/3 cursor-pointer border-l-4 border-l-green-600 ${task.status === 'Chạy' ? 'bg-green-500' : ''}`}
+              onClick={() => handleDivClick(index, 'Chạy')}
+            />
           </div>
         </div>
-      </div>
-      
       ))}
 
       {/* Nút để thêm nhiệm vụ sản xuất mới */}
