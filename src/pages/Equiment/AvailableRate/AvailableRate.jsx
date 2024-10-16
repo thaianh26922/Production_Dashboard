@@ -3,7 +3,7 @@ import { Select, DatePicker } from 'antd';
 import Breadcrumb from '../../../Components/Breadcrumb/Breadcrumb'; // Đường dẫn tới Breadcrumb
 import AvailableGrid from '../../../Components/AvailableRate/AvailableGrid'; // Import AvailableGrid
 import MachineComparisonChart from '../../../Components/AvailableRate/MachineComparisonChart';
-import moment from 'moment'; // Import moment
+import dayjs from 'dayjs'
 
 
 
@@ -13,7 +13,7 @@ const { Option } = Select;
 
 function AvailableRate() {
   const [selectedMachineType, setSelectedMachineType] = useState('CNC'); // State cho loại máy
-  const [selectedDate, setSelectedDate] = useState(moment());
+  const [selectedDate, setSelectedDate] = useState(dayjs());
 
   // Danh sách máy CNC và PHAY
   const cncMachines = Array.from({ length: 17 }, (_, i) => ({ value: `CNC ${i + 1}`, label: `CNC ${i + 1}` }));
@@ -53,7 +53,7 @@ function AvailableRate() {
         { machine: 'PHAY 5', percentage: 55 },
         { machine: 'PHAY 6', percentage: 70 },
         { machine: 'PHAY 7', percentage: 80 },
-        { machine: 'PHAY 8', percentage: 90 },
+        { machine: 'PHAY 8', percentage: 99 },
         { machine: 'PHAY 9', percentage: 89 },
         { machine: 'PHAY 10', percentage: 80 },
         { machine: 'PHAY 11', percentage: 55 },
@@ -97,13 +97,16 @@ function AvailableRate() {
             <Option value="PHAY">Tổ Phay</Option>
           </Select>
           <DatePicker onChange={handleDateChange} 
-            value={selectedDate}  needConfirm />
+            value={selectedDate} 
+            defaultValue={dayjs()} 
+            needConfirm />
         </div>
       </div>
       {/* Hiển thị AvailableGrid */}
       <AvailableGrid
         machines={selectedMachineType === 'CNC' ? cncMachines : phayMachines} // Truyền danh sách máy CNC hoặc PHAY
         machineType={selectedMachineType} // Truyền loại máy
+        
       />
       <div className="mt-2"><MachineComparisonChart data={data} machineType={selectedMachineType} /></div>
 

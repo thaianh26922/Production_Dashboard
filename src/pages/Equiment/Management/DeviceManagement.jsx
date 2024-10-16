@@ -82,27 +82,35 @@ const handleSearch = (query) => {
 
 
   // Kiểm tra trùng lặp mã thiết bị hoặc tên thiết bị
-  const checkDuplicateDevice = (deviceCode, deviceName) => {
-    return devices.some((device) => device.deviceCode === deviceCode || device.deviceName === deviceName);
+  const checkDuplicateDevice = (deviceCode, deviceId = null) => {
+    return devices.some((device) => {
+      // Nếu đang thêm mới (deviceId không tồn tại), kiểm tra xem mã thiết bị đã tồn tại chưa
+      if (!deviceId) {
+        return device.deviceCode === deviceCode;
+      }
+      // Nếu đang cập nhật (deviceId đã tồn tại), bỏ qua việc kiểm tra chính thiết bị đó
+      return device._id !== deviceId && device.deviceCode === deviceCode;
+    });
   };
+  
 
   // Save new or updated device
   const handleSave = async (values) => {
     const { deviceCode, deviceName } = values;
-
-    // Kiểm tra trùng lặp
-    if (checkDuplicateDevice(deviceCode, deviceName)) {
-      toast.error('Mã thiết bị hoặc tên thiết bị đã tồn tại. Vui lòng nhập lại.');
+  
+    // Nếu đang thêm mới (selectedDevice là null), kiểm tra xem mã thiết bị có bị trùng không
+    if (!selectedDevice && checkDuplicateDevice(deviceCode)) {
+      toast.error('Mã thiết bị đã tồn tại. Vui lòng nhập mã thiết bị khác.');
       return; // Dừng lại không gửi yêu cầu lên API
     }
-
+  
     const deviceData = {
       ...values,
-      areaName: values.areaName ? values.areaName.trim() : '', // Đảm bảo 'areaName' không undefined
-      purchaseDate: values.purchaseDate,
+      areaName: values.areaName ? values.areaName.trim() : '',
+      purchaseDate: moment(values.purchaseDate).format("YYYY-MM-DD"),
       _id: selectedDevice ? selectedDevice._id : null,
     };
-
+  
     try {
       if (selectedDevice) {
         // Update device
@@ -113,17 +121,19 @@ const handleSearch = (query) => {
         await axios.post('http://192.168.1.9:5001/api/device', deviceData);
         toast.success('Thêm thiết bị thành công!');
       }
-
-      // Fetch lại danh sách và sắp xếp
+  
       fetchDevicesAndAreas();
       setIsModalOpen(false);
       setSelectedDevice(null);
       form.resetFields(); // Reset form fields after saving
     } catch (error) {
-      console.error(error.response); // Xem chi tiết lỗi từ API
+      console.error(error.response);
       toast.error('Failed to save device');
     }
   };
+  
+
+ 
 
   // Delete device by ID
   const handleDelete = async (id) => {
@@ -192,22 +202,29 @@ const handleSearch = (query) => {
     reader.readAsArrayBuffer(file);
   };
   
+  
 
 
   // Open modal to add or edit device
   const openModal = (device = null) => {
     if (device) {
       setSelectedDevice(device);
+  
+      // Nếu ngày từ API có định dạng khác (ví dụ: "DD-MM-YYYY", "MM/DD/YYYY"), sử dụng moment để parse đúng cách
+      const formattedDate = moment(device.purchaseDate, ["DD-MM-YYYY", "MM/DD/YYYY", "YYYY-MM-DD"]).format("YYYY-MM-DD");
+      console.log (formattedDate)
       form.setFieldsValue({
         ...device,
-        purchaseDate: device.purchaseDate, // No need to use moment, since it's already in 'YYYY-MM-DD' format
+        purchaseDate: formattedDate, // Chuyển đổi thành định dạng đúng 'YYYY-MM-DD'
       });
     } else {
       setSelectedDevice(null);
-      form.resetFields(); // Clear form for new device
+      form.resetFields(); // Xóa form để thêm mới
     }
     setIsModalOpen(true);
   };
+  
+  
 
   return (
     <div className="p-8 bg-white shadow-md rounded-md">
@@ -276,74 +293,79 @@ const handleSearch = (query) => {
       </table>
 
       {/* Modal for Add/Edit Device */}
-      <Modal
-        title={selectedDevice ? 'Chỉnh sửa Thiết Bị' : 'Thêm mới Thiết Bị'}
-        open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)} // Close the modal on cancel
-        onOk={() => form.submit()} // Submit form when clicking OK
-      >
-        <Form form={form} layout="vertical" onFinish={handleSave}>
-          <Form.Item
-            label="Mã Thiết Bị"
-            name="deviceCode"
-            rules={[{ required: true, message: 'Mã Thiết Bị là bắt buộc' }]}
-          >
-            <Input />
-          </Form.Item>
+     <Modal
+                title={selectedDevice ? 'Chỉnh sửa Thiết Bị' : 'Thêm mới Thiết Bị'}
+                open={isModalOpen}
+                onCancel={() => setIsModalOpen(false)} // Đóng modal khi nhấn nút hủy
+                onOk={() => form.submit()} // Gọi hàm submit của form khi nhấn nút OK
+              >
+                <Form
+                  form={form}
+                  layout="vertical"
+                  onFinish={handleSave} // Hàm handleSave sẽ được gọi khi form submit thành công
+                >
+                  <Form.Item
+                    label="Mã Thiết Bị"
+                    name="deviceCode"
+                    rules={[{ required: true, message: 'Mã Thiết Bị là bắt buộc' }]}
+                  >
+                    <Input />
+                  </Form.Item>
 
-          <Form.Item
-            label="Tên Thiết Bị"
-            name="deviceName"
-            rules={[{ required: true, message: 'Tên Thiết Bị là bắt buộc' }]}
-          >
-            <Input />
-          </Form.Item>
+                  <Form.Item
+                    label="Tên Thiết Bị"
+                    name="deviceName"
+                    rules={[{ required: true, message: 'Tên Thiết Bị là bắt buộc' }]}
+                  >
+                    <Input />
+                  </Form.Item>
 
-          {/* Area Dropdown */}
-          <Form.Item
-            label="Khu Vực"
-            name="areaName"
-            rules={[{ required: true, message: 'Khu Vực là bắt buộc' }]}
-          >
-            <AutoComplete
-              options={areas.map((area) => ({ value: area.areaName }))} // Load các khu vực từ API và chuyển thành gợi ý
-              onChange={(value) => {
-                form.setFieldsValue({ area: value }); // Cập nhật giá trị khu vực khi thay đổi
-              }}
-              placeholder="Nhập khu vực"
-              filterOption={(inputValue, option) =>
-                option.value.toLowerCase().includes(inputValue.toLowerCase()) // Lọc gợi ý theo input
-              }
-            >
-              <Input />
-            </AutoComplete>
-          </Form.Item>
+                  {/* Area Dropdown */}
+                  <Form.Item
+                    label="Khu Vực"
+                    name="areaName"
+                    rules={[{ required: true, message: 'Khu Vực là bắt buộc' }]}
+                  >
+                    <AutoComplete
+                      options={areas.map((area) => ({ value: area.areaName }))} 
+                      onChange={(value) => {
+                        form.setFieldsValue({ areaName: value }); // Đảm bảo trường này được cập nhật đúng
+                      }}
+                      placeholder="Nhập khu vực"
+                      filterOption={(inputValue, option) =>
+                        option.value.toLowerCase().includes(inputValue.toLowerCase())
+                      }
+                    >
+                      <Input />
+                    </AutoComplete>
+                  </Form.Item>
 
-          <Form.Item
-            label="Model"
-            name="model"
-            rules={[{ required: true, message: 'Model là bắt buộc' }]}
-          >
-            <Input />
-          </Form.Item>
+                  <Form.Item
+                    label="Model"
+                    name="model"
+                    rules={[{ required: true, message: 'Model là bắt buộc' }]}
+                  >
+                    <Input />
+                  </Form.Item>
 
-          <Form.Item
-            label="Thông Số Kỹ Thuật"
-            name="technicalSpecifications"
-            rules={[{ required: true, message: 'Thông Số Kỹ Thuật là bắt buộc' }]}
-          >
-            <Input />
-          </Form.Item>
+                  <Form.Item
+                    label="Thông Số Kỹ Thuật"
+                    name="technicalSpecifications"
+                    rules={[{ required: true, message: 'Thông Số Kỹ Thuật là bắt buộc' }]}
+                  >
+                    <Input />
+                  </Form.Item>
 
-          <Form.Item
-            label="Ngày Mua"
-            name="purchaseDate"
-            rules={[{ required: true, message: 'Ngày Mua là bắt buộc' }]}
-          >
-            <Input type="date" />
-          </Form.Item>
-        </Form>
-      </Modal>
+                  <Form.Item
+                    label="Ngày Mua"
+                    name="purchaseDate"
+                    rules={[{ required: true, message: 'Ngày Mua là bắt buộc' }]}
+                  >
+                    <Input type="date" />
+                  </Form.Item>
+                </Form>
+              </Modal>
+
 
       
     </div>

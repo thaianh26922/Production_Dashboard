@@ -33,7 +33,7 @@ const MachineComparisonChart = ({ data, machineType }) => {
       .style('padding', '5px')
       .style('border-radius', '4px')
       .style('display', 'none')
-      .style('pointer-events', 'none'); // Ensure tooltip doesn't capture mouse events
+      .style('pointer-events', 'none');
 
     // Draw X axis
     svg
@@ -41,8 +41,10 @@ const MachineComparisonChart = ({ data, machineType }) => {
       .attr('transform', `translate(0,${height - margin.bottom})`)
       .call(d3.axisBottom(xScale));
 
-    // Draw Y axis
-    svg.append('g').attr('transform', `translate(${margin.left},0)`).call(d3.axisLeft(yScale));
+    // Draw Y axis with '%' symbol
+    svg.append('g')
+      .attr('transform', `translate(${margin.left},0)`)
+      .call(d3.axisLeft(yScale).ticks(5).tickFormat(d => `${d}%`)); // Thêm '%' vào nhãn của trục Y
 
     // Draw bars
     svg
@@ -71,25 +73,12 @@ const MachineComparisonChart = ({ data, machineType }) => {
         tooltip.style('display', 'none');
       });
 
-    // Ẩn phần nhãn dữ liệu trên các cột (bằng cách loại bỏ đoạn dưới)
-    // Add percentage labels above bars (bình luận hoặc xóa đoạn này nếu không cần)
-    // svg
-    //   .selectAll('.label')
-    //   .data(data)
-    //   .enter()
-    //   .append('text')
-    //   .attr('x', d => xScale(d.machine) + xScale.bandwidth() / 2)
-    //   .attr('y', d => yScale(d.percentage) - 5)
-    //   .attr('text-anchor', 'middle')
-    //   .text(d => `${d.percentage}%`);
-    
   }, [data]);
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-4">
       <header className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-bold">Tỷ lệ máy chạy</h3>
-        
       </header>
 
       <svg ref={svgRef} width="100%" height="300"></svg>

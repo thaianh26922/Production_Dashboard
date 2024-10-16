@@ -67,20 +67,24 @@ const Dashboard2 = () => {
       alert('Vui lòng chọn máy trước khi xác nhận');
       return;
     }
-  
+
+    // Lưu trạng thái selectedDate và selectedMachine vào localStorage
+    localStorage.setItem('savedSelectedDate', selectedDate);
+    localStorage.setItem('savedSelectedMachine', JSON.stringify(selectedMachine));
+
     // Điều hướng và truyền dữ liệu qua state
     return navigate('/dashboard/mobile/issue', {
       state: {
         selectedDate: selectedDate,
         selectedMachine: {
-          deviceName: selectedMachine.deviceName, // Truyền tên thiết bị
-          id: selectedMachine.id, // Truyền ID nếu cần
-          areaName: selectedMachine.areaName, // Truyền tên khu vực nếu cần
+          deviceName: selectedMachine.deviceName,
+          id: selectedMachine.id,
+          areaName: selectedMachine.areaName,
         },
       },
     });
-  };
-  
+};
+
   
 console.log(selectedMachine)
 

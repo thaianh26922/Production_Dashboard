@@ -14,6 +14,7 @@ const { Option } = Select;
 function DeviceReport() {
   const [selectedMachines, setSelectedMachines] = useState([]);  // Now multiple selections
   const [selectedDate, setSelectedDate] = useState(null);
+  const [startDate, setStartDate] = useState(null); // State for the start date
 
   const machineOptions = [
     
@@ -37,7 +38,17 @@ function DeviceReport() {
   };
 
   const handleDateChange = (dates) => {
+    setStartDate(null)
     setSelectedDate(dates);
+  };
+  const handleDateChangeChoose = (dates) => {
+    setStartDate(dates[0])
+    // setSelectedDate(dates);
+  };
+  const disabledDate = (current) => {
+    // Allow the selected start date and next 7 days
+    if (!startDate) return false; // If no start date selected, allow all dates
+    return current < startDate || current > startDate.clone().add(6, 'days');
   };
   console.log(selectedDate);
 
@@ -77,7 +88,7 @@ function DeviceReport() {
       }
     ],
   };
-
+ console.log(selectedMachines)
   return (
     <>
       <div className="flex justify-end items-center mb-4">
@@ -97,7 +108,7 @@ function DeviceReport() {
             ))}
           </Select>
           
-          <RangePicker onChange={handleDateChange} />
+          <RangePicker onChange={handleDateChange} disabledDate={disabledDate} onCalendarChange={handleDateChangeChoose}/>
         </div>
       </div>
 
@@ -160,7 +171,7 @@ function DeviceReport() {
             onFullscreen={handleFullscreen}
             onPrint={handlePrint}
           />
-          <TimelineChart data={datastatus.status} selectedDate={selectedDate} />
+          <TimelineChart data={datastatus.status} selectedDate={selectedDate}  />
         </div>
         <div className="bg-white p-3 col-span-1 rounded-lg">
           <TitleChart

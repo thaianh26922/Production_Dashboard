@@ -163,7 +163,7 @@ const ErrorReportCatalog = () => {
           form.resetFields(); // Reset form khi đóng modal
         }}
         onOk={handleSave}
-        okText={selectedReport ? 'Cập nhật' : 'Thêm mới'}
+        okText={selectedReport ? 'Cập nhật' : 'OK'}
         cancelText="Hủy"
       >
         <Form form={form} layout="vertical">
