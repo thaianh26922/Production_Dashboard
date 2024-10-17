@@ -10,7 +10,7 @@ import axios from 'axios';  // Import axios để gọi API
 import FormSample from '../../Components/Button/FormSample';
 import ImportButton from '../../Components/Button/ImportButton';
 import Breadcrumb from '../../Components/Breadcrumb/Breadcrumb';
-
+import sampleTemplate from '../../assets/form/Nguyên nhân dừng máy.xlsx'
 const ErrorReportCatalog = () => {
   const [errorReports, setErrorReports] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -107,7 +107,7 @@ const ErrorReportCatalog = () => {
         <SearchButton placeholder="Tìm kiếm mã lỗi, mã thiết bị..." onSearch={(q) => setSearchQuery(q)} />
         <div className="flex items-center gap-2 ml-auto">
           <AddButton onClick={() => openModal()} />
-          <FormSample />
+          <FormSample href={sampleTemplate} label='Tải Form Mẫu'/>
           <ImportButton />
           <ExportExcelButton data={filteredReports} fileName="Báo cáo lỗi.xlsx" />
         </div>

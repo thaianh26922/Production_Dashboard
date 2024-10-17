@@ -33,6 +33,9 @@ const ResponeIssue = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isHelpTimerModalOpen, setIsHelpTimerModalOpen] = useState(false);
+  const [helpStartTime, setHelpStartTime] = useState(null);
+  const [elapsedTime, setElapsedTime] = useState("00:00");
   const [selectedDiv, setSelectedDiv] = useState(null);
   const [isResponseEnabled, setIsResponseEnabled] = useState(false);
   const [telemetryData, setTelemetryData] = useState([]);
@@ -50,15 +53,29 @@ const ResponeIssue = () => {
           if (response.data && response.data.length > 0) {
             setTelemetryData(response.data[0].intervals); // Giả sử API trả về một mảng với các khoảng thời gian
           }
-          console.log(response.data)
         } catch (error) {
           console.error("Error fetching telemetry data:", error);
         }
       };
-
       fetchTelemetryData();
     }
   }, [selectedMachine, selectedDate]);
+
+  // Đếm thời gian khi mở modal trợ giúp
+  useEffect(() => {
+    if (isHelpTimerModalOpen) {
+      const startTime = new Date();
+      setHelpStartTime(startTime);
+      const interval = setInterval(() => {
+        const now = new Date();
+        const diff = Math.floor((now - startTime) / 1000);
+        const minutes = String(Math.floor(diff / 60)).padStart(2, '0');
+        const seconds = String(diff % 60).padStart(2, '0');
+        setElapsedTime(`${minutes}:${seconds}`);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [isHelpTimerModalOpen]);
 
   const handleBackClick = () => {
     navigate(-1);
@@ -72,31 +89,24 @@ const ResponeIssue = () => {
     setIsModalOpen(false);
   };
 
-  const handleCallQC = () => {
-    toast.success('Đã gọi Đội QC thành công. Xin đợi trong giây lát!', {
-      position: "top-center",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      style: { fontSize: '1.6rem', padding: '1rem', width: '90%' }, 
-    });
-    handleCloseModal();
+  const handleOpenHelpTimerModal = () => {
+    setIsHelpTimerModalOpen(true);
   };
 
-  const handleCallMaintenance = () => {
-    toast.success('Đã gọi Đội Bảo Trì thành công. Xin đợi trong giây lát!', {
-      position: "top-center",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      style: { fontSize: '1.6rem', padding: '1rem', width: '90%' },
-    });
-    handleCloseModal();
+  const handleCloseHelpTimerModal = () => {
+    setIsHelpTimerModalOpen(false);
+    toast.success("Trợ giúp đã hoàn thành!");
   };
+
+  const handleCallHelp = (team) => {
+    toast.success(`Đã gọi Đội ${team} thành công. Xin đợi trong giây lát!`);
+    handleCloseModal();
+    handleOpenHelpTimerModal();
+  };
+
+  const handleCallQC = () => handleCallHelp('QC');
+  const handleCallMaintenance = () => handleCallHelp('Bảo Trì');
+  const handleCallTechnical = () => handleCallHelp('Kỹ Thuật');
 
   const handleTimeClick = (index) => {
     setSelectedDiv(index);
@@ -156,71 +166,68 @@ const ResponeIssue = () => {
       </div>
 
       {telemetryData
-  .filter(interval => {
-    const duration = calculateDuration(interval.startTime, interval.endTime);
-    const [hours, minutes] = duration.match(/\d+/g).map(Number); // Tách giờ và phút
-    const totalMinutes = hours * 60 + minutes; // Tính tổng số phút
-    return interval.status === "Dừng" && totalMinutes >= 5;
-  })
-  .map((interval, index) => (
-    <div
-      key={interval._id}
-      className={`border-8 rounded-3xl grid grid-cols-2 py-8 mt-4 px-8 w-[90%] justify-center items-center ml-8 gap-10 text-4xl cursor-pointer ${selectedDiv === index ? 'bg-gray-200' : 'border-[#FCFC00]'}`}
-      onClick={() => handleTimeClick(index)}
-      style={{ boxShadow: `inset 0px 10px 40px 10px rgba(252, 252, 0, 0.4)` }}
-    >
-      <span className="col-span-1 flex ml-2 ">Trong khoảng</span>
-      <span className="col-span-1 flex">{`${interval.startTime} - ${interval.endTime}`}</span>
-      <span className="col-span-1 flex ml-2 ">Thời lượng</span>
-      <span className="col-span-1 flex">{calculateDuration(interval.startTime, interval.endTime)}</span>
-      <span className="col-span-1 flex ml-2 ">Trạng thái thiết bị</span>
-      <span className="col-span-1 flex">Chờ</span>
-    </div>
-  ))
-}
+        .filter(interval => {
+          const duration = calculateDuration(interval.startTime, interval.endTime);
+          const [hours, minutes] = duration.match(/\d+/g).map(Number);
+          const totalMinutes = hours * 60 + minutes;
+          return interval.status === "Dừng" && totalMinutes >= 5;
+        })
+        .map((interval, index) => (
+          <div
+            key={interval._id}
+            className={`border-8 rounded-3xl grid grid-cols-2 py-8 mt-4 px-8 w-[90%] justify-center items-center ml-8 gap-10 text-4xl cursor-pointer ${selectedDiv === index ? 'bg-gray-200' : 'border-[#FCFC00]'}`}
+            onClick={() => handleTimeClick(index)}
+            style={{ boxShadow: `inset 0px 10px 40px 10px rgba(252, 252, 0, 0.4)` }}
+          >
+            <span className="col-span-1 flex ml-2 ">Trong khoảng</span>
+            <span className="col-span-1 flex">{`${interval.startTime} - ${interval.endTime}`}</span>
+            <span className="col-span-1 flex ml-2 ">Thời lượng</span>
+            <span className="col-span-1 flex">{calculateDuration(interval.startTime, interval.endTime)}</span>
+            <span className="col-span-1 flex ml-2 ">Trạng thái thiết bị</span>
+            <span className="col-span-1 flex">Chờ</span>
+          </div>
+        ))
+      }
 
+      {/* Các nút Phản hồi và Gọi trợ giúp */}
+      <div className="fixed bottom-0 w-full flex flex-col items-center z-50 p-4 bg-transperent -ml-4">
+        <button
+          onClick={handleResponse}
+          disabled={!isResponseEnabled}
+          className={`w-[90%] p-6 mb-4 rounded-lg shadow-lg text-white text-center text-4xl font-bold transition duration-300 ease-in-out ${isResponseEnabled ? 'bg-blue-600 hover:bg-blue-500' : 'bg-gray-400 cursor-not-allowed'}`}
+        >
+          Phản hồi
+        </button>
+        <button
+          onClick={handleOpenModal}
+          className="w-[90%] p-6 rounded-lg shadow-lg text-white text-center bg-red-600 hover:bg-red-900 text-4xl font-bold transition duration-300 ease-in-out"
+        >
+          Gọi trợ giúp
+        </button>
+      </div>
 
-
-{/* Các nút Phản hồi và Gọi trợ giúp */}
-<div className="fixed bottom-0 w-full flex flex-col items-center z-50 p-4 bg-transperent -ml-4">
-  <button
-    onClick={handleResponse}
-    disabled={!isResponseEnabled}
-    className={`w-[90%] p-6 mb-4 rounded-lg shadow-lg text-white text-center text-4xl font-bold transition duration-300 ease-in-out ${isResponseEnabled ? 'bg-blue-600 hover:bg-blue-500' : 'bg-gray-400 cursor-not-allowed'}`}
-  >
-    Phản hồi
-  </button>
-  <button
-    onClick={handleOpenModal}
-    className="w-[90%] p-6 rounded-lg shadow-lg text-white text-center bg-red-600 hover:bg-red-900 text-4xl font-bold transition duration-300 ease-in-out"
-  >
-    Gọi trợ giúp
-  </button>
-  
-</div>
-
+      {/* Modal Gọi trợ giúp */}
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-white w-[80%] h-[32%]  rounded-t-xl shadow-lg">
-            <div className="grid grid-cols-4 w-full bg-blue-500 p-8 rounded-t-xl justify-center ">
-              <h2 className="text-5xl text-center font-semibold col-span-3 ml-28">Phản hồi trợ giúp</h2>
-              <button onClick={handleCloseModal} className="text-5xl col-span-1 ml-28 font-bold">
+          <div className="bg-white w-[80%] h-[32%] rounded-t-xl shadow-lg">
+            <div className="grid grid-cols-4 w-full bg-blue-500 p-8 rounded-t-xl justify-center bg-gradient-to-r from-[#375BA9] to-[#43B3DC] ">
+              <h2 className="text-5xl text-center font-semibold col-span-3 ml-32 text-white">Phản hồi trợ giúp</h2>
+              <button onClick={handleCloseModal} className="text-5xl col-span-1 ml-32 font-bold">
                 <IoMdClose />
               </button>
             </div>
-            <div className="mt-10">
-            <h2 className="text-5xl text-center font-bold col-span-3 ml-16">{selectedMachine?.deviceName}</h2>
-            <p className="text-5xl text-center mt-10 mb-22">Cần gọi trợ giúp từ</p>
+            <div className="mt-10 grid grid-rows-2 -ml-12 justify-center items-center gap-1">
+              <h2 className="text-5xl text-center font-bold col-span-3 ml-16">{selectedMachine?.deviceName}</h2>
+              <p className="text-5xl text-center mt-6 mb-22 ml-20">Cần gọi trợ giúp từ</p>
             </div>
-            
             <div className="grid gap-4 mt-16 w-[80%] ml-20 items-center">
-              <button onClick={handleCallQC} className="border-2 border-blue-600 text-blue-600 text-5xl py-4 px-8 rounded-md">
+              <button onClick={handleCallQC} className="border-2 border-blue-600 text-blue-600 hover:bg-blue-500 text-5xl py-4 px-8 rounded-md">
                 Đội QC
               </button>
               <button onClick={handleCallMaintenance} className="border-2 border-blue-600 text-blue-600 text-5xl py-4 px-8 rounded-md">
                 Đội Bảo Trì
               </button>
-              <button onClick={handleCallMaintenance} className="border-2 border-blue-600 text-blue-600 text-5xl py-4 px-8 rounded-md">
+              <button onClick={handleCallTechnical} className="border-2 border-blue-600 text-blue-600 text-5xl py-4 px-8 rounded-md">
                 Đội Kỹ Thuật
               </button>
             </div>
@@ -228,18 +235,31 @@ const ResponeIssue = () => {
         </div>
       )}
 
-      <ToastContainer
-        position="top-right"
-        autoClose={1000}
-        hideProgressBar
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        style={{ fontSize: '30px', padding: '3rem', width: '100%', textAlign: 'center' }}
-      />
+      {/* Modal thời gian trợ giúp */}
+      {isHelpTimerModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-white w-[65%] h-[28%] rounded-xl shadow-lg ">
+            <div className="flex justify-between  bg-gradient-to-r from-[#375BA9] to-[#43B3DC]">
+              <h2 className="text-5xl p-6 ml-10 text-white">Thời gian Trợ giúp</h2>
+              <button onClick={handleCloseHelpTimerModal} className="text-4xl">
+                <IoMdClose />
+              </button>
+            </div>
+            <div className="text-center mt-8">
+            <h2 className="text-5xl font-semibold ">{selectedMachine?.deviceName}</h2>
+              <div className="mt-10 bg-[#42B2DB]  p-8"> 
+                <div className="text-4xl font-semibold mb-6">Quá trình đang diễn ra trong: </div>
+                <span className="text-8xl font-semibold mt-6"> {elapsedTime} </span> 
+                </div>
+              <button onClick={handleCloseHelpTimerModal} className=" bg-gradient-to-r from-[#375BA9] to-[#43B3DC] text-white  rounded-lg mt-10 text-4xl p-6 ">
+                Xác nhận đã hoàn thành
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ToastContainer position="top-right" autoClose={1000} hideProgressBar />
     </div>
   );
 };
