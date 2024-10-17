@@ -168,6 +168,9 @@ const handleCancelDates = () => {
   const handleUpdateClick = () => {
     setIsUpdateModalOpen(true); // Show update confirmation modal
   };
+  const handleCallMachine = () => {
+    set
+  }
 
   // Handle modal confirmation
   const handleConfirmUpdate = () => {
@@ -205,6 +208,12 @@ const handleCancelUpdate = () => {
       <Button className="ml-2 bg-gray-400 text-white " onClick={handleOpenScheduleModal}>
         Lịch Sản xuất
       </Button>
+      {/*nut giao nhiem vu den trang thai*/}
+      {selectedMachines.length > 0 && (
+            <Button type="primary" className="ml-2" onClick={handleUpdateClick}>
+              Giao nhiem vu
+            </Button>
+          )}
 
         <MachineScheduleModal
           open={isScheduleModalOpen}
