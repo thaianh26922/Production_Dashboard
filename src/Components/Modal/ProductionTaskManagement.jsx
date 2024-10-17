@@ -15,10 +15,10 @@ const ProductionTaskManagement = ({ selectedMachines, setTaskData, taskData, sel
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const employeesResponse = await axios.get('${apiUrl}/employees');
+        const employeesResponse = await axios.get(`${apiUrl}/employees`);
         setEmployees(employeesResponse.data);
 
-        const shiftsResponse = await axios.get(`${apiUrl}/workShifts'`);
+        const shiftsResponse = await axios.get(`${apiUrl}/workShifts`);
         setShifts(shiftsResponse.data);
 
         const devicesResponse = await axios.get(`${apiUrl}/device`);

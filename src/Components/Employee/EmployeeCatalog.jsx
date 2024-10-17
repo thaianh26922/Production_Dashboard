@@ -10,6 +10,8 @@ import FormSample from '../Button/FormSample';
 import ImportButton from '../Button/ImportButton';
 import axios from 'axios'; // Thêm axios để gọi API
 import Breadcrumb from '../Breadcrumb/Breadcrumb';
+import sampleTemplate from '../../assets/form/Nhân viên.xlsx';
+import * as XLSX from 'xlsx';
 
 const { Option } = Select; // Ant Design Select
 
@@ -57,6 +59,45 @@ const EmployeeCatalog = () => {
       employee.employeeName.toLowerCase().includes(query.toLowerCase())
     );
     setFilteredEmployees(filtered);
+  };
+  const handleImport = (file) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+  
+      // Chuyển đổi dữ liệu thành định dạng phù hợp
+      const formattedData = jsonData.map((item) => ({
+        employeeCode: item["Mã nhân viên"],
+        employeeName:item["Tên nhân viên"],
+        areaName: item["Tên khu vực sản xuất"],
+      }));
+      console.log(formattedData)
+  
+      // Gửi từng khu vực lên API và cập nhật state
+      const promises = formattedData.map(async (employee) => {
+        try {
+          const response = await axios.post(`${apiUrl}/employees`, employee);
+          // Cập nhật state ngay sau khi thêm thành công
+          return response.data;
+        } catch (error) {
+          toast.error('Failed to save area');
+          return null;
+        }
+      });
+  
+      // Đợi tất cả các yêu cầu hoàn tất và cập nhật bảng
+      Promise.all(promises).then((results) => {
+        const addedEmployee = results.filter((employee) => employee !== null);
+        setAreas((Employee ) => [...Employee , ...addedEmployee]);
+        setFilteredAreas((prevFiltered) => [...prevFiltered, ...addedEmployee]);
+        toast.success('Thêm nhân viên thành công!');
+      });
+    };
+    reader.readAsArrayBuffer(file);
   };
 
   // Handle saving new or edited employee
@@ -115,8 +156,8 @@ const EmployeeCatalog = () => {
         />
         <div className="flex-grow"></div>
         <AddButton onClick={() => openModal()} />
-        <FormSample />
-        <ImportButton />
+        <FormSample href={sampleTemplate}  label="Tải Form Mẫu" />
+        <ImportButton onImport={handleImport}/>
         <ExportExcelButton data={filteredEmployees} fileName="DanhSachNhanVien.xlsx" />
       </div>
 
