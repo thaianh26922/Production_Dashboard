@@ -8,12 +8,37 @@ const TimelineChart = ({ selectedDate }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [dates, setDate] = useState([]);
-  const [zoomLevel, setZoomLevel] = useState(1); // Zoom level state
-  const [configDate , setConfigDate] = ''
-  const apiUrl = import.meta.env.VITE_API_BASE_URL
+  const [zoomLevel, setZoomLevel] = useState(60); // Đơn vị phút, mặc định là 60 phút
+  const apiUrl = import.meta.env.VITE_API_BASE_URL;
   const deviceId = '543ff470-54c6-11ef-8dd4-b74d24d26b24';
 
   const formatDateForAPI = (date) => moment(date).format('YYYY-MM-DD');
+
+  const fetchData = async (startDate, endDate) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(
+        `${apiUrl}/telemetry?deviceId=${deviceId}&startDate=${formatDateForAPI(startDate)}&endDate=${formatDateForAPI(endDate)}`
+      );
+
+      // Kiểm tra xem dữ liệu có hợp lệ không
+      if (response.data && Array.isArray(response.data)) {
+        const processedData = response.data.map(entry => {
+          const gaps = findGaps(entry.intervals);
+          const intervalsWithGaps = [...entry.intervals, ...gaps].sort((a, b) => moment(a.startTime, 'HH:mm') - moment(b.startTime, 'HH:mm'));
+          return { ...entry, intervals: intervalsWithGaps };
+        });
+        setData(processedData);
+      } else {
+        setData([]);
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const timeToMinutes = (time) => {
     const [hours, minutes] = time.split(':').map(Number);
@@ -58,28 +83,6 @@ const TimelineChart = ({ selectedDate }) => {
     return `${hours}:${mins}`;
   };
 
-  const fetchData = async (startDate, endDate) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await axios.get(
-        `${apiUrl}/telemetry?deviceId=${deviceId}&startDate=${formatDateForAPI(startDate)}&endDate=${formatDateForAPI(endDate)}`
-      );
-
-      const processedData = response.data.map(entry => {
-        const gaps = findGaps(entry.intervals);
-        const intervalsWithGaps = [...entry.intervals, ...gaps].sort((a, b) => moment(a.startTime, 'HH:mm') - moment(b.startTime, 'HH:mm'));
-        return { ...entry, intervals: intervalsWithGaps };
-      });
-
-      setData(processedData);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const getStatusColor = (status) => {
     switch (status) {
       case 'Chạy':
@@ -103,13 +106,6 @@ const TimelineChart = ({ selectedDate }) => {
     };
   };
 
-  const createGradientStops = (intervals) => intervals.map(item => {
-    const { startTime, endTime, status } = item;
-    const { startPercent, durationPercent } = calculatePercentage(startTime, endTime);
-    const color = getStatusColor(status);
-    return `${color} ${startPercent}%, ${color} ${startPercent + durationPercent}%`;
-  }).join(', ');
-
   useEffect(() => {
     if (Array.isArray(selectedDate) && selectedDate.length === 2) {
       const [startDate, endDate] = selectedDate.map(d => d.toDate());
@@ -121,95 +117,79 @@ const TimelineChart = ({ selectedDate }) => {
         for (let m = startDate2; m.isBefore(endDate2) || m.isSame(endDate2); m.add(1, 'days')) {
           newArrDate.push(m.clone());
         }
-        setDate(newArrDate.reverse()); // Đảo ngược danh sách ngày để sắp xếp từ ngày gần nhất
+        setDate(newArrDate.reverse());
         fetchData(startDate, endDate);
       }
     }
-  }, [selectedDate, configDate]);
-  
+  }, [selectedDate]);
+
+  // Thêm chức năng zoom khi người dùng cuộn chuột
+  const handleScroll = (event) => {
+    event.preventDefault();
+    const delta = event.deltaY;
+    setZoomLevel(prevZoom => {
+      const newZoom = prevZoom + (delta < 0 ? -15 : 15); // Zoom theo 15 phút mỗi lần
+      return Math.max(15, Math.min(newZoom, 1440)); // Zoom trong khoảng 15 phút đến 1 ngày
+    });
+  };
 
   useEffect(() => {
-    const handleScroll = (event) => {
-      event.preventDefault();
-      const delta = event.deltaY; // Scroll direction
-      setZoomLevel(prevZoom => {
-        const newZoom = prevZoom + (delta < 0 ? 0.1 : -0.1); // Adjust zoom level
-        return Math.max(1, Math.min(newZoom, 3)); // Limit zoom level between 1 and 3
-      });
-    };
-
     window.addEventListener('wheel', handleScroll, { passive: false });
-
     return () => {
       window.removeEventListener('wheel', handleScroll);
     };
   }, []);
 
-  const chartWidth = '100%';
-  const chartHeight = '400px'; // Keep height constant
+  const renderXAxisLabels = useMemo(() => {
+    const labels = [];
+    const step = zoomLevel; // Khoảng cách giữa mỗi nhãn phụ thuộc vào zoomLevel
+    for (let i = 0; i < 1440; i += step) {
+      const time = moment().startOf('day').add(i, 'minutes').format('HH:mm');
+      labels.push(
+        <div key={i} style={{
+          display: 'inline-block',
+          width: `${(step / 1440) * 100}%`,
+          textAlign: 'center',
+          fontSize: '10px',
+        }}>
+          {time}
+        </div>
+      );
+    }
+    return labels;
+  }, [zoomLevel]);
 
-  const renderXAxisLabels = useMemo(() => (
-    Array.from({ length: 24 }, (_, i) => (
-      <div key={i} style={{
-        display: 'inline-block',
-        width: '4.16%', // Đặt chiều rộng cố định cho mỗi nhãn trục X
-        textAlign: 'center',
-        fontSize: '10px',
-        marginTop: '5px'
-      }}>
-        {`${i}:00`}
-      </div>
-    ))
-  ), []);
+  const renderChartData = () => {
+    return data.map((entry, index) => (
+      <div key={index} style={{
+        height: `${32 * zoomLevel}px`,
+        background: `linear-gradient(to right, ${createGradientStops(entry.intervals)})`,
+        marginTop: '10px',
+        width: '100%',
+      }} />
+    ));
+  };
 
-  const renderYAxisLabels = useMemo(() => (
-    dates.map((date, index) => (
-      <div key={index} style={{ textAlign: 'right', fontSize: '10px' }}>
-        {date.format('YYYY-MM-DD')}
-      </div>
-    ))
-  ), [dates]);
+  const createGradientStops = (intervals) => intervals.map(item => {
+    const { startTime, endTime, status } = item;
+    const { startPercent, durationPercent } = calculatePercentage(startTime, endTime);
+    const color = getStatusColor(status);
+    return `${color} ${startPercent}%, ${color} ${startPercent + durationPercent}%`;
+  }).join(', ');
 
   if (loading) return <div>Đang tải dữ liệu...</div>;
   if (error) return <div>Error: {error}</div>;
-  const handleUpArrowClick = () => {
-    if (Array.isArray(selectedDate) && selectedDate.length === 2) {
-      const [startDate, endDate] = selectedDate.map(d => moment(d)); // Convert to moment objects
-        const newStartDate = startDate.add(1, 'days');
-      const newEndDate = endDate.add(1, 'days');
-      fetchData(newStartDate , newEndDate)
-    }
-  };
+
   return (
-    <div style={{ position: 'relative', width: chartWidth, height: chartHeight }}>
-      <div className="y-axis-arrow" style={{ position: 'absolute', top: 0, left: 60, height: '100%', borderLeft: '2px solid black' }}>
-        <span className="arrow up-arrow"  onClick={() => handleUpArrowClick()}>↑</span>
-      </div>
+    <div style={{ position: 'relative', width: '100%', height: '400px' }}>
       <div className="x-axis-arrow" style={{ position: 'absolute', bottom: 0, left: 60, width: '93%', borderBottom: '2px solid black' }}>
         {renderXAxisLabels}
-        <span className="arrow right-arrow">→</span>
       </div>
       <div style={{ paddingLeft: '75px', position: 'relative', height: '100%' }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '60px', height: '93%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          {renderYAxisLabels}
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '93%' }}>
-          {data.length > 0 ? data.map((entry, index) => (
-            <div key={index} style={{
-              height: `${32 * zoomLevel}px`, // Tăng chiều cao của thẻ div theo zoom level
-              background: `linear-gradient(to right, ${createGradientStops(entry.intervals)})`,
-              marginTop: '10px',
-              width: '100%', // Set width to 100% of the parent container
-              marginLeft: `${(100 / (24 * zoomLevel)) * entry.intervals[0]?.startTime / 1440}%` // Adjust position based on start time
-            }} />
-          )) : (
-            <div style={{ height: '32px', backgroundColor: '#E7E7E7', marginTop: '10px', width: '100%' }} />
-          )}
-        </div>
+        {renderChartData()}
       </div>
     </div>
   );
 };
 
 export default TimelineChart;
- 

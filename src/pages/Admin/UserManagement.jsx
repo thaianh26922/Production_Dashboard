@@ -12,12 +12,12 @@ const UserManagement = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const currentRole = localStorage.getItem('role'); // Lấy role hiện tại từ localStorage
-
+  const apiUrl = import.meta.env.VITE_API_BASE_URL
   // Fetch users from API
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('${apiUrl}/users', {
+        const response = await axios.get(`${apiUrl}/users`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
@@ -48,7 +48,7 @@ const UserManagement = () => {
         setUsers(users.map(user => (user._id === selectedUser._id ? { ...user, ...data } : user)));
         toast.success('User updated successfully');
       } else {
-        const response = await axios.post('${apiUrl}/users', data, {
+        const response = await axios.post(`${apiUrl}/users`, data, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },

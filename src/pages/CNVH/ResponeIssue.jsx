@@ -50,6 +50,7 @@ const ResponeIssue = () => {
           if (response.data && response.data.length > 0) {
             setTelemetryData(response.data[0].intervals); // Giả sử API trả về một mảng với các khoảng thời gian
           }
+          console.log(response.data)
         } catch (error) {
           console.error("Error fetching telemetry data:", error);
         }
@@ -155,22 +156,23 @@ const ResponeIssue = () => {
       </div>
 
       {telemetryData
-        .filter(interval => interval.status === "Dừng")
-        .map((interval, index) => (
-          <div
-            key={interval._id}
-            className={`border-8 rounded-3xl grid grid-cols-2 py-8 mt-4 px-8 w-[90%] justify-center items-center ml-8 gap-10 text-4xl cursor-pointer ${selectedDiv === index ? 'bg-gray-200' : 'border-[#FCFC00]'}`}
-            onClick={() => handleTimeClick(index)}
-            style={{ boxShadow: `inset 0px 10px 40px 10px rgba(252, 252, 0, 0.4)` }}
-          >
-            <span className="col-span-1 flex ml-2 ">Trong khoảng</span>
-            <span className="col-span-1 flex">{`${interval.startTime} - ${interval.endTime}`}</span>
-            <span className="col-span-1 flex ml-2 ">Thời lượng</span>
-            <span className="col-span-1 flex">{calculateDuration(interval.startTime, interval.endTime)}</span>
-            <span className="col-span-1 flex ml-2 ">Trạng thái thiết bị</span>
-            <span className="col-span-1 flex">Chờ</span>
-          </div>
-      ))}
+  .filter(interval => interval.status === "Dừng" && calculateDuration(interval.startTime, interval.endTime) !== "0 giờ 0 phút")
+  .map((interval, index) => (
+    <div
+      key={interval._id}
+      className={`border-8 rounded-3xl grid grid-cols-2 py-8 mt-4 px-8 w-[90%] justify-center items-center ml-8 gap-10 text-4xl cursor-pointer ${selectedDiv === index ? 'bg-gray-200' : 'border-[#FCFC00]'}`}
+      onClick={() => handleTimeClick(index)}
+      style={{ boxShadow: `inset 0px 10px 40px 10px rgba(252, 252, 0, 0.4)` }}
+    >
+      <span className="col-span-1 flex ml-2 ">Trong khoảng</span>
+      <span className="col-span-1 flex">{`${interval.startTime} - ${interval.endTime}`}</span>
+      <span className="col-span-1 flex ml-2 ">Thời lượng</span>
+      <span className="col-span-1 flex">{calculateDuration(interval.startTime, interval.endTime)}</span>
+      <span className="col-span-1 flex ml-2 ">Trạng thái thiết bị</span>
+      <span className="col-span-1 flex">Chờ</span>
+    </div>
+  ))}
+
 
 {/* Các nút Phản hồi và Gọi trợ giúp */}
 <div className="fixed bottom-0 w-full flex flex-col items-center z-50 p-4 bg-transperent -ml-4">
