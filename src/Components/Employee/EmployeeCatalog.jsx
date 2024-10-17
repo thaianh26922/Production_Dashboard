@@ -3,13 +3,13 @@ import { FaEdit, FaTrash } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Modal, Form, Input, Select, Button } from 'antd'; // Sử dụng Select cho gợi ý khu vực
-import SearchButton from '../../Button/SearchButton';
-import AddButton from '../../Button/AddButton';
-import ExportExcelButton from '../../Button/ExportExcelButton';
-import FormSample from '../../Button/FormSample';
-import ImportButton from '../../Button/ImportButton';
+import SearchButton from '../Button/SearchButton';
+import AddButton from '../Button/AddButton';
+import ExportExcelButton from '../Button/ExportExcelButton';
+import FormSample from '../Button/FormSample';
+import ImportButton from '../Button/ImportButton';
 import axios from 'axios'; // Thêm axios để gọi API
-import Breadcrumb from '../../Breadcrumb/Breadcrumb';
+import Breadcrumb from '../Breadcrumb/Breadcrumb';
 
 const { Option } = Select; // Ant Design Select
 
