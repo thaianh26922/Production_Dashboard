@@ -56,7 +56,7 @@ const ErrorReportCatalog = () => {
         toast.success('Cập nhật nguyên nhân lỗi thành công!');
       } else {
         // Thêm mới issue
-        await axios.post('${apiUrl}/issue', values);
+        await axios.post(`${apiUrl}/issue`, values);
         toast.success('Thêm nguyên nhân lỗi thành công!');
       }
       fetchErrorReports();  // Tải lại dữ liệu sau khi thêm/cập nhật
