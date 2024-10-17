@@ -26,7 +26,7 @@ const EmployeeCatalog = () => {
   // Fetch employees from API on component mount
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get('${apiUrl}/employees'); // API GET để lấy danh sách nhân viên
+      const response = await axios.get(`${apiUrl}/employees`); // API GET để lấy danh sách nhân viên
       setEmployees(response.data);
       setFilteredEmployees(response.data);
     } catch (error) {
@@ -68,7 +68,7 @@ const EmployeeCatalog = () => {
         toast.success('Cập nhật nhân viên thành công!');
       } else {
         // Create new employee
-        await axios.post('${apiUrl}/employees', values);
+        await axios.post(`${apiUrl}/employees`, values);
         toast.success('Thêm nhân viên thành công!');
       }
 

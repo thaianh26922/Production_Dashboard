@@ -148,7 +148,7 @@ const handleSearch = (query) => {
   const convertExcelDate = (excelDate) => {
     // Excel's serial date format offset
     const date = new Date(Math.round((excelDate - 25569) * 86400 * 1000));
-    return moment(date).format("DD-MM-YYYY");
+    return moment(date).format("MM-DD-YYYY");
   };
   const handleImport = (file) => {
     const reader = new FileReader();
@@ -167,7 +167,7 @@ const handleSearch = (query) => {
           purchaseDate = convertExcelDate(purchaseDate);
         } else {
           // Sử dụng moment nếu giá trị là chuỗi
-          purchaseDate = moment(purchaseDate, ["DD-MM-YYYY", "MM/DD/YYYY", "YYYY-MM-DD"]).format("DD-MM-YYYY");
+          purchaseDate = moment(purchaseDate, ["DD-MM-YYYY", "MM/DD/YYYY", "YYYY-MM-DD"]).format("MM-DD-YYYY");
         }
   
         return {
