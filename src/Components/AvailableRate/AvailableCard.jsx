@@ -1,24 +1,20 @@
 import React from "react";
 import MachineTimeline from "./MachineTimeline"; // Import MachineTimeline component
-import { DatePicker } from 'antd';
 
-const onChange = (date, dateString) => {
-  console.log(date, dateString);
-};
-
-const AvailableCard = ({ machineName, selectedDate, machineType }) => {
+const AvailableCard = ({ machineName, deviceCode, selectedDate, machineType }) => {
   return (
     <div className="bg-white shadow-md rounded-lg p-4 ">
       <header className="flex justify-between items-center mb-4">
         {/* Hiển thị tên máy dựa trên loại máy được chọn */}
-        <h2 className="text-xl font-semibold">
-          {machineType === "CNC" ? `${machineName}` : ` ${machineName}`}
-        </h2>
-       
+        <h2 className="text-xl font-semibold">{machineName}</h2>
       </header>
       <div className="card-body">
-        {/* MachineTimeline component */}
-        <MachineTimeline />
+        {/* MachineTimeline component với dữ liệu được truyền vào */}
+        <MachineTimeline 
+          deviceCode={deviceCode} // Truyền `deviceCode` thay vì `machineName`
+          selectedDate={selectedDate} 
+          machineType={machineType} 
+        />
       </div>
     </div>
   );

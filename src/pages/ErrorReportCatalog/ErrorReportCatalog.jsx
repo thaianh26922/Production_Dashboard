@@ -210,7 +210,7 @@ const ErrorReportCatalog = () => {
               <Select placeholder="Chọn trạng thái thiết bị">
                 <Select.Option value="DỪNG">DỪNG</Select.Option>
                 <Select.Option value="CHỜ">CHỜ</Select.Option>
-                <Select.Option value="LỖI">TẮT MÁY</Select.Option>
+                <Select.Option value="TẮT MÁY">TẮT MÁY</Select.Option>
                 
               </Select>
             </Form.Item>

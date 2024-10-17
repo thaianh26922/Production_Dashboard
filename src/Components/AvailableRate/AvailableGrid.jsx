@@ -9,10 +9,11 @@ function AvailableGrid({ machines, machineType }) {
     >
       {machines.map((machine) => (
         <AvailableCard
-          key={machine.value}
-          machineName={machine.label}
-          selectedDate={new Date().toISOString().split('T')[0]} // Giả sử hiển thị ngày hiện tại
-          machineType={machineType} // Truyền loại máy (CNC hoặc PHAY)
+          key={machine._id} // Sử dụng `_id` làm key để đảm bảo duy nhất
+          machineName={machine.deviceName} // Truyền tên thiết bị
+          deviceCode={machine.deviceCode} // Truyền `deviceCode`
+          selectedDate={new Date().toISOString().split('T')[0]} // Ngày hiện tại
+          machineType={machineType} // Truyền loại máy hoặc khu vực
         />
       ))}
     </div>
