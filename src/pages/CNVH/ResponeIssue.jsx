@@ -156,7 +156,12 @@ const ResponeIssue = () => {
       </div>
 
       {telemetryData
-  .filter(interval => interval.status === "Dừng" && calculateDuration(interval.startTime, interval.endTime) !== "0 giờ 0 phút")
+  .filter(interval => {
+    const duration = calculateDuration(interval.startTime, interval.endTime);
+    const [hours, minutes] = duration.match(/\d+/g).map(Number); // Tách giờ và phút
+    const totalMinutes = hours * 60 + minutes; // Tính tổng số phút
+    return interval.status === "Dừng" && totalMinutes >= 5;
+  })
   .map((interval, index) => (
     <div
       key={interval._id}
@@ -171,7 +176,9 @@ const ResponeIssue = () => {
       <span className="col-span-1 flex ml-2 ">Trạng thái thiết bị</span>
       <span className="col-span-1 flex">Chờ</span>
     </div>
-  ))}
+  ))
+}
+
 
 
 {/* Các nút Phản hồi và Gọi trợ giúp */}
@@ -189,24 +196,32 @@ const ResponeIssue = () => {
   >
     Gọi trợ giúp
   </button>
+  
 </div>
 
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-white w-[70%] h-[22%] p-8 rounded-lg shadow-lg">
-            <div className="grid grid-cols-4 w-full ">
-              <h2 className="text-6xl text-center font-bold col-span-3 ml-4">{selectedMachine?.deviceName}</h2>
-              <button onClick={handleCloseModal} className="text-6xl col-span-1 ml-8 font-bold">
+          <div className="bg-white w-[80%] h-[32%]  rounded-t-xl shadow-lg">
+            <div className="grid grid-cols-4 w-full bg-blue-500 p-8 rounded-t-xl justify-center ">
+              <h2 className="text-5xl text-center font-semibold col-span-3 ml-28">Phản hồi trợ giúp</h2>
+              <button onClick={handleCloseModal} className="text-5xl col-span-1 ml-28 font-bold">
                 <IoMdClose />
               </button>
             </div>
-            <p className="text-5xl text-center mt-10">Cần gọi trợ giúp từ</p>
-            <div className="grid grid-cols-2 gap-4 mt-16">
+            <div className="mt-10">
+            <h2 className="text-5xl text-center font-bold col-span-3 ml-16">{selectedMachine?.deviceName}</h2>
+            <p className="text-5xl text-center mt-10 mb-22">Cần gọi trợ giúp từ</p>
+            </div>
+            
+            <div className="grid gap-4 mt-16 w-[80%] ml-20 items-center">
               <button onClick={handleCallQC} className="border-2 border-blue-600 text-blue-600 text-5xl py-4 px-8 rounded-md">
                 Đội QC
               </button>
               <button onClick={handleCallMaintenance} className="border-2 border-blue-600 text-blue-600 text-5xl py-4 px-8 rounded-md">
                 Đội Bảo Trì
+              </button>
+              <button onClick={handleCallMaintenance} className="border-2 border-blue-600 text-blue-600 text-5xl py-4 px-8 rounded-md">
+                Đội Kỹ Thuật
               </button>
             </div>
           </div>
