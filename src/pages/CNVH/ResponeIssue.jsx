@@ -119,13 +119,27 @@ const ResponeIssue = () => {
       return;
     }
 
+    // Get the selected interval data
+    const selectedInterval = telemetryData.filter(interval => {
+        const duration = calculateDuration(interval.startTime, interval.endTime);
+        const [hours, minutes] = duration.match(/\d+/g).map(Number);
+        const totalMinutes = hours * 60 + minutes;
+        return interval.status === "Dừng" && totalMinutes >= 5;
+    })[selectedDiv]; // Access the selected interval
+
+    if (!selectedInterval) {
+      toast.error("Không có khoảng thời gian nào được chọn!");
+      return;
+    }
+
     navigate('/dashboard/mobile/issue/respone', {
       state: {
         selectedDate: displayDate,
         selectedMachine: selectedMachine,
+        selectedInterval: selectedInterval, // Pass the selected interval
       }
     });
-  };
+};
 
   return (
     <div className="h-screen bg-gray-100 w-full">

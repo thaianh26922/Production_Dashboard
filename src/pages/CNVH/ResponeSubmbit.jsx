@@ -4,49 +4,71 @@ import '../../index.css';
 import { FiChevronLeft } from 'react-icons/fi';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import axios from 'axios'; // Import axios
+import axios from 'axios';
 
 const ResponeSubmit = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const apiUrl = 'http://192.168.1.19:5000/api/issue'; // Define your API URL
+  const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
   // Nhận dữ liệu từ state
   const { selectedDate, selectedMachine } = location.state || {};
+  
+  // Lấy deviceName từ selectedMachine
+  const deviceName = selectedMachine?.deviceName || '';
 
   // State để quản lý trạng thái button nguyên nhân và nút phản hồi
-  const [reasons, setReasons] = useState([]);
+  const [filteredReasons, setFilteredReasons] = useState([]);
   const [selectedReason, setSelectedReason] = useState(null);
   const [isResponseEnabled, setIsResponseEnabled] = useState(false);
 
-  // Fetch reasons from API based on the selected machine using axios
+  // Fetch reasons from API based on the device name
   useEffect(() => {
     const fetchReasons = async () => {
       try {
-        const response = await axios.get(apiUrl);
-        const data = response.data;
+        
+        const response = await axios.get(`${apiUrl}/issue`);
+        const allReasons = response.data;
+        console.log(`Fetching reasons from: ${apiUrl}/issue`);
+        // Kiểm tra xem dữ liệu có phải là một mảng không
+        if (Array.isArray(allReasons)) {
+          // Lọc lý do theo deviceName
+          const filtered = allReasons.filter(reason =>
+            reason.deviceNames.includes(deviceName)
+          );
 
-        // Filter reasons based on whether the selected machine is in deviceNames
-        const filteredReasons = data.filter(item => item.deviceNames.includes(selectedMachine));
-        setReasons(filteredReasons);
+          // Cập nhật state với các lý do đã lọc
+          setFilteredReasons(filtered);
+        } else {
+          console.error('Dữ liệu không phải là một mảng:', allReasons);
+          toast.error('Dữ liệu không hợp lệ từ API.', {
+            position: "top-center",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            style: { fontSize: '1.6rem', padding: '1rem', width: '90%' },
+          });
+        }
       } catch (error) {
-        console.error('Error fetching reasons:', error);
-        toast.error('Không thể tải dữ liệu, vui lòng thử lại.', {
+        console.error('Error fetching reasons:', error.response ? error.response.data : error.message);
+        toast.error('Có lỗi xảy ra khi lấy dữ liệu.', {
           position: "top-center",
           autoClose: 3000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          style: { fontSize: '1.6rem', padding: '1rem' },
+          style: { fontSize: '1.6rem', padding: '1rem', width: '90%' },
         });
       }
     };
 
-    if (selectedMachine) {
+    if (deviceName) {
       fetchReasons();
     }
-  }, [selectedMachine]);
+  }, [deviceName, apiUrl]);
 
   const handleBackClick = () => {
     navigate(-1);
@@ -73,7 +95,7 @@ const ResponeSubmit = () => {
       setTimeout(() => {
         navigate('/dashboard/mobile/issue', {
           state: {
-            selectedDate: selectedDate, // Truyền lại dữ liệu để giữ lại trạng thái
+            selectedDate: selectedDate,
             selectedMachine: selectedMachine,
           },
         });
@@ -99,20 +121,20 @@ const ResponeSubmit = () => {
 
       {/* Nội dung chính */}
       <div className="grid grid-cols-2 gap-4 p-8">
-        {reasons.length > 0 ? (
-          reasons.map((reason, index) => (
+        {filteredReasons.length > 0 ? (
+          filteredReasons.map((reason, index) => (
             <button
               key={index}
-              onClick={() => handleReasonClick(reason.reasonName)}
+              onClick={() => handleReasonClick(reason)}
               className={`p-8 text-4xl font-bold rounded-lg transition duration-300 ease-in-out ${
-                selectedReason === reason.reasonName ? 'bg-blue-600 text-white' : 'bg-gray-200'
+                selectedReason === reason ? 'bg-blue-600 text-white' : 'bg-gray-200'
               } hover:bg-blue-500`}
             >
               {reason.reasonName}
             </button>
           ))
         ) : (
-          <p className="text-xl col-span-2">Không có nguyên nhân nào được tìm thấy.</p>
+          <p className="text-xl col-span-2">Không có nguyên nhân nào được tìm thấy cho thiết bị này.</p>
         )}
       </div>
 
