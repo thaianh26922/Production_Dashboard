@@ -1,20 +1,52 @@
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom'; // Import useLocation và useNavigate
-import '../../index.css'; // Tailwind CSS
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import '../../index.css';
 import { FiChevronLeft } from 'react-icons/fi';
-import { ToastContainer, toast } from 'react-toastify'; // Import react-toastify
-import 'react-toastify/dist/ReactToastify.css'; // Import CSS react-toastify
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios'; // Import axios
 
 const ResponeSubmit = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+  const apiUrl = 'http://192.168.1.19:5000/api/issue'; // Define your API URL
+
   // Nhận dữ liệu từ state
   const { selectedDate, selectedMachine } = location.state || {};
 
   // State để quản lý trạng thái button nguyên nhân và nút phản hồi
+  const [reasons, setReasons] = useState([]);
   const [selectedReason, setSelectedReason] = useState(null);
   const [isResponseEnabled, setIsResponseEnabled] = useState(false);
+
+  // Fetch reasons from API based on the selected machine using axios
+  useEffect(() => {
+    const fetchReasons = async () => {
+      try {
+        const response = await axios.get(apiUrl);
+        const data = response.data;
+
+        // Filter reasons based on whether the selected machine is in deviceNames
+        const filteredReasons = data.filter(item => item.deviceNames.includes(selectedMachine));
+        setReasons(filteredReasons);
+      } catch (error) {
+        console.error('Error fetching reasons:', error);
+        toast.error('Không thể tải dữ liệu, vui lòng thử lại.', {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          style: { fontSize: '1.6rem', padding: '1rem' },
+        });
+      }
+    };
+
+    if (selectedMachine) {
+      fetchReasons();
+    }
+  }, [selectedMachine]);
 
   const handleBackClick = () => {
     navigate(-1);
@@ -67,17 +99,21 @@ const ResponeSubmit = () => {
 
       {/* Nội dung chính */}
       <div className="grid grid-cols-2 gap-4 p-8">
-        {['Nguyên Nhân A', 'Nguyên Nhân B', 'Nguyên Nhân C', 'Nguyên Nhân D'].map((reason, index) => (
-          <button
-            key={index}
-            onClick={() => handleReasonClick(reason)}
-            className={`p-8 text-4xl font-bold rounded-lg transition duration-300 ease-in-out ${
-              selectedReason === reason ? 'bg-blue-600 text-white' : 'bg-gray-200'
-            } hover:bg-blue-500`}
-          >
-            {reason}
-          </button>
-        ))}
+        {reasons.length > 0 ? (
+          reasons.map((reason, index) => (
+            <button
+              key={index}
+              onClick={() => handleReasonClick(reason.reasonName)}
+              className={`p-8 text-4xl font-bold rounded-lg transition duration-300 ease-in-out ${
+                selectedReason === reason.reasonName ? 'bg-blue-600 text-white' : 'bg-gray-200'
+              } hover:bg-blue-500`}
+            >
+              {reason.reasonName}
+            </button>
+          ))
+        ) : (
+          <p className="text-xl col-span-2">Không có nguyên nhân nào được tìm thấy.</p>
+        )}
       </div>
 
       {/* Nút phản hồi */}
