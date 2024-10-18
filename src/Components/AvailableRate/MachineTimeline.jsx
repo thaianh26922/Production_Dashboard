@@ -11,7 +11,7 @@ const MachineTimeline = ({ deviceCode, selectedDate }) => {
   const [dimensions, setDimensions] = useState({ width: 800, height: fixedHeight });
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
-  const formatDateForAPI = (date) => moment(date).format('YYYY-MM-DD');
+  const formatDateForAPI = (date) => date.format('YYYY-MM-DD');
 
   const addOfflineIntervals = (data) => {
     const newData = [];
@@ -35,13 +35,18 @@ const MachineTimeline = ({ deviceCode, selectedDate }) => {
     return newData;
   };
 
+  useEffect(() => {
+    if (deviceCode && selectedDate) {
+      fetchTelemetryData(deviceCode); // Fetch data when selectedDate or deviceCode changes
+    }
+  }, [deviceCode, selectedDate]); // Re-fetch data when deviceCode or selectedDate changes
+
   const fetchTelemetryData = async (code) => {
     try {
-      const formattedStartDate = formatDateForAPI(selectedDate);
-      const formattedEndDate = formatDateForAPI(selectedDate);
-      const apiEndpoint = `${apiUrl}/telemetry?deviceId=${code}&startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
+      const formattedDate = formatDateForAPI(selectedDate);
+      console.log(`Formatted Date for API: ${formattedDate}`);
+      const apiEndpoint = `${apiUrl}/telemetry?deviceId=${code}&startDate=${formattedDate}&endDate=${formattedDate}`;
       const response = await axios.get(apiEndpoint);
-      console.log(`Full API Response for ${code}:`, response.data);
 
       if (response.data && response.data.length > 0 && response.data[0].intervals) {
         const flatData = response.data[0].intervals.flatMap(interval => ({
@@ -50,10 +55,9 @@ const MachineTimeline = ({ deviceCode, selectedDate }) => {
           status: interval.status
         }));
         const processedData = addOfflineIntervals(flatData);
-        console.log(`Processed Data with Offline Intervals for ${code}:`, processedData);
         setDeviceData(prevData => ({ ...prevData, [code]: processedData }));
       } else {
-        console.warn(`No intervals found or intervals is undefined for ${code}`);
+        console.warn(`No intervals found for ${code}`);
         setDeviceData(prevData => ({ ...prevData, [code]: [] }));
       }
     } catch (error) {
@@ -63,39 +67,40 @@ const MachineTimeline = ({ deviceCode, selectedDate }) => {
   };
 
   useEffect(() => {
-    console.log(`Selected Date Changed: ${selectedDate}`); // Log selectedDate changes
-    if (deviceCode) {
-      fetchTelemetryData(deviceCode); // Gọi lại API khi selectedDate thay đổi
-    }
-  }, [deviceCode, selectedDate]); // Đảm bảo selectedDate có trong mảng phụ thuộc
-
-  useEffect(() => {
     const drawChart = () => {
-      if (!deviceData[deviceCode] || deviceData[deviceCode].length === 0) {
-        console.log(`No data to render for ${deviceCode}`);
-        return;
-      }
-
-      const data = deviceData[deviceCode];
       const svg = d3.select(svgRef.current);
       const { width, height } = dimensions;
       const margin = { top: 20, right: 35, bottom: 80, left: 50 };
-
-      svg.selectAll('*').remove(); // Xóa biểu đồ cũ
-
+  
+      svg.selectAll('*').remove(); // Clear the previous chart
+  
+      // Check if there's data for the current device
+      if (!deviceData[deviceCode] || deviceData[deviceCode].length === 0) {
+        svg.append('text')
+          .attr('x', width / 2)
+          .attr('y', height / 2)
+          .attr('text-anchor', 'middle')
+          .style('font-size', '16px')
+          .style('fill', '#888')
+          .text('Không có dữ liệu để hiển thị'); // Message indicating no data
+        return; // Exit the function if there's no data
+      }
+  
+      const data = deviceData[deviceCode];
       const timeParse = d3.timeParse('%H:%M');
       const timeFormat = d3.timeFormat('%H:%M');
-
+  
       const xScale = d3
         .scaleTime()
         .domain([timeParse('00:00'), timeParse('23:59')])
         .range([margin.left, width - margin.right]);
-
+  
       const colorScale = d3
         .scaleOrdinal()
         .domain(['Chạy', 'Dừng', 'Offline'])
         .range(['#4aea4a', '#f10401', '#d3d3d3']);
-
+  
+      // Create tooltip
       const tooltip = d3.select('body')
         .append('div')
         .style('position', 'absolute')
@@ -105,7 +110,8 @@ const MachineTimeline = ({ deviceCode, selectedDate }) => {
         .style('border-radius', '4px')
         .style('display', 'none')
         .style('pointer-events', 'none');
-
+  
+      // Draw x-axis
       svg
         .append('g')
         .attr('transform', `translate(0,${height - margin.bottom - 30})`)
@@ -113,7 +119,8 @@ const MachineTimeline = ({ deviceCode, selectedDate }) => {
         .selectAll("text")
         .attr("transform", "translate(-10,0)rotate(-45)")
         .style("text-anchor", "end");
-
+  
+      // Draw rectangles for status
       svg
         .selectAll('rect')
         .data(data)
@@ -134,40 +141,33 @@ const MachineTimeline = ({ deviceCode, selectedDate }) => {
             .style('top', `${event.pageY - 20}px`);
         })
         .on('mousemove', event => {
-          tooltip
-            .style('left', `${event.pageX + 10}px`)
-            .style('top', `${event.pageY - 20}px`);
+          tooltip.style('left', `${event.pageX + 10}px`).style('top', `${event.pageY - 20}px`);
         })
         .on('mouseout', () => {
           tooltip.style('display', 'none');
         });
-
+  
+      // Calculate total time for each status
       const totalTime = {
         'Chạy': 0,
         'Dừng': 0,
         'Offline': 0
       };
-
+  
       data.forEach(d => {
         const start = moment(d.startTime, 'HH:mm');
         const end = moment(d.endTime, 'HH:mm');
         const duration = moment.duration(end.diff(start));
         totalTime[d.status] += duration.asMinutes();
       });
-
-      const totalRunningHours = Math.floor(totalTime['Chạy'] / 60);
-      const totalRunningMinutes = totalTime['Chạy'] % 60;
-      const totalStoppedHours = Math.floor(totalTime['Dừng'] / 60);
-      const totalStoppedMinutes = totalTime['Dừng'] % 60;
-      const totalOfflineHours = Math.floor(totalTime['Offline'] / 60);
-      const totalOfflineMinutes = totalTime['Offline'] % 60;
-
+  
+      // Create legend
       const legendData = [
-        { status: 'Chạy', time: `${totalRunningHours} giờ ${totalRunningMinutes} phút`, color: '#4aea4a' },
-        { status: 'Dừng', time: `${totalStoppedHours} giờ ${totalStoppedMinutes} phút`, color: '#f10401' },
-        { status: 'Offline', time: `${totalOfflineHours} giờ ${totalOfflineMinutes} phút`, color: '#d3d3d3' },
+        { status: 'Chạy', time: `${Math.floor(totalTime['Chạy'] / 60)} giờ ${totalTime['Chạy'] % 60} phút`, color: '#4aea4a' },
+        { status: 'Dừng', time: `${Math.floor(totalTime['Dừng'] / 60)} giờ ${totalTime['Dừng'] % 60} phút`, color: '#f10401' },
+        { status: 'Offline', time: `${Math.floor(totalTime['Offline'] / 60)} giờ ${totalTime['Offline'] % 60} phút`, color: '#d3d3d3' },
       ];
-
+  
       const legend = svg
         .selectAll('.legend')
         .data(legendData)
@@ -175,7 +175,7 @@ const MachineTimeline = ({ deviceCode, selectedDate }) => {
         .append('g')
         .attr('class', 'legend')
         .attr('transform', (d, i) => `translate(${margin.left + i * 150},${height - margin.bottom + 25})`);
-
+  
       legend
         .append('rect')
         .attr('x', 0)
@@ -183,7 +183,7 @@ const MachineTimeline = ({ deviceCode, selectedDate }) => {
         .attr('width', 20)
         .attr('height', 10)
         .style('fill', d => d.color);
-
+  
       legend
         .append('text')
         .attr('x', 25)
@@ -192,27 +192,28 @@ const MachineTimeline = ({ deviceCode, selectedDate }) => {
         .style('font-size', '12px')
         .style('text-anchor', 'start');
     };
-
-    drawChart(); // Vẽ lại biểu đồ khi có dữ liệu mới
+  
+    drawChart(); // Draw chart when deviceData or dimensions change
   }, [deviceData, dimensions, deviceCode]);
+  
 
   useEffect(() => {
     const handleResize = () => {
-      if (wrapperRef.current) {
-        const { clientWidth } = wrapperRef.current;
-        setDimensions({ width: clientWidth, height: fixedHeight });
-      }
+      const clientWidth = wrapperRef.current.clientWidth;
+      setDimensions({ width: clientWidth, height: fixedHeight });
     };
 
-    handleResize(); // Đặt kích thước ban đầu
-    window.addEventListener('resize', handleResize); // Thêm sự kiện resize
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Call it once on mount to set initial size
 
-    return () => window.removeEventListener('resize', handleResize); // Dọn dẹp
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   return (
-    <div ref={wrapperRef} style={{ overflowX: 'auto' }}>
-      <svg ref={svgRef} width={dimensions.width} height={dimensions.height} />
+    <div ref={wrapperRef}>
+      <svg ref={svgRef} width="100%" height={fixedHeight} />
     </div>
   );
 };

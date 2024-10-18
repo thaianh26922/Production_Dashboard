@@ -2,7 +2,7 @@ import React from "react";
 import MachineTimeline from "./MachineTimeline"; // Import MachineTimeline component
 
 const AvailableCard = ({ machineName, deviceCode, selectedDate, machineType }) => {
-  console.log(selectedDate)
+  console.log("AvailableCard selectedDate:", selectedDate.format("YYYY-MM-DD"));
   return (
     <div className="bg-white shadow-md rounded-lg p-4 ">
       <header className="flex justify-between items-center mb-4">

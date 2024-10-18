@@ -2,6 +2,7 @@ import React from 'react';
 import AvailableCard from './AvailableCard'; // Import AvailableCard
 
 function AvailableGrid({ machines, machineType,selectedDate }) {
+  console.log("AvailableGrid selectedDate:", selectedDate.format("YYYY-MM-DD"));
   return (
     <div
       className="grid grid-cols-2 gap-2 overflow-y-auto"

@@ -5,12 +5,42 @@ import Breadcrumb from '../../Components/Breadcrumb/Breadcrumb';
 
 // Dữ liệu máy móc
 const machines = [
-  { id: '001', status: 'Chạy', time: '3 phút', oee: 78, oeeYesterday: 72, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 01', employee: 'Nguyễn Tấn Dũng' },
-  { id: '002', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 95, totalTimeToday: 9, totalTimeYesterday: 8, workcenter: 'Line 01', employee: 'Nguyễn Tấn Dũng' },
-  { id: '003', status: 'Chờ', time: '3 phút', oee: 94, oeeYesterday: 94, totalTimeToday: 10, totalTimeYesterday: 9, workcenter: 'Line 01', employee: 'Nguyễn Tấn Dũng' },
-  // Thêm các máy khác...
-  { id: '034', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 02', employee: 'Nguyễn Tấn Dũng' },
-  { id: '035', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 02', employee: 'Nguyễn Tấn Dũng' },
+  { id: '001', status: 'Chạy', time: '3 phút', oee: 78, oeeYesterday: 72, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 01' , employee:'Nguyễn Tấn Dũng'},
+  { id: '002', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 95, totalTimeToday: 9, totalTimeYesterday: 8, workcenter: 'Line 01' ,  employee:'Nguyễn Tấn Dũng' },
+  { id: '003', status: 'Chờ', time: '3 phút', oee: 94, oeeYesterday: 94, totalTimeToday: 10, totalTimeYesterday: 9, workcenter: 'Line 01', employee:'Nguyễn Tấn Dũng' },
+  { id: '004', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 01', employee:'Nguyễn Tấn Dũng' },
+  { id: '005', status: 'Chạy', time: '3 phút', oee: 96, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 01' , employee:'Nguyễn Tấn Dũng'},
+  { id: '006', status: 'Lỗi', time: '3giờ 3 phút', oee: 78, oeeYesterday: 96, totalTimeToday: 5, totalTimeYesterday: 7, workcenter: 'Line 01', employee:'Nguyễn Tấn Dũng' },
+  { id: '007', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 01', employee:'Nguyễn Tấn Dũng' },
+  { id: '008', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 01', employee:'Nguyễn Tấn Dũng' },
+  { id: '009', status: 'Chờ', time: '3 phút', oee: 95, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 01' , employee:'Nguyễn Tấn Dũng'},
+  { id: '010', status: 'Chạy', time: '3 phút', oee: 78, oeeYesterday: 72, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 01', employee:'Nguyễn Tấn Dũng' },
+  { id: '011', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 95, totalTimeToday: 9, totalTimeYesterday: 8, workcenter: 'Line 01' , employee:'Nguyễn Tấn Dũng'},
+  { id: '012', status: 'Chạy', time: '3 phút', oee: 94, oeeYesterday: 94, totalTimeToday: 10, totalTimeYesterday: 9, workcenter: 'Line 01' , employee:'Nguyễn Tấn Dũng'},
+  { id: '013', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 01', employee:'Nguyễn Tấn Dũng' },
+  { id: '014', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 01', employee:'Nguyễn Tấn Dũng' },
+  { id: '015', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 01' , employee:'Nguyễn Tấn Dũng'},
+  { id: '016', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 01', employee:'Nguyễn Tấn Dũng' },
+  { id: '017', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 01' , employee:'Nguyễn Tấn Dũng'},
+  { id: '018', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 02' , employee:'Nguyễn Tấn Dũng'},
+  { id: '019', status: 'Chạy', time: '3 phút', oee: 78, oeeYesterday: 72, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 02', employee:'Nguyễn Tấn Dũng' },
+  { id: '020', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 95, totalTimeToday: 9, totalTimeYesterday: 8, workcenter: 'Line 02' , employee:'Nguyễn Tấn Dũng'},
+  { id: '021', status: 'Lỗi', time: '30 phút', oee: 89, oeeYesterday: 94, totalTimeToday: 10, totalTimeYesterday: 9, workcenter: 'Line 02' , employee:'Nguyễn Tấn Dũng'},
+  { id: '022', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 02' , employee:'Nguyễn Tấn Dũng'},
+  { id: '023', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 02' , employee:'Nguyễn Tấn Dũng'},
+  { id: '024', status: 'Chạy', time: '3giờ 00 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 02', employee:'Nguyễn Tấn Dũng' },
+  { id: '025', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 02', employee:'Nguyễn Tấn Dũng' },
+  { id: '026', status: 'Chờ', time: '3 phút', oee: 94, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 02' , employee:'Nguyễn Tấn Dũng'},
+  { id: '027', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 02', employee:'Nguyễn Tấn Dũng' },
+  { id: '028', status: 'Chạy', time: '3 phút', oee: 78, oeeYesterday: 72, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 02' , employee:'Nguyễn Tấn Dũng'},
+  { id: '029', status: 'Lỗi', time: '3 phút', oee: 84, oeeYesterday: 95, totalTimeToday: 9, totalTimeYesterday: 8, workcenter: 'Line 02', employee:'Nguyễn Tấn Dũng' },
+  { id: '030', status: 'Chạy', time: '3 phút', oee: 94, oeeYesterday: 94, totalTimeToday: 10, totalTimeYesterday: 9, workcenter: 'Line 02', employee:'Nguyễn Tấn Dũng' },
+  { id: '031', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 02', employee:'Nguyễn Tấn Dũng' },
+  { id: '032', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 02', employee:'Nguyễn Tấn Dũng' },
+  { id: '033', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 02' , employee:'Nguyễn Tấn Dũng'},
+  { id: '034', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 02', employee:'Nguyễn Tấn Dũng' },
+  { id: '035', status: 'Chạy', time: '3 phút', oee: 100, oeeYesterday: 98, totalTimeToday: 8, totalTimeYesterday: 7, workcenter: 'Line 02', employee:'Nguyễn Tấn Dũng' },
+ 
 ];
 
 const Dashboard1 = () => {
@@ -111,7 +141,7 @@ const Dashboard1 = () => {
           className="fixed bottom-4 right-4 z-50 text-white p-3 rounded-full shadow-lg focus:outline-none bg-red-500 hover:bg-red-600"
           onClick={toggleFullscreen} // Sử dụng lại hàm toggleFullscreen để thoát chế độ toàn màn hình
         >
-          <span>&#8722;</span> {/* Dấu trừ để thu nhỏ */}
+          <span className="text-white">&#8722;</span> {/* Dấu trừ để thu nhỏ */}
         </button>
       )}
     </div>
