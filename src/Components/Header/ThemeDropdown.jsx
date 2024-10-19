@@ -1,38 +1,32 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaMoon, FaSun } from 'react-icons/fa'; // Import các icon
+import { FaMoon, FaSun } from 'react-icons/fa'; // Import icons
 
 const ThemeDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true); // Default to dark mode
   const dropdownRef = useRef(null);
 
-  // Hàm để bật/tắt chế độ dark mode
+  // Function to toggle dark mode
   const toggleDarkMode = (mode) => {
     if (mode === 'light') {
       document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light'); // Lưu trạng thái light mode
-      setDarkMode(false); // Cập nhật trạng thái
+      localStorage.setItem('theme', 'light'); // Save light mode
+      setDarkMode(false); // Update state
     } else if (mode === 'dark') {
       document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark'); // Lưu trạng thái dark mode
-      setDarkMode(true); // Cập nhật trạng thái
+      localStorage.setItem('theme', 'dark'); // Save dark mode
+      setDarkMode(true); // Update state
     }
-    setIsOpen(false); // Đóng dropdown sau khi chọn
+    setIsOpen(false); // Close dropdown after selection
   };
 
-  // Kiểm tra trạng thái dark mode khi component mount
+  // Set dark mode by default (remove the localStorage check)
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-      setDarkMode(true);
-    } else {
-      document.documentElement.classList.remove('dark');
-      setDarkMode(false);
-    }
+    document.documentElement.classList.add('dark'); // Set dark mode on mount
+    setDarkMode(true); // Update state to dark mode
   }, []);
 
-  // Đóng dropdown khi click ra ngoài
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {

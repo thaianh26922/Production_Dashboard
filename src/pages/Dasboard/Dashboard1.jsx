@@ -119,7 +119,7 @@ const Dashboard1 = () => {
         </div>
       </div>
 
-      <div ref={cardsRef} className="overflow-auto h-[calc(100vh-100px)]"> {/* Điều chỉnh chiều cao để cho phép cuộn */}
+      <div ref={cardsRef} className="overflow-auto h-[calc(100vh)]"> {/* Điều chỉnh chiều cao để cho phép cuộn */}
         {loading ? (
           <div className="flex justify-center text-2xl items-center h-64">Loading...</div>
         ) : (
