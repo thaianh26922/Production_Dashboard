@@ -1,24 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Breadcrumb from '../../../Components/Breadcrumb/Breadcrumb';
 import DowntimePieChart from '../../../Components/Equiment/Analysis/DowntimePieChart';
 import TitleChart from '../../../Components/TitleChart/TitleChart';
 import { Select, DatePicker } from 'antd'; 
 import RuntimeTrendChart from '../../../Components/Equiment/Reports/RuntimeTrendChart';
-import RepairBarChart from '../../../Components/Equiment/Reports/RepairBarChart'; // Import RepairBarChart
+import RepairBarChart from '../../../Components/Equiment/Reports/RepairBarChart';
 import StackedBarChart from '../../../Components/Equiment/Reports/StackedBarChart';
 import TimelineChart from '../../../Components/Equiment/Reports/TimelineChart';
 import { datastatus } from '../../../data/status'; 
+
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 function DeviceReport() {
-  const [selectedMachines, setSelectedMachines] = useState([]);  // Now multiple selections
+  const [selectedMachines, setSelectedMachines] = useState([]);  
   const [selectedDate, setSelectedDate] = useState(null);
-  const [startDate, setStartDate] = useState(null); // State for the start date
+  const [startDate, setStartDate] = useState(null); 
+  const runtimeTrendChartRef = useRef(null); // Create a ref for the RuntimeTrendChart
+  const timelineChartRef = useRef(null); // Create a ref for the TimelineChart
+  const stackedBarChartRef = useRef(null); // Create a ref for the StackedBarChart
 
   const machineOptions = [
-    
-    // Add the rest of the CNC and PHAY machines
     ...Array.from({ length: 17 }, (_, i) => ({
       value: `CNC${i + 1}`,
       label: `CNC ${i + 1}`
@@ -29,17 +31,31 @@ function DeviceReport() {
     }))
   ];
 
-  const handleFullscreen = () => {
-    console.log("Fullscreen chart");
+  const handleFullscreen = (chartRef) => {
+    if (chartRef.current) {
+      if (!document.fullscreenElement) {
+        chartRef.current.requestFullscreen().catch(err => {
+          console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
   };
 
   const handlePrint = () => {
-    console.log("Print chart");
+    // Implement your print logic here
   };
 
-  const handleDateChange = (dates) => {
+  const newDateChane = (dates) => {
+    console.log(dates)
     setStartDate(null)
-    setSelectedDate(dates);
+    setSelectedDate({startDate : dates.startDate , endDate : dates.endDate});
+  }
+  const handleDateChange = (dates) => {
+    console.log(dates)
+    setStartDate(null)
+    setSelectedDate({startDate : dates[0].$d , endDate : dates[1].$d});
   };
   const handleDateChangeChoose = (dates) => {
     setStartDate(dates[0])
@@ -50,7 +66,6 @@ function DeviceReport() {
     if (!startDate) return false; // If no start date selected, allow all dates
     return current < startDate || current > startDate.clone().add(6, 'days');
   };
-  console.log(selectedDate);
 
   const runtimeChartData = {
     labels: ['Dừng', 'Chờ', 'Cài đặt', 'Tắt máy'],
@@ -88,14 +103,13 @@ function DeviceReport() {
       }
     ],
   };
- console.log(selectedMachines)
+  
   return (
     <>
       <div className="flex justify-end items-center mb-4">
-        
         <div className="flex items-center space-x-4">
           <Select
-            mode="multiple"  // Allow multiple selections
+            mode="multiple" 
             value={selectedMachines}
             onChange={setSelectedMachines}
             placeholder="Chọn máy"
@@ -108,7 +122,7 @@ function DeviceReport() {
             ))}
           </Select>
           
-          <RangePicker onChange={handleDateChange} disabledDate={disabledDate} onCalendarChange={handleDateChangeChoose}/>
+          <RangePicker onChange={handleDateChange} disabledDate={disabledDate} onCalendarChange={handleDateChangeChoose} />
         </div>
       </div>
 
@@ -118,7 +132,7 @@ function DeviceReport() {
           <TitleChart
             title="Tỷ lệ máy chạy"
             timeWindow="Last 24 hours"
-            onFullscreen={handleFullscreen}
+            onFullscreen={() => handleFullscreen(runtimeTrendChartRef)}
             onPrint={handlePrint}
           />
           <div className="h-28">
@@ -130,7 +144,7 @@ function DeviceReport() {
           <TitleChart
             title="Phân bố nhiệm vụ"
             timeWindow="Last 24 hours"
-            onFullscreen={handleFullscreen}
+            onFullscreen={() => handleFullscreen(runtimeTrendChartRef)}
             onPrint={handlePrint}
           />
           <div className="w-full h-full">
@@ -138,11 +152,11 @@ function DeviceReport() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-4 shadow-md col-span-4 ">
+        <div className="bg-white rounded-lg p-4 shadow-md col-span-4 " ref={runtimeTrendChartRef}>
           <TitleChart
             title="Xu hướng máy chạy"
             timeWindow="Last 24 hours"
-            onFullscreen={handleFullscreen}
+            onFullscreen={() => handleFullscreen(runtimeTrendChartRef)}
             onPrint={handlePrint}
           />
           <div className="w-full h-full mt-1 ml-2 p-2">
@@ -154,7 +168,7 @@ function DeviceReport() {
           <TitleChart
             title="Thời gian dừng sửa chữa"
             timeWindow="Last 24 hours"
-            onFullscreen={handleFullscreen}
+            onFullscreen={() => handleFullscreen(runtimeTrendChartRef)}
             onPrint={handlePrint}
           />
           <div className="w-full h-full mt-12 ml-2 px-3">
@@ -164,23 +178,23 @@ function DeviceReport() {
       </div>
 
       <div className="grid grid-cols-2 gap-2 p-1">
-        <div className="bg-white p-3 col-span-1 rounded-lg">
+        <div className="bg-white p-3 col-span-1" ref={timelineChartRef}>
           <TitleChart
             title="Ngăn xếp trạng thái"
             timeWindow="Last 24 hours"
-            onFullscreen={handleFullscreen}
+            onFullscreen={() => handleFullscreen(timelineChartRef)}
             onPrint={handlePrint}
           />
-          <TimelineChart data={datastatus.status} selectedDate={selectedDate}  />
+          {selectedDate ? <TimelineChart data={datastatus.status} selectedDate={selectedDate} onDateChange={newDateChane}/> : <>No data</>}
         </div>
-        <div className="bg-white p-3 col-span-1 rounded-lg">
-          <TitleChart
+        <div className="bg-white p-3 col-span-1" ref={stackedBarChartRef}>
+          <TitleChart 
             title="Thống kê trạng thái"
             timeWindow="Last 24 hours"
-            onFullscreen={handleFullscreen}
+            onFullscreen={() => handleFullscreen(stackedBarChartRef)}
             onPrint={handlePrint}
           />
-          <StackedBarChart selectedDate={selectedDate} />
+          <StackedBarChart selectedDate={selectedDate} onDateChange={newDateChane}/>
         </div>
       </div>
     </>

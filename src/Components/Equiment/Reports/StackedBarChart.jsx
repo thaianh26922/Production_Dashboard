@@ -1,231 +1,290 @@
-import React, { useEffect, useRef, useState } from 'react';
-import * as d3 from 'd3';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import moment from 'moment';
-
-const StackedBarChart = ({ selectedDate }) => {
-  const svgRef = useRef();
+import './TimelineChart.css';
+const StackedBarChart = ({ selectedDate, onDateChange }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [accessToken, setAccessToken] = useState(''); // Token sẽ được lưu ở đây
+  const [dates, setDate] = useState([]);
+  const [listGradient, setListGradient] = useState([]);
+  const [hour, setHour] = useState([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23])
+  const [ArrayPercentOffline, setArrayPercentOffline] = useState([]);
+  const [ArrayPercentRun, setArrayPercentRun] = useState([]);
+  const [ArrayPercentStop, setArrayPercentStop] = useState([]);
+  const [currentIndex , setCurrentIndex] = useState(1)
+  const [positionToTolipth , setPositionToTolipth] = useState(1)
+  const [textToTolipth , setTextToTolipth] = useState('')
+  const deviceId = '543ff470-54c6-11ef-8dd4-b74d24d26b24';
+  const apiUrl =import.meta.env.VITE_API_BASE_URL;
 
-  // Hàm lấy token mới
-  const getNewAccessToken = async () => {
-    try {
-      const response = await axios.post('http://cloud.datainsight.vn:8080/api/auth/login', {
-        username: 'oee2024@gmail.com', 
-        password: 'Oee@2124' 
-      });
-      const token = response.data.token;
-      setAccessToken(token); // Lưu token vào state
-      return token;
-    } catch (error) {
-      console.error('Error getting new access token:', error);
-      throw new Error('Could not refresh access token');
-    }
+  const formatDateForAPI = (date) => moment(date).format('YYYY-MM-DD');
+
+  const timeToMinutes = (time) => {
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
   };
 
-  // Hàm lấy dữ liệu từ API và tự động làm mới token nếu hết hạn
-  const fetchData = async (startDate, endDate, token) => {
+  const findGaps = (intervals) => {
+    const sortedIntervals = intervals.map(item => ({
+      start: timeToMinutes(item.startTime),
+      end: timeToMinutes(item.endTime),
+    })).sort((a, b) => a.start - b.start);
+
+    const gaps = [];
+    const dayStart = 0;
+    const dayEnd = 24 * 60;
+    let lastEnd = dayStart;
+
+    sortedIntervals.forEach(({ start, end }) => {
+      if (start > lastEnd) {
+        gaps.push({
+          status: 'offline',
+          startTime: formatTime(lastEnd),
+          endTime: formatTime(start),
+        });
+      }
+      lastEnd = Math.max(lastEnd, end);
+    });
+
+    if (lastEnd < dayEnd) {
+      gaps.push({
+        status: 'offline',
+        startTime: formatTime(lastEnd),
+        endTime: formatTime(dayEnd),
+      });
+    }
+    return gaps;
+  };
+
+  const formatTime = (minutes) => {
+    const hours = String(Math.floor(minutes / 60)).padStart(2, '0');
+    const mins = String(minutes % 60).padStart(2, '0');
+    return `${hours}:${mins}`;
+  };
+  const calculateTotalOfflinePercentageBefore23 = (gaps, type) => {
+    const totalSecondsInDay = 24 * 60 * 60;
+    const limitTime = moment('23:00', 'HH:mm').hours() * 3600;
+    let totalOfflineTime
+    if (type == 'offline') {
+      totalOfflineTime = gaps.reduce((acc, gap) => {
+        let startSeconds = moment(gap.startTime, 'HH:mm').hours() * 3600 + moment(gap.startTime, 'HH:mm').minutes() * 60;
+        let endSeconds = moment(gap.endTime, 'HH:mm').hours() * 3600 + moment(gap.endTime, 'HH:mm').minutes() * 60;
+        if (endSeconds > limitTime) {
+          endSeconds = limitTime;
+        }
+        if (endSeconds > startSeconds) {
+          const offlineDuration = endSeconds - startSeconds;
+          acc += offlineDuration;
+        }
+
+        return acc;
+      }, 0);
+    } else {
+      totalOfflineTime = gaps.reduce((acc, gap) => {
+        let startSeconds
+        let endSeconds
+        if (gap.status == type) {
+          startSeconds = moment(gap.startTime, 'HH:mm').hours() * 3600 + moment(gap.startTime, 'HH:mm').minutes() * 60;
+          endSeconds = moment(gap.endTime, 'HH:mm').hours() * 3600 + moment(gap.endTime, 'HH:mm').minutes() * 60;
+        }
+        if (endSeconds > limitTime) {
+          endSeconds = limitTime; // Chỉ tính đến 23:00
+        }
+        if (endSeconds > startSeconds) {
+          const offlineDuration = endSeconds - startSeconds;
+          acc += offlineDuration;
+        }
+        return acc;
+      }, 0);
+    }
+
+    const totalOfflinePercentage = (totalOfflineTime / totalSecondsInDay) * 100;
+    return totalOfflinePercentage.toFixed(2);
+  };
+  const fetchData = async (startDate, endDate) => {
     setLoading(true);
     setError(null);
+
     try {
       const response = await axios.get(
-        `http://cloud.datainsight.vn:8080/api/plugins/telemetry/DEVICE/543ff470-54c6-11ef-8dd4-b74d24d26b24/values/timeseries?keys=status&interval=36000&limit=10000&startTs=${startDate}&endTs=${endDate}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        `${apiUrl}/telemetry?deviceId=${deviceId}&startDate=${formatDateForAPI(startDate)}&endDate=${formatDateForAPI(endDate)}`
       );
-      setData(response.data.status);
+      let totalOfflinePercentArray = [];
+      let totalRun = []
+      let totalStop = []
+
+      const processedData = response.data.map(entry => {
+        const gaps = findGaps(entry.intervals);
+        const totalOfflinePercent = calculateTotalOfflinePercentageBefore23(gaps, 'offline');
+        const runPercent = calculateTotalOfflinePercentageBefore23(entry.intervals, 'Chạy');
+        const stopPercent = calculateTotalOfflinePercentageBefore23(entry.intervals, 'Dừng');
+        totalRun.push(runPercent);
+        totalOfflinePercentArray.push(totalOfflinePercent);
+        totalStop.push(stopPercent)
+        const intervalsWithGaps = [...entry.intervals, ...gaps].sort((a, b) => moment(a.startTime, 'HH:mm') - moment(b.startTime, 'HH:mm'));
+        return { ...entry, intervals: intervalsWithGaps };
+      });
+
+      setArrayPercentOffline(totalOfflinePercentArray)
+      setArrayPercentRun(totalRun)
+      setArrayPercentStop(totalStop)
+
+      const combinedArray = totalRun.map((run, index) => {
+        const stop = Number(totalStop[index]) + Number(run);
+        const offline = totalOfflinePercentArray[index];
+
+        return ` #00ff07 0% , #00ff07 ${run}% ,red ${run}% , red ${stop}% , #d9d9d9 ${offline}%`;
+      });
+      setListGradient(combinedArray);
+
+      setData(processedData);
+
     } catch (error) {
-      // Nếu gặp lỗi 401, tức là token hết hạn, gọi hàm refresh token
-      if (error.response && error.response.status === 401) {
-        const newToken = await getNewAccessToken();
-        if (newToken) {
-          // Nếu lấy token mới thành công, gọi lại API với token mới
-          await fetchData(startDate, endDate, newToken);
-        }
-      } else {
-        setError(error.message);
-      }
+      setError(error.message);
     } finally {
       setLoading(false);
     }
   };
-  // Gọi API khi selectedDate thay đổi và token đã có
-  useEffect(() => {
-    const fetchDataWithToken = async () => {
-      if (selectedDate && selectedDate.length === 2 && accessToken) {
-        const startDate = Math.min(selectedDate[0].valueOf(), selectedDate[1].valueOf());
-        const endDate = Math.max(selectedDate[0].valueOf(), selectedDate[1].valueOf());
-        await fetchData(startDate, endDate, accessToken);
-      }
-    };
 
-    if (accessToken) {
-      fetchDataWithToken();
-    } else {
-      // Nếu không có token, lấy token mới
-      getNewAccessToken().then(token => {
-        if (token && selectedDate && selectedDate.length === 2) {
-          const startDate = Math.min(selectedDate[0].valueOf(), selectedDate[1].valueOf());
-          const endDate = Math.max(selectedDate[0].valueOf(), selectedDate[1].valueOf());
-          fetchData(startDate, endDate, token);
-        }
-      });
+
+  useEffect(() => {
+    const startDate = selectedDate?.startDate;
+    const endDate = selectedDate?.endDate;
+
+    if (startDate != null && endDate != null) {
+      const startDate2 = moment(startDate);
+      const endDate2 = moment(endDate);
+      const newArrDate = [];
+
+      for (let m = startDate2; m.isBefore(endDate2) || m.isSame(endDate2); m.add(1, 'days')) {
+        newArrDate.push(m.clone());
+      }
+      setDate(newArrDate);
+      fetchData(startDate, endDate);
     }
+
   }, [selectedDate]);
 
-  useEffect(() => {
-    if (data.length === 0) return;
 
-    const svg = d3.select(svgRef.current);
-    svg.selectAll('*').remove(); // Xóa biểu đồ cũ
+  const chartWidth = '100%';
+  const chartHeight = '500px';
 
-    const margin = { top: 10, right: 30, bottom: 50, left: 40 };
-    const width = 780 - margin.left - margin.right;
-    const height = 450 - margin.top - margin.bottom;
+  const renderXAxisLabels = useMemo(() => (
+    hour.map((value) => (
+      <div key={value} style={{
+        display: 'inline-block',
+        width: '4.16%',
+        textAlign: 'center',
+        fontSize: '10px',
+        marginTop: '5px'
+      }}>
+        {`${value}:00`}
+      </div>
+    ))
+  ), [hour]);
 
-    // Xử lý dữ liệu để tính tổng thời gian cho "Chạy" và "Dừng"
-    const formattedData = data.map(d => ({
-      date: moment(d.ts).format('YYYY-MM-DD'),
-      status: d.value === '1' ? 'Chạy' : 'Dừng',
-      duration: 1, // Mặc định mỗi bản ghi có 1 đơn vị thời gian
-    }));
+  const renderYAxisLabels = useMemo(() => (
+    dates.map((date, index) => (
+      <div key={index} style={{ textAlign: 'right', fontSize: '10px', display: 'flex' }}>
+        {date.format('DD/MM')}
+      </div>
+    ))
+  ), [dates]);
 
-    const groupedData = {};
-    formattedData.forEach(d => {
-      if (!groupedData[d.date]) {
-        groupedData[d.date] = { Chạy: 0, Dừng: 0 };
-      }
-      groupedData[d.date][d.status] += d.duration;
-    });
+  if (loading) return <div>Đang tải dữ liệu...</div>;
+  if (error) return <div>Error: {error}</div>;
 
-    const labels = Object.keys(groupedData);
-
-    // Tính phần trăm cho mỗi trạng thái
-    const stackedData = labels.map(date => {
-      const total = groupedData[date].Chạy + groupedData[date].Dừng;
-      return {
-        date,
-        Chạy: (groupedData[date].Chạy / total) * 100,
-        Dừng: (groupedData[date].Dừng / total) * 100,
-      };
-    });
-
-    const stack = d3.stack().keys(['Chạy', 'Dừng']);
-    const stackedSeries = stack(stackedData);
-
-    // X Scale (Percentage)
-    const xScale = d3.scaleLinear()
-      .domain([0, 100]) // X là phần trăm từ 0 đến 100
-      .range([0, width]);
-
-    // Y Scale (Dates - sắp xếp ngày gần nhất lên trên và định dạng dd/mm)
-    const uniqueDates = [...new Set(formattedData .map(d => d.date))];
-    const yScale = d3
-      .scaleBand()
-      .domain(uniqueDates.sort())
-      .range([height,0])
-      .padding(0.1);
-
-    const dateFormat = d3.timeFormat('%d/%m'); // Định dạng dd/mm cho trục Y
-
-    // Color Scale
-    const colorScale = d3.scaleOrdinal()
-      .domain(['Chạy', 'Dừng'])
-      .range(['#31e700', '#ff0137']); // Chạy: Xanh lá, Dừng: Đỏ
-
-    const chart = svg
-      .append('g')
-      .attr('transform', `translate(${margin.left},${margin.top})`);
-
-    // Vẽ các thanh biểu đồ
-    chart
-      .selectAll('.serie')
-      .data(stackedSeries)
-      .enter()
-      .append('g')
-      .attr('fill', d => colorScale(d.key))
-      .selectAll('rect')
-      .data(d => d)
-      .enter()
-      .append('rect')
-      .attr('y', d => yScale(d.data.date))
-      .attr('x', d => xScale(d[0]))
-      .attr('width', d => xScale(d[1]) - xScale(d[0]))
-      .attr('height', yScale.bandwidth())
-      .append('title') // Tooltip
-      .text(d => `${d.data.date}: ${(d[1] - d[0]).toFixed(1)}%`);
-
-    // Thêm nhãn phần trăm vào các thanh
-    chart
-      .selectAll('.serie')
-      .data(stackedSeries)
-      .enter()
-      .append('g')
-      .attr('fill', 'white')
-      .selectAll('text')
-      .data(d => d)
-      .enter()
-      .append('text')
-      .attr('font-size', '12px')
-      .attr('x', d => xScale(d[0]) + 10)
-      .attr('y', d => yScale(d.data.date) + yScale.bandwidth() / 2)
-      .attr('dy', '.30em')
-      .attr('text-anchor', 'start')
-      .text(d => `${(d[1] - d[0]).toFixed(1)}%`);
-
-    // X Axis (Percentage)
-    chart
-      .append('g')
-      .attr('transform', `translate(0, ${height})`)
-      .call(d3.axisBottom(xScale).tickFormat(d => d + '%'));
-
-    // Y Axis (Dates)
-    chart
-      .append('g')
-      .call(d3.axisLeft(yScale).tickFormat(date => dateFormat(new Date(date))));
-
-    // Vẽ chú thích (Legend)
-    const legend = svg
-      .append('g')
-      .attr('transform', `translate(${margin.left}, ${height + margin.bottom - 5})`);
-
-    const legendData = ['Chạy', 'Dừng'];
-
-    legend
-      .selectAll('g')
-      .data(legendData)
-      .enter()
-      .append('g')
-      .attr('transform', (d, i) => `translate(${i * 100}, 0)`)
-      .call(g => {
-        // Hình chữ nhật cho chú thích
-        g.append('rect')
-          .attr('width', 18)
-          .attr('height', 5)
-          .attr('fill', colorScale);
-
-        // Văn bản chú thích
-        g.append('text')
-          .attr('x', 24)
-          .attr('y', 3)
-          .attr('dy', '0.1em')
-          .attr('font-size', '10px')
-          .text(d => d);
-      });
-  }, [data]);
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
-  if (data.length === 0) return <p>No data available for the selected date range.</p>;
-
+  const handleUpArrowClick = () => {
+    const startDate = new Date(selectedDate.startDate);
+    const endDate = new Date(selectedDate.endDate);
+    startDate.setDate(startDate.getDate() + 1);
+    endDate.setDate(endDate.getDate() + 1);
+    onDateChange({ startDate: startDate, endDate: endDate });
+  };
+  const handleMouseMove = (event, index) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const percentX = (x / rect.width) * 100;
+    const valueRun = Number(ArrayPercentRun[index]) 
+    const valueStop = Number(ArrayPercentStop[index])
+    if(percentX < valueRun){
+      setTextToTolipth(`Chạy : ${valueRun}`)
+    }
+    if(percentX > valueRun && percentX <valueRun+valueStop){
+      setTextToTolipth(`Dừng : ${ArrayPercentStop[index]}`)
+    }
+    if(percentX > valueRun+valueStop){
+      setTextToTolipth(`Offline : ${ArrayPercentOffline[index]}`)
+    }
+    setCurrentIndex(index)
+    setPositionToTolipth(percentX);
+};
+const handleMouseLeave = () => {
+  setTextToTolipth(''); // Xóa text để ẩn tooltip
+  setPositionToTolipth(0); // Reset vị trí của tooltip
+}
   return (
-    <svg ref={svgRef} width="800" height="450"></svg>
+    <div style={{ position: 'relative', width: chartWidth, height: chartHeight }}>
+      <div className="y-axis-arrow" style={{ position: 'absolute', top: 0, left: 31, height: '100%', borderLeft: '2px solid black' }}>
+        <span className="arrow up-arrow" onClick={() => handleUpArrowClick()}>↑</span>
+      </div>
+      <div className="x-axis-arrow" style={{ position: 'absolute', bottom: 0, left: 31, width: '95%', borderBottom: '2px solid black' }}>
+        <div style={{ position: 'absolute', width: '100%', display: 'flex', justifyContent: 'space-between' }}>{renderXAxisLabels}</div>
+        <span className="arrow right-arrow">→</span>
+      </div>
+      <div style={{ paddingLeft: '33px', position: 'relative', height: '100%' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '60px', height: '99%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '10px 0' }}>
+          {renderYAxisLabels}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '99%' }}>
+          {data.length > 0 ? data.map((entry, index) => (
+            <div style={{ height: `${((100 / data.length-1)) - 5}%` }} onMouseMove={(event) => handleMouseMove(event, index)} onMouseLeave={() => handleMouseLeave()}>
+              <div className='gradient-container gradient-section gradient' key={index} style={{
+                height: `100%`,
+                background: `linear-gradient(to right, ${listGradient[index]})`,
+                marginTop: '0',
+                width: '100%',
+                position : 'relative'
+              }}>
+                <div style={{ display: 'flex', position : 'absolute' , top : '10px' , width: '100%'}}>
+                <div style={{ display: 'flex', alignItems: 'center', marginRight: '15px' , position: 'absolute', color: 'black' , fontSize: '15px' , fontWeight: '500' , color: '#474747' }}>
+                  {ArrayPercentRun[index]} %
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', marginLeft: `${(Number(ArrayPercentRun[index])).toString()}%` , color: 'black' , fontSize: '15px' , fontWeight: '500' , color: 'white'} }>
+                <span>{(100 - ArrayPercentRun[index] - ArrayPercentOffline[index]).toFixed(2)}%</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center' , position : 'absolute' , right : '0' , color: 'black' , fontSize: '15px' , fontWeight: '500' , color: '#474747'}}>
+                  <span> {ArrayPercentOffline[index]} %</span>
+                </div>
+                </div>
+                {currentIndex == index ? <span style={{ display: 'flex'  , justifyContent : 'space-between' ,  position : 'absolute' , top : '0' , marginLeft : `${positionToTolipth}%` ,background: '#ffff95'} }>
+                {textToTolipth}
+              </span> : <></>}
+              </div>
+              
+            </div>
+          )) : (
+            <div style={{ height: '32px', backgroundColor: '#E7E7E7', marginTop: '10px', width: '100%' }} />
+          )}
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginRight: '15px' }}>
+          <div style={{ width: '15px', height: '15px', backgroundColor: '#00ff07', marginRight: '5px' }}></div>
+          <span>Chạy</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', marginRight: '15px' }}>
+          <div style={{ width: '15px', height: '15px', backgroundColor: 'red', marginRight: '5px' }}></div>
+          <span>Dừng</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ width: '15px', height: '15px', backgroundColor: '#E7E7E7', marginRight: '5px' }}></div>
+          <span>Offline</span>
+        </div>
+      </div>
+    </div>
   );
 };
 

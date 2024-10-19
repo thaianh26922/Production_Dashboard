@@ -26,7 +26,10 @@ const MachineComparisonChart = ({ selectedDate, machineType }) => {
       
       const fetchPromises = machineType.map(async (machine) => {
         const deviceCode = machine.deviceCode;
-        const response = await axios.get(`${apiUrl}/telemetry?deviceId=${deviceCode}&startDate=${formattedStartDate}&endDate=${formattedEndDate}`);
+        console.log(deviceId)
+        const response = await axios.get(`${apiUrl}/telemetry?deviceId=${deviceId}&startDate=${formattedStartDate}&endDate=${formattedEndDate}`);
+        console.log("this is response")
+        console.log(response)
         const fetchedData = response.data;
 
         let runningTime = 0;
@@ -40,7 +43,7 @@ const MachineComparisonChart = ({ selectedDate, machineType }) => {
           });
         }
 
-        const percentage = (runningTime / 1440) * 100; // Calculate percentage of 24 hours
+        const percentage = (runningTime / 1440) * 100; 
 
         return {
           machine: machine.deviceName,
