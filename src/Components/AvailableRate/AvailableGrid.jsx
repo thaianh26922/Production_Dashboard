@@ -12,7 +12,7 @@ function AvailableGrid({ machines, machineType,selectedDate }) {
         <AvailableCard
           key={machine._id} // Sử dụng `_id` làm key để đảm bảo duy nhất
           machineName={machine.deviceName} // Truyền tên thiết bị
-          deviceCode={machine.deviceCode} // Truyền `deviceCode`
+          deviceId={machine.deviceId} // Truyền `deviceCode`
           selectedDate={selectedDate} // Ngày hiện tại
           machineType={machineType} // Truyền loại máy hoặc khu vực
         />

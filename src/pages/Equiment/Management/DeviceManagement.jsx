@@ -39,7 +39,7 @@ const DeviceManagement = () => {
   
   // Hàm sắp xếp thiết bị theo thứ tự bảng chữ cái tăng dần
   const sortDevicesAlphabetically = (devices) => {
-    return devices.sort((a, b) => a.deviceCode.localeCompare(b.deviceCode));
+    return devices.sort((a, b) => a.deviceId.localeCompare(b.deviceId));
   };
 
   // Fetch devices and areas from API
@@ -72,7 +72,7 @@ const handleSearch = (query) => {
   } else {
     // Thực hiện lọc danh sách thiết bị theo query
     const filtered = devices.filter((device) =>
-      device.deviceCode.toLowerCase().includes(query.toLowerCase()) ||
+      device.deviceId.toLowerCase().includes(query.toLowerCase()) ||
       device.deviceName.toLowerCase().includes(query.toLowerCase()) ||
       device.areaName.toLowerCase().includes(query.toLowerCase()) // Sửa lại 'device.area' thành 'device.areaName'
     );
@@ -82,24 +82,24 @@ const handleSearch = (query) => {
 
 
   // Kiểm tra trùng lặp mã thiết bị hoặc tên thiết bị
-  const checkDuplicateDevice = (deviceCode, deviceId = null) => {
+  const checkDuplicateDevice = (deviceId, deviceIdigone = null) => {
     return devices.some((device) => {
       // Nếu đang thêm mới (deviceId không tồn tại), kiểm tra xem mã thiết bị đã tồn tại chưa
       if (!deviceId) {
-        return device.deviceCode === deviceCode;
+        return device.deviceId === deviceId;
       }
       // Nếu đang cập nhật (deviceId đã tồn tại), bỏ qua việc kiểm tra chính thiết bị đó
-      return device._id !== deviceId && device.deviceCode === deviceCode;
+      return device._id !== deviceId && device.deviceId === deviceIdigone;
     });
   };
   
 
   // Save new or updated device
   const handleSave = async (values) => {
-    const { deviceCode, deviceName } = values;
+    const { deviceId, deviceName } = values;
   
     // Nếu đang thêm mới (selectedDevice là null), kiểm tra xem mã thiết bị có bị trùng không
-    if (!selectedDevice && checkDuplicateDevice(deviceCode)) {
+    if (!selectedDevice && checkDuplicateDevice(deviceId)) {
       toast.error('Mã thiết bị đã tồn tại. Vui lòng nhập mã thiết bị khác.');
       return; // Dừng lại không gửi yêu cầu lên API
     }
@@ -171,7 +171,7 @@ const handleSearch = (query) => {
         }
   
         return {
-          deviceCode: item["Mã thiết bị"],
+          deviceId: item["Mã thiết bị"],
           deviceName: item["Tên thiết bị"],
           areaName: item["Khu vực sản xuất"],
           model: item["Model thiết bị"],
@@ -265,7 +265,7 @@ const handleSearch = (query) => {
           {filteredDevices.map((device, index) => (
             <tr key={device._id} className="hover:bg-gray-50">
               <td className="border px-4 py-2 text-sm text-center">{index + 1}</td>
-              <td className="border px-4 py-2 text-sm text-center">{device.deviceCode}</td>
+              <td className="border px-4 py-2 text-sm text-center">{device.deviceId}</td>
               <td className="border px-4 py-2 text-sm text-center">{device.deviceName}</td>
               <td className="border px-4 py-2 text-sm text-center">{device.areaName}</td>
               <td className="border px-4 py-2 text-sm text-center">{device.model}</td>
@@ -306,7 +306,7 @@ const handleSearch = (query) => {
                 >
                   <Form.Item
                     label="Mã Thiết Bị"
-                    name="deviceCode"
+                    name="deviceId"
                     rules={[{ required: true, message: 'Mã Thiết Bị là bắt buộc' }]}
                   >
                     <Input />

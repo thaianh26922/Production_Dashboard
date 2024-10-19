@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 import axios from 'axios';
 import moment from 'moment';
 
-const MachineTimeline = ({ deviceCode, selectedDate }) => {
+const MachineTimeline = ({ deviceId, selectedDate }) => {
   const fixedHeight = 150;
   const svgRef = useRef();
   const wrapperRef = useRef();
@@ -36,10 +36,10 @@ const MachineTimeline = ({ deviceCode, selectedDate }) => {
   };
 
   useEffect(() => {
-    if (deviceCode && selectedDate) {
-      fetchTelemetryData(deviceCode); // Fetch data when selectedDate or deviceCode changes
+    if (deviceId && selectedDate) {
+      fetchTelemetryData(deviceId); // Fetch data when selectedDate or deviceId changes
     }
-  }, [deviceCode, selectedDate]); // Re-fetch data when deviceCode or selectedDate changes
+  }, [deviceId, selectedDate]); // Re-fetch data when deviceId or selectedDate changes
 
   const fetchTelemetryData = async (code) => {
     try {
@@ -75,7 +75,7 @@ const MachineTimeline = ({ deviceCode, selectedDate }) => {
       svg.selectAll('*').remove(); // Clear the previous chart
   
       // Check if there's data for the current device
-      if (!deviceData[deviceCode] || deviceData[deviceCode].length === 0) {
+      if (!deviceData[deviceId] || deviceData[deviceId].length === 0) {
         svg.append('text')
           .attr('x', width / 2)
           .attr('y', height / 2)
@@ -86,7 +86,7 @@ const MachineTimeline = ({ deviceCode, selectedDate }) => {
         return; // Exit the function if there's no data
       }
   
-      const data = deviceData[deviceCode];
+      const data = deviceData[deviceId];
       const timeParse = d3.timeParse('%H:%M');
       const timeFormat = d3.timeFormat('%H:%M');
   
@@ -194,7 +194,7 @@ const MachineTimeline = ({ deviceCode, selectedDate }) => {
     };
   
     drawChart(); // Draw chart when deviceData or dimensions change
-  }, [deviceData, dimensions, deviceCode]);
+  }, [deviceData, dimensions, deviceId]);
   
 
   useEffect(() => {

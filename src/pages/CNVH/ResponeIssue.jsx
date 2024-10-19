@@ -199,8 +199,11 @@ const ResponeIssue = () => {
             <span className="col-span-1 flex">{calculateDuration(interval.startTime, interval.endTime)}</span>
             <span className="col-span-1 flex ml-2 ">Trạng thái thiết bị</span>
             <span className="col-span-1 flex">Chờ</span>
+            <Button onClick={handlepasssubmit}>Da Khai Bao</Button>
           </div>
+        
         ))
+        
       }
 
       {/* Các nút Phản hồi và Gọi trợ giúp */}
