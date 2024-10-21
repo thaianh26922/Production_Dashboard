@@ -12,8 +12,11 @@ const ResponeSubmit = () => {
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
   // Nhận dữ liệu từ state
-  const { selectedDate, selectedMachine } = location.state || {};
-  
+  const { selectedDate, selectedMachine,selectedInterval } = location.state || {};
+  console.log(selectedMachine)
+  const selectedIntervalIndex = selectedInterval?.selectedIntervalIndex;
+
+  console.log("Selected Interval Index:", selectedIntervalIndex); // Kiểm tra log
   // Lấy deviceName từ selectedMachine
   const deviceName = selectedMachine?.deviceName || '';
 
@@ -90,18 +93,28 @@ const ResponeSubmit = () => {
         draggable: true,
         style: { fontSize: '1.6rem', padding: '1rem', width: '90%' },
       });
-
-      // Quay lại trang trước hoặc bất kỳ hành động nào sau khi phản hồi
+  
+      const { selectedIntervalIndex } = location.state.selectedInterval;
+  
+      console.log("Selected Interval Index:", selectedIntervalIndex); // Kiểm tra log
+  
+      // Quay lại ResponeIssue với index đã khai báo
       setTimeout(() => {
         navigate('/dashboard/mobile/issue', {
           state: {
-            selectedDate: selectedDate,
-            selectedMachine: selectedMachine,
+            selectedDate,
+            selectedMachine,
+            declaredIntervals: [
+              ...(location.state.declaredIntervals || []),
+              selectedIntervalIndex,
+            ],
           },
         });
       }, 500);
     }
   };
+  
+  
 
   const handleCancel = () => {
     navigate(-1);

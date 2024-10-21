@@ -9,7 +9,28 @@ const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelected
   const [tasks, setTasks] = useState([]); // Quản lý trạng thái tasks
   const apiUrl =import.meta.env.VITE_API_BASE_URL;
   // Hàm xử lý khi lưu nhiệm vụ cùng ngày đã chọn
+  const getDataWithSessionID = async (sessionID) => {
+    try {
+      const response = await axios.put('https://192.168.1.13/data/tags/T8:Status', 
+       
+        {
+          headers: {
+            'Referer': "https://127.0.0.1/",
+            'Content-Type': 'application/json',
+            'Cookie': `SID=003bbe4229ef448c13b15cd34232d397f4e`
+          }
+        }
+      );
+  
+      console.log('Data:', response.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+};
   const handleSave = async () => {
+
+    getDataWithSessionID()
+    
     const updatedTaskData = { ...taskData };
 
     // Kiểm tra xem có nhiệm vụ nào được thêm hay không
@@ -46,7 +67,7 @@ const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelected
         // Gửi từng nhiệm vụ riêng lẻ lên API
         try {
             for (const task of productionTasks) {
-                await axios.post(`${apiUrl}/productiontask`, task);
+                await axios.put(`${apiUrl}/productiontask`, task);
             }
             message.success('Kế hoạch đã được lưu thành công!');
 

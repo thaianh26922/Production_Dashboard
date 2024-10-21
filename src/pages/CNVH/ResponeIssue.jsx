@@ -39,6 +39,8 @@ const ResponeIssue = () => {
   const [selectedDiv, setSelectedDiv] = useState(null);
   const [isResponseEnabled, setIsResponseEnabled] = useState(false);
   const [telemetryData, setTelemetryData] = useState([]);
+  const [declaredIntervals, setDeclaredIntervals] = useState([]);
+
   const apiUrl = import.meta.env.VITE_API_BASE_URL
 
   const { selectedDate, selectedMachine } = location.state || { selectedDate: null, selectedMachine: null };
@@ -108,38 +110,49 @@ const ResponeIssue = () => {
   const handleCallMaintenance = () => handleCallHelp('Bảo Trì');
   const handleCallTechnical = () => handleCallHelp('Kỹ Thuật');
 
-  const handleTimeClick = (index) => {
-    setSelectedDiv(index);
-    setIsResponseEnabled(true);
+  useEffect(() => {
+    if (location.state?.declaredIntervals) {
+      setDeclaredIntervals((prev) => [
+        ...new Set([...prev, ...location.state.declaredIntervals]),
+      ]);
+    }
+  }, [location.state]);
+  
+  const handleTimeClick = (interval, index) => {
+    setSelectedDiv(index); // Lưu index của div đã chọn
+    setIsResponseEnabled(true); // Kích hoạt nút Phản hồi
+    console.log("Khoảng thời gian đã chọn:", interval); // Ghi log để kiểm tra
   };
-
+  
   const handleResponse = () => {
     if (!selectedMachine) {
       toast.error("Không có thiết bị nào được chọn!");
       return;
     }
-
-    // Get the selected interval data
-    const selectedInterval = telemetryData.filter(interval => {
-        const duration = calculateDuration(interval.startTime, interval.endTime);
-        const [hours, minutes] = duration.match(/\d+/g).map(Number);
-        const totalMinutes = hours * 60 + minutes;
-        return interval.status === "Dừng" && totalMinutes >= 5;
-    })[selectedDiv]; // Access the selected interval
-
+  
+    // Lấy khoảng downtime đã chọn từ state `selectedDiv`
+    const selectedInterval = telemetryData[selectedDiv];
+    
+  
     if (!selectedInterval) {
       toast.error("Không có khoảng thời gian nào được chọn!");
       return;
     }
-
+   
+  
+    // Điều hướng sang trang mới với dữ liệu đã chọn
     navigate('/dashboard/mobile/issue/respone', {
       state: {
         selectedDate: displayDate,
         selectedMachine: selectedMachine,
-        selectedInterval: selectedInterval, // Pass the selected interval
-      }
+        selectedInterval: { ...selectedInterval, selectedIntervalIndex: selectedDiv } // Truyền khoảng downtime đã chọn
+      },
     });
-};
+  };
+ 
+  
+
+  
 
   return (
     <div className="h-screen bg-gray-100 w-full">
@@ -178,33 +191,34 @@ const ResponeIssue = () => {
       <div className="justify-start grid grid-flow-row p-8">
         <h1 className="text-center text-5xl font-semibold mt-2">Khoảng thời gian ngừng máy</h1>
       </div>
-
       {telemetryData
-        .filter(interval => {
-          const duration = calculateDuration(interval.startTime, interval.endTime);
-          const [hours, minutes] = duration.match(/\d+/g).map(Number);
-          const totalMinutes = hours * 60 + minutes;
-          return interval.status === "Dừng" && totalMinutes >= 5;
-        })
-        .map((interval, index) => (
-          <div
-            key={interval._id}
-            className={`border-8 rounded-3xl grid grid-cols-2 py-8 mt-4 px-8 w-[90%] justify-center items-center ml-8 gap-10 text-4xl cursor-pointer ${selectedDiv === index ? 'bg-gray-200' : 'border-[#FCFC00]'}`}
-            onClick={() => handleTimeClick(index)}
-            style={{ boxShadow: `inset 0px 10px 40px 10px rgba(252, 252, 0, 0.4)` }}
-          >
-            <span className="col-span-1 flex ml-2 ">Trong khoảng</span>
-            <span className="col-span-1 flex">{`${interval.startTime} - ${interval.endTime}`}</span>
-            <span className="col-span-1 flex ml-2 ">Thời lượng</span>
-            <span className="col-span-1 flex">{calculateDuration(interval.startTime, interval.endTime)}</span>
-            <span className="col-span-1 flex ml-2 ">Trạng thái thiết bị</span>
-            <span className="col-span-1 flex">Chờ</span>
-            {/* <Button onClick={handlepasssubmit}>Da Khai Bao</Button> */}
-          </div>
-        
-        ))
-        
-      }
+  .filter(interval => {
+    const duration = calculateDuration(interval.startTime, interval.endTime);
+    const [hours, minutes] = duration.match(/\d+/g).map(Number);
+    const totalMinutes = hours * 60 + minutes;
+    return interval.status === 'Dừng' && totalMinutes >= 5;
+  })
+  .map((interval, index) => (
+    <div
+      key={interval._id}
+      className={`border-8 rounded-3xl grid grid-cols-2 py-8 mt-4 px-8 w-[90%] justify-center items-center ml-8 gap-10 text-4xl cursor-pointer ${
+        declaredIntervals.includes(index) ? 'bg-gray-300' : 'border-[#FCFC00]'
+      }`}
+      onClick={() => handleTimeClick(interval, index)}
+      style={{ boxShadow: `inset 0px 10px 40px 10px rgba(252, 252, 0, 0.4)` }}
+    >
+      <span className="col-span-1 flex ml-2">Trong khoảng</span>
+      <span className="col-span-1 flex">{`${interval.startTime} - ${interval.endTime}`}</span>
+      <span className="col-span-1 flex ml-2">Thời lượng</span>
+      <span className="col-span-1 flex">{calculateDuration(interval.startTime, interval.endTime)}</span>
+      <span className="col-span-1 flex ml-2">Trạng thái thiết bị</span>
+      <span className="col-span-1 flex ml-2">Trạng thái thiết bị</span>
+      <span className="col-span-1 flex">
+        {declaredIntervals.includes(index) ? 'Đã khai báo' : 'Chưa khai báo'}
+      </span>
+    </div>
+  ))}
+
 
       {/* Các nút Phản hồi và Gọi trợ giúp */}
       <div className="fixed bottom-0 w-full flex flex-col items-center z-50 p-4 bg-transperent -ml-4">
