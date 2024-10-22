@@ -1,26 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import InfoCard from '../../Components/MachineCard/InfoCard';
-import axios from 'axios'; 
-import '../../index.css'; 
-
-const getCurrentDate = () => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0'); 
-  const day = String(today.getDate()).padStart(2, '0'); 
-  return `${year}-${month}-${day}`;
-};
+import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+import { setMachineData } from '../../redux/intervalSlice';
 
 const Dashboard2 = () => {
-  const [selectedMachineType, setSelectedMachineType] = useState('ALL'); // Mặc định là toàn bộ nhà máy
-  const [data, setData] = useState([]); 
-  const [selectedDate, setSelectedDate] = useState(getCurrentDate()); 
-  const [selectedMachine, setSelectedMachine] = useState(null); 
-  const [areas, setAreas] = useState([]); 
-  const [devices, setDevices] = useState([]);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const apiUrl =import.meta.env.VITE_API_BASE_URL;
+  const apiUrl = import.meta.env.VITE_API_BASE_URL;
+
+  const [areas, setAreas] = useState([]);
+  const [devices, setDevices] = useState([]);
+  const [filteredDevices, setFilteredDevices] = useState([]);
+
+  const selectedDate = useSelector((state) => state.interval?.selectedDate);
+  const selectedMachine = useSelector((state) => state.interval?.selectedMachine);
+
+  useEffect(() => {
+    fetchAreas();
+    fetchDevices();
+  }, []);
+
   const fetchAreas = async () => {
     try {
       const response = await axios.get(`${apiUrl}/areas`);
@@ -34,59 +35,36 @@ const Dashboard2 = () => {
     try {
       const response = await axios.get(`${apiUrl}/device`);
       setDevices(response.data);
-      setData(response.data); // Mặc định hiển thị tất cả các thiết bị
+      setFilteredDevices(response.data);
     } catch (error) {
       console.error('Failed to fetch devices:', error);
     }
   };
 
-  useEffect(() => {
-    fetchAreas();
-    fetchDevices();
-  }, []);
-
-  // Hàm xử lý chọn khu vực
   const handleMachineTypeSelect = (value) => {
-    setSelectedMachineType(value);
     if (value === 'ALL') {
-      // Nếu chọn toàn bộ nhà máy, hiển thị tất cả thiết bị
-      setData(devices);
+      setFilteredDevices(devices);
     } else {
-      // Lọc thiết bị theo khu vực được chọn
-      const filteredDevices = devices.filter(device => device.areaName === value);
-      setData(filteredDevices);
+      const filtered = devices.filter((device) => device.areaName === value);
+      setFilteredDevices(filtered);
     }
   };
 
-  const handleDateChange = (event) => {
-    setSelectedDate(event.target.value);
+  const handleMachineSelect = (device) => {
+    dispatch(setMachineData({ selectedDate, selectedMachine: device }));
+  };
+
+  const handleDateChange = (e) => {
+    dispatch(setMachineData({ selectedDate: e.target.value, selectedMachine }));
   };
 
   const handleConfirm = () => {
     if (!selectedMachine) {
-      alert('Vui lòng chọn máy trước khi xác nhận');
+      alert('Vui lòng chọn máy!');
       return;
     }
-
-    // Lưu trạng thái selectedDate và selectedMachine vào localStorage
-    localStorage.setItem('savedSelectedDate', selectedDate);
-    localStorage.setItem('savedSelectedMachine', JSON.stringify(selectedMachine));
-
-    // Điều hướng và truyền dữ liệu qua state
-    return navigate('/dashboard/mobile/issue', {
-      state: {
-        selectedDate: selectedDate,
-        selectedMachine: {
-          deviceName: selectedMachine.deviceName,
-          id: selectedMachine.id,
-          areaName: selectedMachine.areaName,
-        },
-      },
-    });
-};
-
-  
-console.log(selectedMachine)
+    navigate('/dashboard/mobile/issue');
+  };
 
   return (
     <div className="h-screen bg-gray-100 w-full">
@@ -116,11 +94,10 @@ console.log(selectedMachine)
 
         <div>
           <select
-            value={selectedMachineType}
             onChange={(e) => handleMachineTypeSelect(e.target.value)}
             className="block w-[90%] h-20 text-3xl ml-8 border border-gray-300 rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="ALL">Toàn bộ nhà máy</option> {/* Thêm tùy chọn cho toàn bộ nhà máy */}
+            <option value="ALL">Toàn bộ nhà máy</option>
             {areas.map((area, index) => (
               <option key={index} value={area.areaName}>
                 {area.areaName}
@@ -134,13 +111,14 @@ console.log(selectedMachine)
         </div>
 
         <div className="bg-white rounded-lg grid grid-cols-3 gap-3 shadow-sm w-[90%] h-full ml-6 p-8">
-          {data.map((device, index) => (
+          {filteredDevices.map((device, index) => (
             <div
               key={index}
-              onClick={() => setSelectedMachine(device)}
-              className={`cursor-pointer ${selectedMachine === device ? 'border-2 border-blue-500' : ''}`}
+              onClick={() => handleMachineSelect(device)}
+              className={`cursor-pointer ${
+                selectedMachine?.id === device.id ? 'border-2 border-blue-500' : ''
+              }`}
             >
-              {/* Hiển thị InfoCard với deviceName */}
               <InfoCard machine={device.deviceName} />
             </div>
           ))}
