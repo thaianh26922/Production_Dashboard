@@ -29,7 +29,7 @@ const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelected
 };
   const handleSave = async () => {
 
-    getDataWithSessionID()
+    // getDataWithSessionID()
     
     const updatedTaskData = { ...taskData };
 
@@ -67,7 +67,7 @@ const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelected
         // Gửi từng nhiệm vụ riêng lẻ lên API
         try {
             for (const task of productionTasks) {
-                await axios.put(`${apiUrl}/productiontask`, task);
+                await axios.post(`${apiUrl}/productiontask`, task);
             }
             message.success('Kế hoạch đã được lưu thành công!');
 

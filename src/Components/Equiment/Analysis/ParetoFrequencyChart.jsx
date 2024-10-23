@@ -7,9 +7,17 @@ const ParetoFrequencyChart = ({ data }) => {
   useEffect(() => {
     const ctx = chartRef.current.getContext('2d');
 
-    const { labels, values } = data || {};
-    console.log('Received Labels:', labels); // Debugging
-    console.log('Received Values:', values); // Debugging
+    // Sort data descending based on values for Pareto 80/20 logic
+    let { labels, values } = data || {};
+    const sortedData = values
+      .map((value, index) => ({ label: labels[index], value }))
+      .sort((a, b) => b.value - a.value);
+
+    labels = sortedData.map(item => item.label);
+    values = sortedData.map(item => item.value);
+
+    console.log('Sorted Labels:', labels); // Debugging
+    console.log('Sorted Values:', values); // Debugging
 
     if (!labels || !values || labels.length === 0 || values.length === 0) {
       console.error('No data or labels available');
@@ -23,9 +31,7 @@ const ParetoFrequencyChart = ({ data }) => {
       return (cumulativeSum / total) * 100;
     });
 
-    const barColors = [
-      '#410278', 
-    ];
+    const barColors = ['#0e1b93'];
 
     const chart = new Chart(ctx, {
       type: 'bar',
@@ -33,20 +39,22 @@ const ParetoFrequencyChart = ({ data }) => {
         labels: labels,
         datasets: [
           {
+            label: 'Cumulative Percentage',
+            data: cumulativeData,
+            type: 'line',
+            borderColor: '#c21224',
+            backgroundColor: '#c21224',
+            borderWidth: 2,
+            pointRadius: 3,
+            yAxisID: 'y1',
+          },
+          {
             label: 'Frequency',
             data: values,
             backgroundColor: barColors,
             borderColor: barColors,
             borderWidth: 1,
             yAxisID: 'y',
-          },
-          {
-            label: '',
-            data: cumulativeData,
-            type: 'line',
-            borderColor: '#c21224',
-            backgroundColor: '#c21224',
-            yAxisID: 'y1',
           },
         ],
       },
@@ -63,7 +71,6 @@ const ParetoFrequencyChart = ({ data }) => {
             ticks: {
               callback: (value) => `${value} lần`,
             },
-            
           },
           y1: {
             beginAtZero: true,
@@ -72,7 +79,6 @@ const ParetoFrequencyChart = ({ data }) => {
               callback: (value) => `${value}%`,
             },
             grid: { drawOnChartArea: false },
-            
           },
         },
         plugins: {

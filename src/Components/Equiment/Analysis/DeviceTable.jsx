@@ -1,5 +1,3 @@
-import React from 'react';
-
 const DeviceTable = ({ downtimeData, productionData }) => {
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
@@ -9,6 +7,27 @@ const DeviceTable = ({ downtimeData, productionData }) => {
   const formatTime = (time) => time || 'N/A'; // Fallback if time is missing
 
   console.log('Downtime Data:', downtimeData); // Debugging
+  const calculateDuration = (startTime, endTime) => {
+    const [startHour, startMinute, startSecond] = startTime.split(':').map(Number);
+    const [endHour, endMinute, endSecond] = endTime.split(':').map(Number);
+  
+    let startTotalSeconds = startHour * 3600 + startMinute * 60 + startSecond;
+    let endTotalSeconds = endHour * 3600 + endMinute * 60 + endSecond;
+  
+    // Xử lý trường hợp thời gian qua ngày
+    if (endTotalSeconds < startTotalSeconds) {
+      endTotalSeconds += 24 * 3600; // Cộng thêm 24 giờ
+    }
+  
+    const totalSeconds = endTotalSeconds - startTotalSeconds;
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+  
+    // Định dạng hh:mm:ss
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  };
+  
 
   return (
     <div>
@@ -20,6 +39,7 @@ const DeviceTable = ({ downtimeData, productionData }) => {
             <th className="border px-4 py-2 text-xs">Ngày</th>
             <th className="border px-4 py-2 text-xs">Thời gian bắt đầu</th>
             <th className="border px-4 py-2 text-xs">Thời gian kết thúc</th>
+            <th className="border px-4 py-2 text-xs">Thời lượng</th>
             <th className="border px-4 py-2 text-xs">Lý do</th>
             <th className="border px-4 py-2 text-xs">Nhân viên vận hành</th>
           </tr>
@@ -39,6 +59,9 @@ const DeviceTable = ({ downtimeData, productionData }) => {
                 </td>
                 <td className="border px-4 py-2">
                   {formatTime(interval.endTime)}
+                </td>
+                <td className="border px-4 py-2">
+                  {calculateDuration(interval.startTime, interval.endTime)}
                 </td>
                 <td className="border px-4 py-2">{item.reasonName}</td>
                 <td className="border px-4 py-2">{item.operator || 'N/A'}</td>
@@ -68,7 +91,7 @@ const DeviceTable = ({ downtimeData, productionData }) => {
         <tbody>
           {productionData.map((item, index) => (
             <tr key={item._id}>
-              <td className="border px-4 py-2">{index }</td>
+              <td className="border px-4 py-2">{index + 1}</td>
               <td className="border px-4 py-2">{formatDate(item.date)}</td>
               <td className="border px-4 py-2">{item.startTime}</td>
               <td className="border px-4 py-2">{item.endTime}</td>
