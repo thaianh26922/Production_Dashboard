@@ -1,13 +1,22 @@
 // src/redux/intervalSlice.js
 import { createSlice } from '@reduxjs/toolkit';
 
-const getCurrentDate = () => new Date().toISOString().split('T')[0];
+// Lấy state từ LocalStorage
+const loadStateFromLocalStorage = () => {
+  try {
+    const serializedState = localStorage.getItem('intervalState');
+    return serializedState ? JSON.parse(serializedState) : undefined;
+  } catch (e) {
+    console.error("Lỗi khi load state từ LocalStorage:", e);
+    return undefined;
+  }
+};
 
-const initialState = {
-  selectedDate: getCurrentDate(),
+const initialState = loadStateFromLocalStorage() || {
+  selectedDate: new Date().toISOString().split('T')[0],
   selectedMachine: null,
   selectedInterval: null,
-  declaredIntervals: [], // Mảng chứa các khoảng thời gian đã khai báo
+  declaredIntervals: {}, // Lưu các interval đã khai báo theo ngày
 };
 
 const intervalSlice = createSlice({
@@ -21,13 +30,17 @@ const intervalSlice = createSlice({
       state.selectedInterval = selectedInterval;
     },
     declareInterval: (state, action) => {
-      const intervalIndex = action.payload;
-      if (!state.declaredIntervals.includes(intervalIndex)) {
-        state.declaredIntervals.push(intervalIndex); // Thêm chỉ mục vào mảng nếu chưa tồn tại
+      const { date, intervalIndex } = action.payload;
+      if (!state.declaredIntervals[date]) {
+        state.declaredIntervals[date] = [];
+      }
+      if (!state.declaredIntervals[date].includes(intervalIndex)) {
+        state.declaredIntervals[date].push(intervalIndex);
       }
     },
   },
 });
 
 export const { setMachineData, declareInterval } = intervalSlice.actions;
+
 export default intervalSlice.reducer;

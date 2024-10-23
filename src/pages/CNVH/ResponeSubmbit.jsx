@@ -12,6 +12,10 @@ const ResponeSubmit = () => {
   
   const { selectedInterval, selectedMachine, selectedDate } = useSelector((state) => state.interval);
   console.log(selectedMachine.deviceId)
+  useEffect(() => {
+    console.log('Selected Interval:', selectedInterval); // Kiểm tra dữ liệu từ Redux
+    console.log('Selected Machine:', selectedMachine);
+  }, [selectedInterval, selectedMachine]);
 
   const [filteredReasons, setFilteredReasons] = useState([]);
   const [selectedReason, setSelectedReason] = useState(null);
@@ -34,29 +38,36 @@ const ResponeSubmit = () => {
     setSelectedReason(reason);
     setIsResponseEnabled(true);
   };
-
   const handleResponse = async () => {
-    if (selectedReason) {
+    if (selectedReason && selectedInterval) {
       try {
-        // Payload gửi lên backend
         const payload = {
           deviceId: selectedMachine.deviceId,
           deviceName: selectedMachine.deviceName,
           date: selectedDate,
-          intervalData: selectedInterval,
+          interval: {
+            status: selectedInterval.status,
+            startTime: selectedInterval.startTime,
+            endTime: selectedInterval.endTime,
+            _id: selectedInterval._id,
+            selectedIntervalIndex: selectedInterval.selectedIntervalIndex,
+          },
           reasonName: selectedReason.reasonName,
         };
-
+  
         console.log('Payload:', payload); // Kiểm tra payload trước khi gửi
-
-        // Gửi dữ liệu về backend
+  
+        // Gửi dữ liệu lên backend
         await axios.post(`${import.meta.env.VITE_API_BASE_URL}/downtime`, payload);
-
-        // Cập nhật Redux Store
-        dispatch(declareInterval(selectedInterval.selectedIntervalIndex));
-
+  
+        // Cập nhật Redux Store và localStorage
+        dispatch(declareInterval({
+          date: selectedDate,
+          intervalIndex: selectedInterval.selectedIntervalIndex,
+        }));
+  
         toast.success('Phản hồi thành công!');
-
+  
         // Điều hướng về trang chính sau 0.5 giây
         setTimeout(() => navigate('/dashboard/mobile/issue'), 500);
       } catch (error) {
@@ -67,6 +78,8 @@ const ResponeSubmit = () => {
       toast.error('Vui lòng chọn một lý do.');
     }
   };
+  
+  
 
   return (
     <div>
