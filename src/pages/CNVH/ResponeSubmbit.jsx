@@ -50,7 +50,7 @@ const ResponeSubmit = () => {
         console.log('Payload:', payload); // Kiểm tra payload trước khi gửi
 
         // Gửi dữ liệu về backend
-        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/update-interval`, payload);
+        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/downtime`, payload);
 
         // Cập nhật Redux Store
         dispatch(declareInterval(selectedInterval.selectedIntervalIndex));
