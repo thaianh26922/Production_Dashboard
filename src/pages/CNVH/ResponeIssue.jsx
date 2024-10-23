@@ -50,18 +50,39 @@ const ResponeIssue = () => {
       const fetchTelemetryData = async () => {
         try {
           const response = await axios.get(
-            `${apiUrl}/telemetry?deviceId=543ff470-54c6-11ef-8dd4-b74d24d26b24&startDate=${selectedDate}&endDate=${selectedDate}`
+            `${apiUrl}/telemetry?deviceId=${selectedMachine.deviceId}&startDate=${selectedDate}&endDate=${selectedDate}`
           );
+  
           if (response.data && response.data.length > 0) {
-            setTelemetryData(response.data[0].intervals);
+            // Lọc dữ liệu ngay sau khi nhận được từ API
+            const filteredIntervals = response.data[0].intervals.filter((interval) => {
+              const [startHour, startMinute] = interval.startTime.split(':').map(Number);
+              const [endHour, endMinute] = interval.endTime.split(':').map(Number);
+  
+              // Tính tổng số phút từ giờ và phút
+              const startTotalMinutes = startHour * 60 + startMinute;
+              const endTotalMinutes = endHour * 60 + endMinute;
+  
+              // Tính thời lượng giữa hai thời điểm (xử lý qua ngày)
+              let totalMinutes = endTotalMinutes - startTotalMinutes;
+              if (totalMinutes < 0) totalMinutes += 24 * 60; // Nếu qua ngày, cộng thêm 24 giờ
+  
+              // Lọc các interval có status "Dừng" và thời lượng > 5 phút
+              return interval.status === 'Dừng' && totalMinutes > 5;
+            });
+  
+            // Cập nhật state với dữ liệu đã lọc
+            setTelemetryData(filteredIntervals);
           }
         } catch (error) {
-          console.error("Error fetching telemetry data:", error);
+          console.error('Error fetching telemetry data:', error);
         }
       };
+  
       fetchTelemetryData();
     }
   }, [selectedMachine, selectedDate]);
+  
 
   useEffect(() => {
     if (isHelpTimerModalOpen) {
@@ -97,6 +118,7 @@ const ResponeIssue = () => {
   const handleCallMaintenance = () => handleCallHelp('Bảo Trì');
   const handleCallTechnical = () => handleCallHelp('Kỹ Thuật');
 
+  
 
   const handleTimeClick = (interval, index) => {
     const isDeclared = declaredIntervals[selectedDate]?.includes(index);
@@ -137,13 +159,7 @@ const ResponeIssue = () => {
     localStorage.setItem('intervalState', JSON.stringify(stateToSave));
   
     // Chuyển sang trang "respone" với state truyền qua navigate
-    navigate('/dashboard/mobile/issue/respone', {
-      state: {
-        selectedDate,
-        selectedMachine,
-        selectedInterval: { ...selectedInterval, selectedIntervalIndex: selectedDiv },
-      },
-    });
+    navigate('/dashboard/mobile/issue/respone');
   };
   console.log(telemetryData)
  
@@ -185,50 +201,50 @@ const ResponeIssue = () => {
       <div className="p-4">
         <h2 className="text-3xl font-bold text-center mb-4">Khoảng thời gian ngừng máy:</h2>
         {telemetryData
-  .filter((interval) => {
-    // Lấy giờ và phút từ startTime và endTime
-    const [startHour, startMinute] = interval.startTime.split(':').map(Number);
-    const [endHour, endMinute] = interval.endTime.split(':').map(Number);
+        .filter((interval) => {
+          // Lấy giờ và phút từ startTime và endTime
+          const [startHour, startMinute] = interval.startTime.split(':').map(Number);
+          const [endHour, endMinute] = interval.endTime.split(':').map(Number);
 
-    // Tính tổng số phút cho thời gian bắt đầu và kết thúc
-    const startTotalMinutes = startHour * 60 + startMinute;
-    const endTotalMinutes = endHour * 60 + endMinute;
+          // Tính tổng số phút cho thời gian bắt đầu và kết thúc
+          const startTotalMinutes = startHour * 60 + startMinute;
+          const endTotalMinutes = endHour * 60 + endMinute;
 
-    // Tính thời lượng giữa hai thời điểm (xử lý qua ngày)
-    let totalMinutes = endTotalMinutes - startTotalMinutes;
-    if (totalMinutes < 0) totalMinutes += 24 * 60; // Nếu qua ngày, cộng thêm 24h
+          // Tính thời lượng giữa hai thời điểm (xử lý qua ngày)
+          let totalMinutes = endTotalMinutes - startTotalMinutes;
+          if (totalMinutes < 0) totalMinutes += 24 * 60; // Nếu qua ngày, cộng thêm 24h
 
-    // Điều kiện lọc: Status là "Dừng" và thời lượng lớn hơn 5 phút
-    return interval.status === 'Dừng' && totalMinutes > 5;
-  })
-  .map((interval, index) => {
-    // Lặp lại logic tính thời lượng cho việc hiển thị
-    const [startHour, startMinute] = interval.startTime.split(':').map(Number);
-    const [endHour, endMinute] = interval.endTime.split(':').map(Number);
-    let totalMinutes = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
-    if (totalMinutes < 0) totalMinutes += 24 * 60;
+          // Điều kiện lọc: Status là "Dừng" và thời lượng lớn hơn 5 phút
+          return interval.status === 'Dừng' && totalMinutes > 5;
+        })
+        .map((interval, index) => {
+          // Lặp lại logic tính thời lượng cho việc hiển thị
+          const [startHour, startMinute] = interval.startTime.split(':').map(Number);
+          const [endHour, endMinute] = interval.endTime.split(':').map(Number);
+          let totalMinutes = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
+          if (totalMinutes < 0) totalMinutes += 24 * 60;
 
-    const isDeclared = declaredIntervals[selectedDate]?.includes(index) ?? false;
+          const isDeclared = declaredIntervals[selectedDate]?.includes(index) ?? false;
 
-    return (
-      <div
-        key={interval._id}
-        className={`transition-transform transform border-4 rounded-3xl grid grid-cols-2 py-8 mt-4 px-8 w-[90%] justify-center items-center ml-8 gap-10 text-4xl cursor-pointer ${
-          isDeclared ? 'bg-gray-300' : 'border-yellow-300'
-        }${selectedDiv === index ? 'scale-105 bg-green-200 border-green-500' : ''}`}
-        onClick={() => handleTimeClick(interval, index)}
-        style={{ boxShadow: `inset 0px 10px 40px 10px rgba(252, 252, 0, 0.4)` }}
-      >
-        <span className="col-span-1 flex ml-2">Trong khoảng</span>
-        <span className="col-span-1 flex">{`${interval.startTime} - ${interval.endTime}`}</span>
-        <span className="col-span-1 flex ml-2">Thời lượng</span>
-        <span className="col-span-1 flex">{`${Math.floor(totalMinutes / 60)} giờ ${totalMinutes % 60} phút`}</span>
-        <span className="col-span-1 flex">
-          {isDeclared ? 'Đã khai báo' : 'Chưa khai báo'}
-        </span>
-      </div>
-    );
-  })}
+          return (
+            <div
+              key={interval._id}
+              className={`transition-transform transform border-4 rounded-3xl grid grid-cols-2 py-8 mt-4 px-8 w-[90%] justify-center items-center ml-8 gap-10 text-4xl cursor-pointer ${
+                isDeclared ? 'bg-gray-300' : 'border-yellow-300'
+              }${selectedDiv === index ? 'scale-105 bg-green-200 border-green-500' : ''}`}
+              onClick={() => handleTimeClick(interval, index)}
+              style={{ boxShadow: `inset 0px 10px 40px 10px rgba(252, 252, 0, 0.4)` }}
+            >
+              <span className="col-span-1 flex ml-2">Trong khoảng</span>
+              <span className="col-span-1 flex">{`${interval.startTime} - ${interval.endTime}`}</span>
+              <span className="col-span-1 flex ml-2">Thời lượng</span>
+              <span className="col-span-1 flex">{`${Math.floor(totalMinutes / 60)} giờ ${totalMinutes % 60} phút`}</span>
+              <span className="col-span-1 flex">
+                {isDeclared ? 'Đã khai báo' : 'Chưa khai báo'}
+              </span>
+            </div>
+          );
+        })}
       </div>
 
       <div className="fixed bottom-0 w-full p-4 bg-white flex flex-col items-center">

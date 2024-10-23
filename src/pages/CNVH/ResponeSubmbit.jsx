@@ -60,11 +60,13 @@ const ResponeSubmit = () => {
         // Gửi dữ liệu lên backend
         await axios.post(`${import.meta.env.VITE_API_BASE_URL}/downtime`, payload);
   
-        // Cập nhật Redux Store và localStorage
-        dispatch(declareInterval({
-          date: selectedDate,
-          intervalIndex: selectedInterval.selectedIntervalIndex,
-        }));
+        // Cập nhật Redux Store để lưu trạng thái đã khai báo
+        dispatch(
+          declareInterval({
+            date: selectedDate,
+            intervalIndex: selectedInterval.selectedIntervalIndex,
+          })
+        );
   
         toast.success('Phản hồi thành công!');
   
@@ -78,6 +80,7 @@ const ResponeSubmit = () => {
       toast.error('Vui lòng chọn một lý do.');
     }
   };
+  
   
   
 
