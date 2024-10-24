@@ -2,15 +2,17 @@ import React, { useState } from 'react';
 import { Modal, Button, message } from 'antd';
 import CustomCalendar from '../../Components/Calendar/CustomCalendar';
 import ProductionTaskManagement from './ProductionTaskManagement';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelectedMachines, setSelectedDates, selectedMachines }) => {
   const [taskData, setTaskData] = useState({}); // Dữ liệu nhiệm vụ sản xuất lưu theo ngày
+  
 
   // Hàm xử lý khi lưu nhiệm vụ cùng ngày đã chọn
-  const handleSave = () => {
+  const handleSave = async () => {
     const updatedTaskData = { ...taskData };
 
-    // Kiểm tra xem có nhiệm vụ nào được thêm hay không
     let isTaskAdded = false;
 
     selectedDates.forEach(date => {
@@ -27,18 +29,25 @@ const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelected
         }
       }
     });
-
-    // Nếu không có nhiệm vụ nào được thêm, thông báo lỗi
     if (!isTaskAdded) {
       message.error('Vui lòng thêm ít nhất một nhiệm vụ trước khi lưu.');
       return;
     }
-
-    // Cập nhật dữ liệu nhiệm vụ và lưu
+    try {
+      const response = await axios.get(`http://192.168.1.11:5001/api/updateTask`);
+      console.log(response)
+      if(response.data.status == "success"){
+        message.success('Bật thành công');
+      }
+      console.log(response)
+    } catch (error) {
+      console.error('Failed to fetch telemetry data:', error.message);
+      throw new Error('Failed to fetch telemetry data');
+    }
     setTaskData(updatedTaskData);
+    
     console.log('Dữ liệu nhiệm vụ đã lưu:', updatedTaskData);
     
-    // Xóa các thiết bị đã chọn và các ngày đã chọn sau khi lưu
     setSelectedDates([]); 
     setSelectedMachines([]); 
     

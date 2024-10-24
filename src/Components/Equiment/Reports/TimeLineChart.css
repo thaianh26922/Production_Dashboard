@@ -1,0 +1,42 @@
+.arrow {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .x-axis-arrow .right-arrow {
+    position: absolute;
+    right: -10px;
+    bottom: -16px;
+    font-size: 25px;
+  }
+  
+  .gradient {
+    transition: background 3s ease; 
+}
+  .up-arrow {
+    position: absolute;
+    right: -5px;
+    font-size: 25px;
+    top: -23px;
+  }
+  .zoom-in {
+    transition: transform 0.2s ease-in-out; /* Thời gian hoạt ảnh */
+  }
+  
+  .zoomed {
+    transform: scale(2); /* Tăng kích thước lên 10% khi phóng to */
+  }
+  .gradient-section {
+    transition: transform 2s;
+  }
+  
+  .tooltip {
+    position: absolute;
+    background-color: white;
+    border: 1px solid black;
+    padding: 5px;
+    z-index: 1000;
+    pointer-events: none; /* Để không làm ảnh hưởng đến sự tương tác của chuột */
+    transition: opacity 0.1s ease-in-out;
+  }
+  

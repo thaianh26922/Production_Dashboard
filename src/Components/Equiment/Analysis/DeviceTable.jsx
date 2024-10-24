@@ -25,7 +25,7 @@ const DeviceTable = ({ downtimeData, productionData }) => {
           {downtimeData.map((item, index) => (
             <tr key={index}>
               <td className="border px-4 py-2">{index + 1}</td>
-              <td className="border px-4 py-2">{formatDate(item.startTime)}</td>
+              <td className="border px-4 py-2">{item.startTime}</td>
               <td className="border px-4 py-2">{item.startTime}</td>
               <td className="border px-4 py-2">{item.endTime}</td>
               <td className="border px-4 py-2">{item.duration}</td>
@@ -54,10 +54,10 @@ const DeviceTable = ({ downtimeData, productionData }) => {
           </tr>
         </thead>
         <tbody>
-          {productionData.map((item, index) => (
+          {productionData.map((item, index) => ( 
             <tr key={index}>
               <td className="border px-4 py-2">{index + 1}</td>
-              <td className="border px-4 py-2">{formatDate(item.startTime)}</td>
+              <td className="border px-4 py-2">{formatDate(item.date)}</td>
               <td className="border px-4 py-2">{item.startTime}</td>
               <td className="border px-4 py-2">{item.endTime}</td>
               <td className="border px-4 py-2">{item.workTime}</td>
@@ -66,7 +66,7 @@ const DeviceTable = ({ downtimeData, productionData }) => {
               <td className="border px-4 py-2">{item.downTime}</td>
               <td className="border px-4 py-2">{item.offTime}</td>
               <td className="border px-4 py-2">{item.maintenanceTime}</td>
-              <td className="border px-4 py-2">{item.runRate}</td>
+              <td className="border px-4 py-2">{item.runRate}%</td>
             </tr>
           ))}
         </tbody>
