@@ -10,21 +10,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { setMachineData } from '../../redux/intervalSlice';
 
-// Hàm lấy ngày hiện tại
-const getCurrentDate = () => new Date().toISOString().split('T')[0];
-
-// Hàm tính thời lượng giữa thời gian bắt đầu và kết thúc
-const calculateDuration = (startTime, endTime) => {
-  const [startHour, startMinute] = startTime.split(':').map(Number);
-  const [endHour, endMinute] = endTime.split(':').map(Number);
-  const start = new Date(0, 0, 0, startHour, startMinute);
-  const end = new Date(0, 0, 0, endHour, endMinute);
-  let diff = (end - start) / 1000 / 60; // Tính ra phút
-  if (diff < 0) diff += 24 * 60; // Xử lý thời gian qua ngày
-  const hours = Math.floor(diff / 60);
-  const minutes = diff % 60;
-  return `${hours} giờ ${minutes} phút`;
-};
 
 const ResponeIssue = () => {
   const navigate = useNavigate();
@@ -38,10 +23,11 @@ const ResponeIssue = () => {
   );
 
   const [telemetryData, setTelemetryData] = useState([]);
-  const [selectedDiv, setSelectedDiv] = useState(null);
+  const [selectedDiv, setSelectedDiv] = useState([]);
   const [isResponseEnabled, setIsResponseEnabled] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isHelpTimerModalOpen, setIsHelpTimerModalOpen] = useState(false);
+  const [declaredDowntimes, setDeclaredDowntimes] = useState([]); // Lưu downtime đã khai báo
   
   const [elapsedTime, setElapsedTime] = useState("00:00");
 
@@ -70,7 +56,7 @@ const ResponeIssue = () => {
               // Lọc các interval có status "Dừng" và thời lượng > 5 phút
               return interval.status === 'Dừng' && totalMinutes > 5;
             });
-  
+            console.log(filteredIntervals)
             // Cập nhật state với dữ liệu đã lọc
             setTelemetryData(filteredIntervals);
           }
@@ -116,56 +102,114 @@ const ResponeIssue = () => {
   };
   const handleCallQC = () => handleCallHelp('QC');
   const handleCallMaintenance = () => handleCallHelp('Bảo Trì');
-  const handleCallTechnical = () => handleCallHelp('Kỹ Thuật');
-
-  
-
+  const handleCallTechnical = () => handleCallHelp('Đội kỹ thuật');
   const handleTimeClick = (interval, index) => {
-    const isDeclared = declaredIntervals[selectedDate]?.includes(index);
+    const isDeclared = isIntervalDeclared(interval); // Kiểm tra đã khai báo chưa
   
-    if (!isDeclared) {
-      setSelectedDiv(index); // Lưu index đã chọn
-      setIsResponseEnabled(true); // Kích hoạt nút phản hồi
-      console.log("Khoảng thời gian đã chọn:", interval);
-    } else {
+    if (isDeclared) {
       toast.info('Khoảng thời gian này đã được khai báo!');
+      return; // Không cho phép chọn nếu đã khai báo
     }
+  
+    setSelectedDiv((prevSelected) =>
+      prevSelected.includes(index)
+        ? prevSelected.filter((i) => i !== index) // Bỏ chọn nếu đã chọn trước đó
+        : [...prevSelected, index] // Thêm vào nếu chưa chọn
+    );
+  
+    setIsResponseEnabled(true); // Kích hoạt nút phản hồi
+    console.log('Khoảng thời gian đã chọn:', interval);
   };
   
-  
+  console.log(selectedDiv)
 
   const handleResponse = () => {
-    const selectedInterval = telemetryData[selectedDiv];
-    if (!selectedMachine || !selectedInterval) {
-      toast.error('Vui lòng chọn thiết bị và khoảng thời gian.');
+    if (!selectedMachine || selectedDiv.length === 0) {
+      toast.error('Vui lòng chọn thiết bị và ít nhất một khoảng thời gian.');
       return;
     }
   
-    // Cập nhật Redux Store
+    const selectedIntervals = selectedDiv.map((index) => telemetryData[index]);
+  
     dispatch(
       setMachineData({
         selectedDate,
         selectedMachine,
-        selectedInterval: { ...selectedInterval, selectedIntervalIndex: selectedDiv },
+        selectedIntervals: selectedIntervals.map((interval, i) => ({
+          ...interval,
+          selectedIntervalIndex: selectedDiv[i],
+        })),
       })
     );
   
-    // Lưu state vào localStorage để đảm bảo dữ liệu không bị mất khi reload
     const stateToSave = {
       selectedDate,
       selectedMachine,
-      declaredIntervals: { ...declaredIntervals, [selectedDate]: [...(declaredIntervals[selectedDate] || []), selectedDiv] }
+      declaredIntervals: {
+        ...declaredIntervals,
+        [selectedDate]: [...(declaredIntervals[selectedDate] || []), ...selectedDiv],
+      },
     };
     localStorage.setItem('intervalState', JSON.stringify(stateToSave));
   
-    // Chuyển sang trang "respone" với state truyền qua navigate
     navigate('/dashboard/mobile/issue/respone');
   };
+  
   console.log(telemetryData)
- 
+  
+  const formatDate = (date) => {
+    const d = new Date(date);
+    const year = d.getUTCFullYear();
+    const month = String(d.getUTCMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`; // Chuẩn định dạng YYYY-MM-DD
+  };
+  
+  useEffect(() => {
+    const fetchDeclaredDowntimes = async () => {
+      try {
+        const formattedDate = formatDate(selectedDate); 
+        const response = await axios.get(`${apiUrl}/downtime`, {
+          params: {
+            deviceId: selectedMachine.deviceId,
+            startDate: formattedDate,
+            endDate: formattedDate,
+          },
+        });
+        console.log('Downtime response:', response.data); // Kiểm tra dữ liệu trả về
+        setDeclaredDowntimes(response.data);
+      } catch (error) {
+        console.error('Error fetching declared downtimes:', error);
+        toast.error('Có lỗi xảy ra khi lấy dữ liệu downtime.');
+      }
+    };
+  
+    if (selectedMachine && selectedDate) {
+      fetchDeclaredDowntimes();
+    }
+  }, [selectedMachine, selectedDate]);
+  
+  const isIntervalDeclared = (interval) => {
+    if (declaredDowntimes.length === 0) return false; // Nếu downtime rỗng, cho phép chọn tất cả
+  
+    return declaredDowntimes.some((downtime) =>
+      downtime.interval.some((d) =>
+        d.startTime === interval.startTime && d.endTime === interval.endTime
+      )
+    );
+  };
+  
+  const getReasonName = (interval) => {
+    const downtime = declaredDowntimes.find((downtime) =>
+      downtime.interval.some((d) =>
+        d.startTime === interval.startTime && d.endTime === interval.endTime
+      )
+    );
+    return downtime ? downtime.reasonName : 'Chưa có lý do';
+  };
+   
   
   
-
   return (
     <div className="h-screen bg-gray-100">
       <div className="flex justify-between items-center bg-gradient-to-r from-blue-600 to-sky-500">
@@ -199,55 +243,49 @@ const ResponeIssue = () => {
       </div>
 
       <div className="p-4">
-        <h2 className="text-3xl font-bold text-center mb-4">Khoảng thời gian ngừng máy:</h2>
-        {telemetryData
-        .filter((interval) => {
-          // Lấy giờ và phút từ startTime và endTime
-          const [startHour, startMinute] = interval.startTime.split(':').map(Number);
-          const [endHour, endMinute] = interval.endTime.split(':').map(Number);
+  <h2 className="text-3xl font-bold text-center mb-4">Danh sách các khoảng thời gian ngừng máy:</h2>
+  {telemetryData.map((interval, index) => {
+    const [startHour, startMinute] = interval.startTime.split(':').map(Number);
+    const [endHour, endMinute] = interval.endTime.split(':').map(Number);
 
-          // Tính tổng số phút cho thời gian bắt đầu và kết thúc
-          const startTotalMinutes = startHour * 60 + startMinute;
-          const endTotalMinutes = endHour * 60 + endMinute;
+    let totalMinutes = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
+    if (totalMinutes < 0) totalMinutes += 24 * 60; // Xử lý qua ngày
 
-          // Tính thời lượng giữa hai thời điểm (xử lý qua ngày)
-          let totalMinutes = endTotalMinutes - startTotalMinutes;
-          if (totalMinutes < 0) totalMinutes += 24 * 60; // Nếu qua ngày, cộng thêm 24h
+    const isDeclared = isIntervalDeclared(interval); // Kiểm tra đã khai báo chưa
+    const reasonName = isDeclared ? getReasonName(interval) : 'Chưa có lý do';
 
-          // Điều kiện lọc: Status là "Dừng" và thời lượng lớn hơn 5 phút
-          return interval.status === 'Dừng' && totalMinutes > 5;
-        })
-        .map((interval, index) => {
-          // Lặp lại logic tính thời lượng cho việc hiển thị
-          const [startHour, startMinute] = interval.startTime.split(':').map(Number);
-          const [endHour, endMinute] = interval.endTime.split(':').map(Number);
-          let totalMinutes = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
-          if (totalMinutes < 0) totalMinutes += 24 * 60;
+    const isSelected = selectedDiv.includes(index);
 
-          const isDeclared = declaredIntervals[selectedDate]?.includes(index) ?? false;
-
-          return (
-            <div
-              key={interval._id}
-              className={`transition-transform transform border-4 rounded-3xl grid grid-cols-2 py-8 mt-4 px-8 w-[90%] justify-center items-center ml-8 gap-10 text-4xl cursor-pointer ${
-                isDeclared ? 'bg-gray-300' : 'border-yellow-300'
-              }${selectedDiv === index ? 'scale-105 bg-green-200 border-green-500' : ''}`}
-              onClick={() => handleTimeClick(interval, index)}
-              style={{ boxShadow: `inset 0px 10px 40px 10px rgba(252, 252, 0, 0.4)` }}
-            >
-              <span className="col-span-1 flex ml-2">Trong khoảng</span>
-              <span className="col-span-1 flex">{`${interval.startTime} - ${interval.endTime}`}</span>
-              <span className="col-span-1 flex ml-2">Thời lượng</span>
-              <span className="col-span-1 flex">{`${Math.floor(totalMinutes / 60)} giờ ${totalMinutes % 60} phút`}</span>
-              <span className="col-span-1 flex">
-                {isDeclared ? 'Đã khai báo' : 'Chưa khai báo'}
-              </span>
-            </div>
-          );
-        })}
+    return (
+      <div
+        key={interval._id}
+        className={`transition-transform transform border-4 rounded-3xl grid grid-cols-2 py-8 mt-4 px-8 w-[90%] justify-center items-center ml-8 gap-10 text-4xl cursor-pointer ${
+          isDeclared ? 'bg-gray-300' : 'border-red-500'
+        } ${isSelected ? 'scale-105 bg-green-200 border-green-500' : ''}`}
+        onClick={() => handleTimeClick(interval, index)}
+        style={{ boxShadow: `inset 0px 10px 40px 10px rgba(255, 0, 0, 0.8)` }}
+      >
+        <span className="col-span-1 flex ml-2">Trong khoảng</span>
+        <span className="col-span-1 flex">{`${interval.startTime} - ${interval.endTime}`}</span>
+        <span className="col-span-1 flex ml-2">Thời lượng</span>
+        <span className="col-span-1 flex">{`${Math.floor(totalMinutes / 60)} giờ ${totalMinutes % 60} phút`}</span>
+        <span className="col-span-1 flex">
+          {isDeclared ? 'Đã khai báo' : 'Chưa khai báo'}
+        </span>
+        {isDeclared && (
+          <span className="col-span-1 flex text-blue-600 font-semibold">
+            {reasonName}
+          </span>
+        )}
       </div>
+    );
+  })}
+</div>
 
-      <div className="fixed bottom-0 w-full p-4 bg-white flex flex-col items-center">
+
+
+
+      <div className="fixed bottom-0 w-full p-4 bg-transperent flex flex-col items-center">
         <button
           onClick={handleResponse}
           disabled={!isResponseEnabled}

@@ -7,7 +7,7 @@ const DowntimePieChart = ({ data }) => {
     labels: data.labels,
     datasets: [
       {
-        label: '',
+        label: 'Hours',
         data: data.values,
         backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#ed0905'],
         hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#ed0905'],

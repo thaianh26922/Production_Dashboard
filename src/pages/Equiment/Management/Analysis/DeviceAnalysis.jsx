@@ -19,6 +19,7 @@ const DeviceAnalysis = () => {
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [selectedDateRange, setSelectedDateRange] = useState(null);
   const [downtimeData, setDowntimeData] = useState([]);
+  const [employeeData, setEmployeeData] = useState([]);
   const [productionData, setProductionData] = useState([]);
 
   // Fetch areas from API
@@ -87,6 +88,7 @@ const DeviceAnalysis = () => {
       // Gọi API nếu đã có thiết bị được chọn
       if (selectedDevice) {
         fetchDowntimeData(selectedDevice, [formattedStartDate, formattedEndDate]);
+        fetchEmployeeData(selectedDevice, [formattedStartDate, formattedEndDate]);
       }
     }
   };
@@ -96,6 +98,7 @@ const DeviceAnalysis = () => {
     if (selectedDevice && selectedDateRange) {
       console.log('Triggering fetch with new data:', selectedDevice, selectedDateRange);
       fetchDowntimeData(selectedDevice, selectedDateRange);
+      fetchEmployeeData(selectedDevice,selectedDateRange);
     }
   }, [selectedDevice, selectedDateRange]);
   
@@ -115,8 +118,22 @@ const DeviceAnalysis = () => {
       console.error('Error fetching downtime data:', error);
     }
   };
+  const fetchEmployeeData = async (deviceId, [startDate, endDate]) => {
+    const formattedStartDate = moment(startDate).format('YYYY-MM-DD');
+    const formattedEndDate = moment(endDate).format('YYYY-MM-DD');
   
+    console.log(`Fetching with Device ID: ${deviceId}, Start: ${formattedStartDate}, End: ${formattedEndDate}`);
   
+    try {
+      const response = await axios.get(
+        `${apiUrl}/productiontask?deviceId=${deviceId}&startDate=${formattedStartDate}&endDate=${formattedEndDate}`
+      );
+      setEmployeeData(response.data);
+    } catch (error) {
+      console.error('Error fetching downtime data:', error);
+    }
+  };
+ 
   
   const aggregateDowntimeByReason = (data) => {
     const reasonCounts = data.reduce((acc, item) => {
@@ -170,9 +187,10 @@ const aggregateFrequencyByReason = (data) => {
     values: Object.values(reasonCounts),
   };
 };
+console.log(employeeData.shift)
   const aggregatedData = aggregateDowntimeHoursByReason(downtimeData);
   console.log('data timepareto chart',aggregatedData)
-  const aggregatedDowntimeData = aggregateDowntimeByReason(downtimeData);
+  const aggregatedDowntimeData = aggregateDowntimeHoursByReason(downtimeData);
   const aggregatedFrequencytimeData = aggregateFrequencyByReason(downtimeData);
   return (
     <div>
@@ -230,7 +248,7 @@ const aggregateFrequencyByReason = (data) => {
       </div>
 
       <div className="bg-white p-3 mt-2">
-        <DeviceTable downtimeData={downtimeData} productionData={productionData} />
+        <DeviceTable downtimeData={downtimeData} employeeData={employeeData} productionData={productionData} />
       </div>
     </div>
   );

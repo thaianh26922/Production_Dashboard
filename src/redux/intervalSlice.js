@@ -15,19 +15,20 @@ const loadStateFromLocalStorage = () => {
 const initialState = loadStateFromLocalStorage() || {
   selectedDate: new Date().toISOString().split('T')[0],
   selectedMachine: null,
-  selectedInterval: null,
+  selectedIntervals: [], // Chứa các intervals đã chọn
   declaredIntervals: {}, // Lưu các interval đã khai báo theo ngày
 };
+
 
 const intervalSlice = createSlice({
   name: 'interval',
   initialState,
   reducers: {
     setMachineData: (state, action) => {
-      const { selectedDate, selectedMachine, selectedInterval } = action.payload;
+      const { selectedDate, selectedMachine, selectedIntervals } = action.payload;
       state.selectedDate = selectedDate || state.selectedDate;
       state.selectedMachine = selectedMachine;
-      state.selectedInterval = selectedInterval;
+      state.selectedIntervals = selectedIntervals || [];
     },
     declareInterval: (state, action) => {
       const { date, intervalIndex } = action.payload;
@@ -40,6 +41,7 @@ const intervalSlice = createSlice({
     },
   },
 });
+
 
 export const { setMachineData, declareInterval } = intervalSlice.actions;
 

@@ -9,19 +9,13 @@ import axios from 'axios';
 const ResponeSubmit = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
-  const { selectedInterval, selectedMachine, selectedDate } = useSelector((state) => state.interval);
-  console.log(selectedMachine.deviceId)
-  useEffect(() => {
-    console.log('Selected Interval:', selectedInterval); // Kiểm tra dữ liệu từ Redux
-    console.log('Selected Machine:', selectedMachine);
-  }, [selectedInterval, selectedMachine]);
 
+  const { selectedIntervals, selectedMachine, selectedDate } = useSelector((state) => state.interval);
+  console.log(selectedIntervals)
   const [filteredReasons, setFilteredReasons] = useState([]);
   const [selectedReason, setSelectedReason] = useState(null);
   const [isResponseEnabled, setIsResponseEnabled] = useState(false);
 
-  // Lấy lý do từ API
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_API_BASE_URL}/issue`)
@@ -38,50 +32,52 @@ const ResponeSubmit = () => {
     setSelectedReason(reason);
     setIsResponseEnabled(true);
   };
+
   const handleResponse = async () => {
-    if (selectedReason && selectedInterval) {
-      try {
-        const payload = {
-          deviceId: selectedMachine.deviceId,
-          deviceName: selectedMachine.deviceName,
-          date: selectedDate,
-          interval: {
-            status: selectedInterval.status,
-            startTime: selectedInterval.startTime,
-            endTime: selectedInterval.endTime,
-            _id: selectedInterval._id,
-            selectedIntervalIndex: selectedInterval.selectedIntervalIndex,
-          },
-          reasonName: selectedReason.reasonName,
-        };
+    if (!selectedReason || !selectedIntervals || selectedIntervals.length === 0) {
+      toast.error('Vui lòng chọn ít nhất một khoảng thời gian và một lý do.');
+      return;
+    }
   
-        console.log('Payload:', payload); // Kiểm tra payload trước khi gửi
+    try {
+      const payloads = selectedIntervals.map((interval) => ({
+        deviceId: selectedMachine.deviceId,
+        deviceName: selectedMachine.deviceName,
+        date: selectedDate,
+        interval: {
+          status: interval.status,
+          startTime: interval.startTime,
+          endTime: interval.endTime,
+          _id: interval._id,
+          selectedIntervalIndex: interval.selectedIntervalIndex,
+        },
+        reasonName: selectedReason.reasonName,
+      }));
   
-        // Gửi dữ liệu lên backend
-        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/downtime`, payload);
+      console.log('Payloads:', payloads);
   
-        // Cập nhật Redux Store để lưu trạng thái đã khai báo
+      await Promise.all(
+        payloads.map((payload) =>
+          axios.post(`${import.meta.env.VITE_API_BASE_URL}/downtime`, payload)
+        )
+      );
+  
+      selectedIntervals.forEach((interval) => {
         dispatch(
           declareInterval({
             date: selectedDate,
-            intervalIndex: selectedInterval.selectedIntervalIndex,
+            intervalIndex: interval.selectedIntervalIndex,
           })
         );
+      });
   
-        toast.success('Phản hồi thành công!');
-  
-        // Điều hướng về trang chính sau 0.5 giây
-        setTimeout(() => navigate('/dashboard/mobile/issue'), 500);
-      } catch (error) {
-        console.error('Error submitting response:', error);
-        toast.error('Có lỗi xảy ra khi gửi phản hồi.');
-      }
-    } else {
-      toast.error('Vui lòng chọn một lý do.');
+      toast.success('Phản hồi thành công!');
+      setTimeout(() => navigate('/dashboard/mobile/issue'), 500);
+    } catch (error) {
+      console.error('Error submitting response:', error);
+      toast.error('Có lỗi xảy ra khi gửi phản hồi.');
     }
   };
-  
-  
   
 
   return (
