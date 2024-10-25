@@ -17,7 +17,7 @@ const MachineWorkScheduleList = () => {
   const [selectedArea, setSelectedArea] = useState('all'); // State để lưu khu vực được chọn
   const [selectedDates, setSelectedDates] = useState([dayjs().format('YYYY-MM-DD')]); // Track selected dates (default to today)
   const [selectedMachines, setSelectedMachines] = useState([]); // Track selected machines
-  
+  const apiUrl =import.meta.env.VITE_API_BASE_URL;
   const [isSelecting, setIsSelecting] = useState(false); // Track if the user is selecting devices
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // Modal visibility for update confirmation
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false); // Custom modal visibility for the final confirmation
@@ -28,11 +28,11 @@ const MachineWorkScheduleList = () => {
     const fetchAreasAndDevices = async () => {
       try {
         // Lấy danh sách khu vực
-        const areasResponse = await axios.get('http://192.168.1.9:5001/api/areas');
+        const areasResponse = await axios.get(`${apiUrl}/areas`);
         setAreas(areasResponse.data);
 
         // Lấy danh sách thiết bị
-        const devicesResponse = await axios.get('http://192.168.1.9:5001/api/device');
+        const devicesResponse = await axios.get(`${apiUrl}/device`);
         setDevices(devicesResponse.data);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -57,7 +57,7 @@ const MachineWorkScheduleList = () => {
   useEffect(() => {
     const fetchProductionTasks = async () => {
       try {
-        const response = await axios.get('http://192.168.1.9:5001/api/productiontask');
+        const response = await axios.get(`${apiUrl}/productiontask`);
         setProductionTasks(response.data); // Lưu dữ liệu nhiệm vụ sản xuất vào state
       } catch (error) {
         console.error('Error fetching production tasks:', error);
@@ -92,52 +92,56 @@ const handleCancelDates = () => {
 };
 
 
-  // Toggle machine selection mode
+  
  // Toggle machine selection mode
-const toggleSelectDevicesByArea = () => {
+ const toggleSelectDevicesByArea = () => {
   const machinesInArea = filteredDevices; // Lấy tất cả thiết bị trong khu vực được chọn
 
   // Kiểm tra xem tất cả thiết bị trong khu vực đã được chọn chưa
   const allSelected = machinesInArea.every(machine => selectedMachines.some(selected => selected._id === machine._id));
 
   if (allSelected) {
-    // Nếu tất cả thiết bị đã được chọn, bỏ chọn tất cả thiết bị trong khu vực
-    const remainingMachines = selectedMachines.filter(selected => !machinesInArea.some(machine => machine._id === selected._id));
-    setSelectedMachines(remainingMachines);
-    setIsSelecting(false); // Reset trạng thái chọn khi tất cả máy đã bị bỏ chọn
+      // Nếu tất cả thiết bị đã được chọn, bỏ chọn các thiết bị trong khu vực
+      const updatedSelectedMachines = selectedMachines.filter(selected => !machinesInArea.some(machine => machine._id === selected._id));
+      setSelectedMachines(updatedSelectedMachines);
   } else {
-    // Nếu chưa chọn hết, thêm tất cả thiết bị trong khu vực vào danh sách
-    const newSelectedMachines = [
-      ...selectedMachines,
-      ...machinesInArea.filter(machine => !selectedMachines.some(selected => selected._id === machine._id)) // Chỉ thêm các thiết bị chưa được chọn
-    ];
-    setSelectedMachines(newSelectedMachines);
-    setIsSelecting(true); // Chọn thiết bị
+      // Nếu chưa chọn hết, thêm tất cả thiết bị trong khu vực vào danh sách
+      const newSelectedMachines = [
+          ...selectedMachines,
+          ...machinesInArea.filter(machine => !selectedMachines.some(selected => selected._id === machine._id)) // Chỉ thêm các thiết bị chưa được chọn
+      ];
+      setSelectedMachines(newSelectedMachines);
   }
+
+  // Điều chỉnh trạng thái chọn thiết bị
+  setIsSelecting(!allSelected);
 };
+
+
 
 
   // Handle machine click
   const handleMachineClick = (machine) => {
-    if (!isSelecting) {
-      setIsSelecting(true); // Tự động bật chế độ chọn nếu chưa bật
-    }
+    // Kiểm tra xem thiết bị đã được chọn chưa
+    const isSelected = selectedMachines.some((m) => m._id === machine._id);
 
-    // Kiểm tra xem máy đã được chọn chưa
-    if (selectedMachines.some((m) => m.id === machine.id)) {
-      // Nếu đã được chọn, bỏ chọn máy
-      const updatedMachines = selectedMachines.filter((m) => m.id !== machine.id);
-      setSelectedMachines(updatedMachines);
+    if (isSelected) {
+        // Nếu đã được chọn, bỏ chọn thiết bị đó
+        const updatedMachines = selectedMachines.filter((m) => m._id !== machine._id);
+        setSelectedMachines(updatedMachines);
 
-      // Kiểm tra nếu không còn máy nào được chọn, thì chuyển lại trạng thái về "Chọn Thiết Bị"
-      if (updatedMachines.length === 0) {
-        setIsSelecting(false);
-      }
+        // Kiểm tra nếu không còn máy nào được chọn, thì chuyển lại trạng thái về "Chọn Thiết Bị"
+        if (updatedMachines.length === 0) {
+            setIsSelecting(false);
+        }
     } else {
-      // Nếu chưa được chọn, thêm máy vào danh sách
-      setSelectedMachines(prevMachines => [...prevMachines, machine]);
+        // Nếu chưa được chọn, thêm thiết bị vào danh sách
+        setSelectedMachines((prevMachines) => [...prevMachines, machine]);
+        setIsSelecting(true);
     }
-  };
+};
+
+
 
   // Sử dụng useEffect để theo dõi thay đổi của selectedMachines
   useEffect(() => {
@@ -164,6 +168,9 @@ const toggleSelectDevicesByArea = () => {
   const handleUpdateClick = () => {
     setIsUpdateModalOpen(true); // Show update confirmation modal
   };
+  const handleCallMachine = () => {
+    set
+  }
 
   // Handle modal confirmation
   const handleConfirmUpdate = () => {
@@ -201,6 +208,12 @@ const handleCancelUpdate = () => {
       <Button className="ml-2 bg-gray-400 text-white " onClick={handleOpenScheduleModal}>
         Lịch Sản xuất
       </Button>
+      {/*nut giao nhiem vu den trang thai*/}
+      {selectedMachines.length > 0 && (
+            <Button type="primary" className="ml-2" onClick={handleUpdateClick}>
+              Giao nhiem vu
+            </Button>
+          )}
 
         <MachineScheduleModal
           open={isScheduleModalOpen}
@@ -228,7 +241,7 @@ const handleCancelUpdate = () => {
 
           {/* Toggle "Chọn Thiết Bị" or "Bỏ Chọn Thiết Bị" */}
           <Button onClick={toggleSelectDevicesByArea}>
-            {isSelecting ? 'Bỏ Chọn Tất Cả': 'Chọn Tất Cả'  }
+            {isSelecting ?  'Bỏ Chọn Tất Cả' : 'Chọn Tất Cả'   }
           </Button>
           <DatePicker 
         onChange={handleDateChange} 
@@ -249,7 +262,7 @@ const handleCancelUpdate = () => {
       </div>
 
       {/* Machine List */}
-      <div className="grid grid-cols-4 gap-1 lg:grid-cols-4">
+      <div className="grid grid-cols-3 gap-1 sm:grid-cols-4 ">
   {filteredDevices.map((machine) => {
     const tasksForDevice = getTasksForDevice(machine.deviceName);
     
@@ -259,7 +272,7 @@ const handleCancelUpdate = () => {
         <div
           key={`${machine._id}-${index}`} // Đảm bảo key là duy nhất
           onClick={() => handleMachineClick(machine)}
-          className={`relative cursor-pointer transition duration-300 ease-in-out h-full p-2
+          className={`relative cursor-pointer transition duration-300 ease-in-out h-full p-1
             ${isSelecting && selectedMachines.some((m) => m.id === machine._id) ? 'border-2 border-blue-700 round-lg bg-gray-600 ' : ''}`}
         >
           <MachineWorkScheduleCard
@@ -315,7 +328,8 @@ const handleCancelUpdate = () => {
         onClose={() => setIsCustomModalOpen(false)}
         onCancel={handleCancelDates} // Clear dates and close modal
         onSave={handleSaveDates} // Save the selected dates
-        selectedDates={selectedDates} // Pass selected dates to modal
+        selectedDates={selectedDates} 
+        
         setSelectedDates={setSelectedDates}
         setSelectedMachines={setSelectedMachines}
         selectedMachines={selectedMachines} // Allow modal to update dates if necessary

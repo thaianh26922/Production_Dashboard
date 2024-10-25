@@ -11,7 +11,7 @@ import AreasManagement from '../pages/Equiment/Management/AreasManagement'; // I
 import MachineWorkScheduleList from '../pages/Equiment/Management/MachineWorkScheduleList'; // Import Machine Work Schedule
 import ErrorReportCatalog from '../pages/ErrorReportCatalog/ErrorReportCatalog'; // Import Error Report
 import WorkShiftCatalog from '../Components/Shifr/WorkShiftCatalog'; // Import Work Shift Catalog
-import EmployeeCatalog from '../Components/Equiment/Employee/EmployeeCatalog'; // Import Employee Catalog
+import EmployeeCatalog from '../Components/Employee/EmployeeCatalog'; // Import Employee Catalog
 import AvailableRate from '../pages/Equiment/AvailableRate/AvailableRate'; // Import Available Rate
 import DeviceAnalysis from '../pages/Equiment/Management/Analysis/DeviceAnalysis';
 import DeviceManagement from '../pages/Equiment/Management/DeviceManagement';

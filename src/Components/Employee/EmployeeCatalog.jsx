@@ -3,13 +3,15 @@ import { FaEdit, FaTrash } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Modal, Form, Input, Select, Button } from 'antd'; // Sử dụng Select cho gợi ý khu vực
-import SearchButton from '../../Button/SearchButton';
-import AddButton from '../../Button/AddButton';
-import ExportExcelButton from '../../Button/ExportExcelButton';
-import FormSample from '../../Button/FormSample';
-import ImportButton from '../../Button/ImportButton';
+import SearchButton from '../Button/SearchButton';
+import AddButton from '../Button/AddButton';
+import ExportExcelButton from '../Button/ExportExcelButton';
+import FormSample from '../Button/FormSample';
+import ImportButton from '../Button/ImportButton';
 import axios from 'axios'; // Thêm axios để gọi API
-import Breadcrumb from '../../Breadcrumb/Breadcrumb';
+import Breadcrumb from '../Breadcrumb/Breadcrumb';
+import sampleTemplate from '../../assets/form/Nhân viên.xlsx';
+import * as XLSX from 'xlsx';
 
 const { Option } = Select; // Ant Design Select
 
@@ -21,11 +23,12 @@ const EmployeeCatalog = () => {
   const [areas, setAreas] = useState([]); // State cho danh sách khu vực
   const [form] = Form.useForm(); // Ant Design Form
   const [searchQuery, setSearchQuery] = useState('');
+  const apiUrl =import.meta.env.VITE_API_BASE_URL
 
   // Fetch employees from API on component mount
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get('http://192.168.1.9:5001/api/employees'); // API GET để lấy danh sách nhân viên
+      const response = await axios.get(`${apiUrl}/employees`); // API GET để lấy danh sách nhân viên
       setEmployees(response.data);
       setFilteredEmployees(response.data);
     } catch (error) {
@@ -36,7 +39,7 @@ const EmployeeCatalog = () => {
   // Fetch areas from API on component mount
   const fetchAreas = async () => {
     try {
-      const response = await axios.get('http://192.168.1.9:5001/api/areas'); // API GET để lấy danh sách khu vực
+      const response = await axios.get(`${apiUrl}/areas`); // API GET để lấy danh sách khu vực
       setAreas(response.data);
     } catch (error) {
       toast.error('Lỗi khi tải danh sách khu vực');
@@ -57,17 +60,56 @@ const EmployeeCatalog = () => {
     );
     setFilteredEmployees(filtered);
   };
+  const handleImport = (file) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+  
+      // Chuyển đổi dữ liệu thành định dạng phù hợp
+      const formattedData = jsonData.map((item) => ({
+        employeeCode: item["Mã nhân viên"],
+        employeeName:item["Tên nhân viên"],
+        areaName: item["Tên khu vực sản xuất"],
+      }));
+      console.log(formattedData)
+  
+      // Gửi từng khu vực lên API và cập nhật state
+      const promises = formattedData.map(async (employee) => {
+        try {
+          const response = await axios.post(`${apiUrl}/employees`, employee);
+          // Cập nhật state ngay sau khi thêm thành công
+          return response.data;
+        } catch (error) {
+          toast.error('Failed to save area');
+          return null;
+        }
+      });
+  
+      // Đợi tất cả các yêu cầu hoàn tất và cập nhật bảng
+      Promise.all(promises).then((results) => {
+        const addedEmployee = results.filter((employee) => employee !== null);
+        setAreas((Employee ) => [...Employee , ...addedEmployee]);
+        setFilteredAreas((prevFiltered) => [...prevFiltered, ...addedEmployee]);
+        toast.success('Thêm nhân viên thành công!');
+      });
+    };
+    reader.readAsArrayBuffer(file);
+  };
 
   // Handle saving new or edited employee
   const handleSave = async (values) => {
     try {
       if (selectedEmployee) {
         // Update employee
-        await axios.put(`http://192.168.1.9:5001/api/employees/${selectedEmployee._id}`, values);
+        await axios.put(`${apiUrl}/employees/${selectedEmployee._id}`, values);
         toast.success('Cập nhật nhân viên thành công!');
       } else {
         // Create new employee
-        await axios.post('http://192.168.1.9:5001/api/employees', values);
+        await axios.post(`${apiUrl}/employees`, values);
         toast.success('Thêm nhân viên thành công!');
       }
 
@@ -83,7 +125,7 @@ const EmployeeCatalog = () => {
   // Handle delete employee by ID
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://192.168.1.9:5001/api/employees/${id}`);
+      await axios.delete(`${apiUrl}/employees/${id}`);
       toast.success('Xóa nhân viên thành công!');
       fetchEmployees(); // Refresh employee list after delete
     } catch (error) {
@@ -114,8 +156,8 @@ const EmployeeCatalog = () => {
         />
         <div className="flex-grow"></div>
         <AddButton onClick={() => openModal()} />
-        <FormSample />
-        <ImportButton />
+        <FormSample href={sampleTemplate}  label="Tải Form Mẫu" />
+        <ImportButton onImport={handleImport}/>
         <ExportExcelButton data={filteredEmployees} fileName="DanhSachNhanVien.xlsx" />
       </div>
 

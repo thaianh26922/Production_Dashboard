@@ -1,7 +1,8 @@
 import React from 'react';
 import AvailableCard from './AvailableCard'; // Import AvailableCard
 
-function AvailableGrid({ machines, machineType }) {
+function AvailableGrid({ machines, machineType,selectedDate }) {
+  console.log("AvailableGrid selectedDate:", selectedDate.format("YYYY-MM-DD"));
   return (
     <div
       className="grid grid-cols-2 gap-2 overflow-y-auto"
@@ -9,10 +10,11 @@ function AvailableGrid({ machines, machineType }) {
     >
       {machines.map((machine) => (
         <AvailableCard
-          key={machine.value}
-          machineName={machine.label}
-          selectedDate={new Date().toISOString().split('T')[0]} // Giả sử hiển thị ngày hiện tại
-          machineType={machineType} // Truyền loại máy (CNC hoặc PHAY)
+          key={machine._id} // Sử dụng `_id` làm key để đảm bảo duy nhất
+          machineName={machine.deviceName} // Truyền tên thiết bị
+          deviceId={machine.deviceId} // Truyền `deviceCode`
+          selectedDate={selectedDate} // Ngày hiện tại
+          machineType={machineType} // Truyền loại máy hoặc khu vực
         />
       ))}
     </div>

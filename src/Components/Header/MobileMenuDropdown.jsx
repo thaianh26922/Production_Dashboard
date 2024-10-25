@@ -15,7 +15,7 @@ const navigate = useNavigate(); // Khởi tạo useNavigate
     navigate('/login');
   };
   return (
-    <div className="lg:items-center lg:space-x-6 lg:hidden sm:flex">
+    <div className="lg:items-center lg:space-x-6 lg:hidden sm:flex ">
       <Menu as="div" className="relative">
         <div>
           {/* Button mở menu */}
@@ -34,7 +34,7 @@ const navigate = useNavigate(); // Khởi tạo useNavigate
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50">
+          <Menu.Items className="absolute right-0 mt-2  w-48 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50">
             <div className="py-1">
               {/* Các mục trong menu */}
               <Menu.Item>
@@ -43,7 +43,7 @@ const navigate = useNavigate(); // Khởi tạo useNavigate
                   to="/settings/profile" // Điều hướng tới trang Thông tin cá nhân
                   className={`${
                     active ? 'bg-gray-100' : ''
-                  } block px-4 py-2 text-sm text-gray-700`}
+                  } block px-4 py-2 text-sm text-gray-700 dark:text-white hover:text-black `}
                 >
                   Thông tin cá nhân
                 </Link>
@@ -57,7 +57,7 @@ const navigate = useNavigate(); // Khởi tạo useNavigate
                   onClick={handleLogout} // Gọi hàm handleLogout khi nhấn Đăng xuất
                   className={`${
                     active ? 'bg-gray-100' : ''
-                  } block w-full text-left px-4 py-2 text-sm text-gray-700`}
+                  } block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-white hover:text-black`}
                 >
                   Đăng xuất
                 </button>

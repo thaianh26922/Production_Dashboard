@@ -12,10 +12,13 @@ const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 const DeviceAnalysis = () => {
+  const [areas, setAreas] = useState([]);
+  const [devices, setDevices] = useState([]);
+  const [selectedArea, setSelectedArea] = useState(null);
+  const [selectedDevice, setSelectedDevice] = useState(null);
   const [selectedDateRange, setSelectedDateRange] = useState(null);
-  const [selectedMachineType, setSelectedMachineType] = useState('CNC'); // Thêm state cho lựa chọn loại máy
-  const [selectedMachine, setSelectedMachine] = useState(null); // Thêm state cho lựa chọn máy cụ thể
   const [downtimeData, setDowntimeData] = useState([]);
+  const [employeeData, setEmployeeData] = useState([]);
   const [productionData, setProductionData] = useState([]);
 
   function secondsToTime(seconds) {
@@ -69,43 +72,30 @@ const DeviceAnalysis = () => {
   const cncMachines = Array.from({ length: 17 }, (_, i) => ({ value: `CNC ${i + 1}`, label: `CNC ${i + 1}` }));
   const phayMachines = Array.from({ length: 18 }, (_, i) => ({ value: `PHAY ${i + 1}`, label: `PHAY ${i + 1}` }));
 
-  // Dữ liệu cố định cho các biểu đồ (không thay đổi)
-  const downtimeChartData = {
-    labels: ['Lỗi kỹ thuật', 'Lỗi sensor', 'Lỗi chất lượng', 'Xước màn'],
-    values: [50, 20, 20, 10],
-  };
-
-  const paretoDataTime = {
-    labels: ['Lỗi kỹ thuật', 'Lỗi sensor', 'Lỗi chất lượng', 'Xước màn'],
-    values: [120, 80, 60, 3],
-  };
-
-  const paretoDataFrequency = {
-    labels: ['Lỗi kỹ thuật', 'Lỗi sensor', 'Lỗi chất lượng'],
-    values: [10, 6, 4],
-  };
-
-  // Hàm sinh dữ liệu Downtime ngẫu nhiên dựa trên khoảng ngày được chọn
-  const generateDowntimeData = (startDate, endDate) => {
-    const reasons = ['Lỗi kỹ thuật', 'Bảo trì', 'Lỗi sensor', 'Lỗi chất lượng'];
-    const operators = ['Nguyễn Văn A', 'Trần Văn B', 'Lê Thị C'];
-    const randomData = [];
-
-    for (let i = 0; i < 5; i++) {
-      const randomStartTime = moment(startDate).add(Math.floor(Math.random() * endDate.diff(startDate, 'hours')), 'hours');
-      const randomEndTime = moment(randomStartTime).add(Math.floor(Math.random() * 60), 'minutes');
-      const duration = moment.duration(randomEndTime.diff(randomStartTime)).humanize();
-
-      randomData.push({
-        startTime: randomStartTime.format('YYYY-MM-DD HH:mm'),
-        endTime: randomEndTime.format('YYYY-MM-DD HH:mm'),
-        duration: duration,
-        reason: reasons[Math.floor(Math.random() * reasons.length)],
-        operator: operators[Math.floor(Math.random() * operators.length)],
-      });
+  // Fetch devices when an area is selected
+  const handleAreaSelect = async (areaId) => {
+    setSelectedArea(areaId);
+    console.log('Selected Area ID:', areaId); // Debug
+  
+    try {
+      const response = await axios.get(`${apiUrl}/device?areaId=${areaId}`);
+      console.log('API URL:', `${apiUrl}/device?areaId=${areaId}`); // Debug
+      console.log('Fetched Devices:', response.data); // Debug
+  
+      if (response.data && response.data.length > 0) {
+        const formattedDevices = response.data.map((device) => ({
+          id: device.deviceId, // Lưu deviceId thay vì _id
+          name: device.deviceName,
+        }));
+        setDevices(formattedDevices);
+      } else {
+        console.warn('No devices found for this area.');
+        setDevices([]); // Đảm bảo xóa dữ liệu cũ nếu không tìm thấy thiết bị
+      }
+    } catch (error) {
+      console.error('Error fetching devices:', error);
+      setDevices([]); // Xóa dữ liệu cũ trong trường hợp lỗi
     }
-
-    return randomData;
   };
 
   // Hàm sinh dữ liệu Production ngẫu nhiên dựa trên khoảng ngày được chọn
@@ -128,8 +118,6 @@ const DeviceAnalysis = () => {
         runRate: `${Math.floor(Math.random() * 100)}%`,
       });
     }
-
-    return randomData;
   };
   useEffect(() => {
    if(selectedDateRange != null){
@@ -169,18 +157,106 @@ const DeviceAnalysis = () => {
     //   setProductionData([]);
     // }
   };
-
-  // Hàm xử lý khi chọn loại máy từ Select
-  const handleMachineTypeSelect = (value) => {
-    setSelectedMachineType(value); // Cập nhật loại máy khi người dùng chọn
-    setSelectedMachine(null); // Reset máy cụ thể khi thay đổi loại máy
+  
+  
+  useEffect(() => {
+    if (selectedDevice && selectedDateRange) {
+      console.log('Triggering fetch with new data:', selectedDevice, selectedDateRange);
+      fetchDowntimeData(selectedDevice, selectedDateRange);
+      fetchEmployeeData(selectedDevice,selectedDateRange);
+    }
+  }, [selectedDevice, selectedDateRange]);
+  
+  
+  const fetchDowntimeData = async (deviceId, [startDate, endDate]) => {
+    const formattedStartDate = moment(startDate).format('YYYY-MM-DD');
+    const formattedEndDate = moment(endDate).format('YYYY-MM-DD');
+  
+    console.log(`Fetching with Device ID: ${deviceId}, Start: ${formattedStartDate}, End: ${formattedEndDate}`);
+  
+    try {
+      const response = await axios.get(
+        `${apiUrl}/downtime?deviceId=${deviceId}&startDate=${formattedStartDate}&endDate=${formattedEndDate}`
+      );
+      setDowntimeData(response.data);
+    } catch (error) {
+      console.error('Error fetching downtime data:', error);
+    }
   };
-
-  // Hàm xử lý khi chọn máy cụ thể
-  const handleMachineSelect = (value) => {
-    setSelectedMachine(value);
+  const fetchEmployeeData = async (deviceId, [startDate, endDate]) => {
+    const formattedStartDate = moment(startDate).format('YYYY-MM-DD');
+    const formattedEndDate = moment(endDate).format('YYYY-MM-DD');
+  
+    console.log(`Fetching with Device ID: ${deviceId}, Start: ${formattedStartDate}, End: ${formattedEndDate}`);
+  
+    try {
+      const response = await axios.get(
+        `${apiUrl}/productiontask?deviceId=${deviceId}&startDate=${formattedStartDate}&endDate=${formattedEndDate}`
+      );
+      setEmployeeData(response.data);
+    } catch (error) {
+      console.error('Error fetching downtime data:', error);
+    }
   };
+ 
+  
+  const aggregateDowntimeByReason = (data) => {
+    const reasonCounts = data.reduce((acc, item) => {
+      const reason = item.reasonName;
+      
+      // Count all intervals for the given reasonName
+      const intervalCount = item.interval.length;
+  
+      acc[reason] = (acc[reason] || 0) + intervalCount;
+      return acc;
+    }, {});
+  
+    return {
+      labels: Object.keys(reasonCounts),
+      values: Object.values(reasonCounts),
+    };
+  };
+  const aggregateDowntimeHoursByReason = (data) => {
+  const reasonHours = data.reduce((acc, item) => {
+    const reason = item.reasonName;
+    const totalIntervalHours = item.interval.reduce((sum, interval) => {
+      const [startHour, startMinute] = interval.startTime.split(':').map(Number);
+      const [endHour, endMinute] = interval.endTime.split(':').map(Number);
 
+      const startTime = startHour + startMinute / 60;
+      const endTime = endHour + endMinute / 60;
+
+      return sum + (endTime - startTime); // Calculate duration in hours
+    }, 0);
+
+    acc[reason] = (acc[reason] || 0) + totalIntervalHours;
+    return acc;
+  }, {});
+
+  return {
+    labels: Object.keys(reasonHours),
+    values: Object.values(reasonHours),
+  };
+};
+const aggregateFrequencyByReason = (data) => {
+  const reasonCounts = data.reduce((acc, item) => {
+    const reason = item.reasonName;
+    const frequency = item.interval.length; // Each interval counts as one occurrence
+
+    acc[reason] = (acc[reason] || 0) + frequency;
+    return acc;
+  }, {});
+
+  return {
+    labels: Object.keys(reasonCounts),
+    values: Object.values(reasonCounts),
+  };
+};
+console.log(employeeData.shift)
+  const aggregatedData = aggregateDowntimeHoursByReason(downtimeData);
+  console.log('data timepareto chart',aggregatedData)
+  const aggregatedDowntimeData = aggregateDowntimeHoursByReason(downtimeData);
+  const aggregatedFrequencytimeData = aggregateFrequencyByReason(downtimeData);
   return (
     <div>
       {/* Breadcrumb */}

@@ -13,7 +13,7 @@ RUN npm install
 COPY . .
 
 # Expose port cho frontend
-EXPOSE 8386
+EXPOSE 8686
 
 # Chạy Vite server
 CMD ["npm", "run", "dev"]

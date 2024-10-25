@@ -22,6 +22,10 @@ const TimelineChart = ({ selectedDate, onDateChange }) => {
   const [currentIndex , setCurrentIndex] = useState(1)
   const [redPercentage, setRedPercentage] = useState([0, 100]); // Mới thêm state cho phần trăm màu đỏ
   const deviceId = '543ff470-54c6-11ef-8dd4-b74d24d26b24';
+<<<<<<< HEAD
+=======
+  const apiUrl =import.meta.env.VITE_API_BASE_URL;
+>>>>>>> 7888fc5cd70b7e0a62be986a49bdb2727bc68e80
 
   const formatDateForAPI = (date) => moment(date).format('YYYY-MM-DD');
 
@@ -137,7 +141,7 @@ const TimelineChart = ({ selectedDate, onDateChange }) => {
 
     try {
       const response = await axios.get(
-        `http://192.168.1.15:5000/api/telemetry?deviceId=${deviceId}&startDate=${formatDateForAPI(startDate)}&endDate=${formatDateForAPI(endDate)}`
+        `${apiUrl}/telemetry?deviceId=${deviceId}&startDate=${formatDateForAPI(startDate)}&endDate=${formatDateForAPI(endDate)}`
       );
       let totalOfflinePercentArray = [];
       let totalRun = []

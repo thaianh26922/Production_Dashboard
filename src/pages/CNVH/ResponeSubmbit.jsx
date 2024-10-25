@@ -1,117 +1,108 @@
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom'; // Import useLocation và useNavigate
-import '../../index.css'; // Tailwind CSS
-import { FiChevronLeft } from 'react-icons/fi';
-import { ToastContainer, toast } from 'react-toastify'; // Import react-toastify
-import 'react-toastify/dist/ReactToastify.css'; // Import CSS react-toastify
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { declareInterval } from '../../redux/intervalSlice';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
 
 const ResponeSubmit = () => {
-  const navigate = useNavigate(); // Sử dụng useNavigate để điều hướng quay lại
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  // State để quản lý trạng thái button nguyên nhân và nút phản hồi
-  const [selectedReason, setSelectedReason] = useState(null); // Trạng thái để lưu nguyên nhân được chọn
-  const [isResponseEnabled, setIsResponseEnabled] = useState(false); // Trạng thái để bật nút phản hồi
+  const { selectedIntervals, selectedMachine, selectedDate } = useSelector((state) => state.interval);
+  console.log(selectedIntervals)
+  const [filteredReasons, setFilteredReasons] = useState([]);
+  const [selectedReason, setSelectedReason] = useState(null);
+  const [isResponseEnabled, setIsResponseEnabled] = useState(false);
 
-  // Hàm xử lý khi click vào biểu tượng "back" FiChevronLeft
-  const handleBackClick = () => {
-    navigate(-1); // Điều hướng quay lại trang trước đó
-  };
+  useEffect(() => {
+    axios
+      .get(`${import.meta.env.VITE_API_BASE_URL}/issue`)
+      .then((response) => {
+        const reasons = response.data.filter((reason) =>
+          reason.deviceNames.includes(selectedMachine.deviceName)
+        );
+        setFilteredReasons(reasons);
+      })
+      .catch((error) => toast.error('Có lỗi xảy ra khi lấy dữ liệu.'));
+  }, [selectedMachine]);
 
-  // Hàm xử lý khi nhấn vào button nguyên nhân
   const handleReasonClick = (reason) => {
-    setSelectedReason(reason); // Đặt trạng thái nguyên nhân được chọn
-    setIsResponseEnabled(true); // Bật nút phản hồi
+    setSelectedReason(reason);
+    setIsResponseEnabled(true);
   };
 
-  // Hàm xử lý khi nhấn vào nút phản hồi
-  const handleResponse = () => {
-    if (selectedReason) {
-      toast.success('Phản hồi thành công!', {
-        position: "top-center",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        style: { fontSize: '1.6rem', padding: '1rem', width: '90%' }, // Kích thước phù hợp cho điện thoại
+  const handleResponse = async () => {
+    if (!selectedReason || !selectedIntervals || selectedIntervals.length === 0) {
+      toast.error('Vui lòng chọn ít nhất một khoảng thời gian và một lý do.');
+      return;
+    }
+  
+    try {
+      const payloads = selectedIntervals.map((interval) => ({
+        deviceId: selectedMachine.deviceId,
+        deviceName: selectedMachine.deviceName,
+        date: selectedDate,
+        interval: {
+          status: interval.status,
+          startTime: interval.startTime,
+          endTime: interval.endTime,
+          _id: interval._id,
+          selectedIntervalIndex: interval.selectedIntervalIndex,
+        },
+        reasonName: selectedReason.reasonName,
+      }));
+  
+      console.log('Payloads:', payloads);
+  
+      await Promise.all(
+        payloads.map((payload) =>
+          axios.post(`${import.meta.env.VITE_API_BASE_URL}/downtime`, payload)
+        )
+      );
+  
+      selectedIntervals.forEach((interval) => {
+        dispatch(
+          declareInterval({
+            date: selectedDate,
+            intervalIndex: interval.selectedIntervalIndex,
+          })
+        );
       });
   
-      // Điều hướng sau một thời gian ngắn (ví dụ 100ms)
-      setTimeout(() => {
-        navigate('/dashboard/mobile/issue');
-      }, 500);
+      toast.success('Phản hồi thành công!');
+      setTimeout(() => navigate('/dashboard/mobile/issue'), 500);
+    } catch (error) {
+      console.error('Error submitting response:', error);
+      toast.error('Có lỗi xảy ra khi gửi phản hồi.');
     }
   };
   
-  
-  
-
-  // Hàm xử lý quay lại trang trước khi hủy bỏ
-  const handleCancel = () => {
-    navigate(-1); // Điều hướng quay lại trang trước đó
-  };
 
   return (
-    <div className="h-screen bg-gray-100 w-full">
-      {/* Header */}
-      <div className="flex justify-between items-center w-full bg-gradient-to-r from-blue-600 to-sky-500">
-        <h1 className="h-32 items-center text-5xl text-white font-bold flex w-full justify-evenly">
-          <span className="text-5xl -ml-52 cursor-pointer" onClick={handleBackClick}>
-            <FiChevronLeft />
-          </span>
-          Phản hồi ngừng máy
-        </h1>
-      </div>
-
-      {/* Nội dung chính */}
+    <div>
       <div className="grid grid-cols-2 gap-4 p-8">
-        {/* Hiển thị danh sách nguyên nhân (2 cột) */}
-        {['Nguyên Nhân A', 'Nguyên Nhân B', 'Nguyên Nhân C', 'Nguyên Nhân D'].map((reason, index) => (
+        {filteredReasons.map((reason, index) => (
           <button
             key={index}
             onClick={() => handleReasonClick(reason)}
-            className={`p-8 text-4xl font-bold rounded-lg transition duration-300 ease-in-out ${
-              selectedReason === reason ? 'bg-blue-600 text-white' : 'bg-gray-200'
-            } hover:bg-blue-500`}
+            className={`p-8 text-4xl font-bold ${selectedReason === reason ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
           >
-            {reason}
+            {reason.reasonName}
           </button>
         ))}
       </div>
 
-      {/* Nút phản hồi */}
       <button
         onClick={handleResponse}
-      
-        disabled={!isResponseEnabled} // Nút chỉ hoạt động khi isResponseEnabled = true
-        className={`w-[90%] p-8 rounded-lg shadow-lg text-white text-center ml-6 mt-2 text-4xl font-bold transition duration-300 ease-in-out ${
-          isResponseEnabled ? 'bg-blue-500 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'
-        }`}
+        disabled={!isResponseEnabled}
+        className={`w-full p-4 text-xl font-bold ${isResponseEnabled ? 'bg-blue-600' : 'bg-gray-400 cursor-not-allowed'}`}
       >
         Phản hồi
       </button>
 
-      {/* Nút hủy bỏ */}
-      <button
-        onClick={handleCancel} // Quay lại trang trước khi hủy bỏ
-        className="bg-red-600 w-[90%] hover:bg-red-900 p-8 rounded-lg shadow-lg text-white text-center ml-6 mt-2 text-4xl font-bold transition duration-300 ease-in-out"
-      >
-        Hủy Bỏ
-      </button>
-
-      {/* Toast Container để hiển thị các thông báo */}
-      <ToastContainer
-        position="top-right"
-        autoClose={1000}
-        hideProgressBar
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        style={{ fontSize: '30px', padding: '3rem', width: '100%', textAlign: 'center' }} // Cấu hình cho phù hợp với điện thoại
-      />
+      <ToastContainer autoClose={1000} />
     </div>
   );
 };

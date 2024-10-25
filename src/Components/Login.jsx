@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaGoogle, FaFacebook, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { toast,ToastContainer } from 'react-toastify';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import logo from '../../src/assets/image/logo.png' 
@@ -14,19 +14,23 @@ function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const apiUrl =import.meta.env.VITE_API_BASE_URL
+  console.log(apiUrl)
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await axios.post('http://192.168.1.15:5000/api/login', { username: email, password });
+      const response = await axios.post(`${apiUrl}/login`, { username: email, password });
       if (response.status === 200) {
         const { token } = response.data;
         localStorage.setItem('token', token);
-        const decodedToken = jwtDecode(token); 
-        const role = decodedToken.user.role; 
-        localStorage.setItem('role', role);  
+        const decodedToken = jwtDecode(token);
+        const role = decodedToken.user.role;
+        localStorage.setItem('role', role);
         setUserRole(role);
+  
+        // Hiển thị toast khi đăng nhập thành công
         toast.success('Đăng nhập thành công!');
         navigate(role === 'CNVH' ? '/dashboard/mobile' : '/dashboard');
       }
@@ -36,6 +40,7 @@ function Login() {
       setIsLoading(false);
     }
   };
+  
   
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
@@ -113,6 +118,7 @@ function Login() {
           </button>
         </form>
       </div>
+    
     </div>
   );
 }

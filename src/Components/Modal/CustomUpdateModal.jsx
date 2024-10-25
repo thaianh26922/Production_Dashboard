@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Button, message } from 'antd';
+import axios from 'axios'; // Import Axios
 import CustomCalendar from '../../Components/Calendar/CustomCalendar';
 import ProductionTaskManagement from './ProductionTaskManagement';
 import axios from 'axios';
@@ -14,6 +15,7 @@ const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelected
     const updatedTaskData = { ...taskData };
 
     let isTaskAdded = false;
+    const productionTasks = [];
 
     selectedDates.forEach(date => {
       if (selectedMachines.length > 0) {
@@ -62,6 +64,7 @@ const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelected
     onCancel(); // Gọi hàm onCancel nếu được truyền vào
     onClose();
     setTaskData([]); // Xóa dữ liệu nhiệm vụ
+    setTasks([]); // Xóa các nhiệm vụ đã tạo
   };
 
   // Hàm để lấy thông tin nhiệm vụ đã lưu cho một ngày cụ thể
@@ -100,6 +103,8 @@ const CustomUpdateModal = ({ open, onClose, onCancel, selectedDates, setSelected
             setSelectedMachines={setSelectedMachines}
             setTaskData={setTaskData} // Cập nhật dữ liệu nhiệm vụ khi chỉnh sửa hoặc thêm mới
             taskData={taskData} // Truyền dữ liệu nhiệm vụ hiện tại để cho phép chỉnh sửa/cập nhật
+            tasks={tasks} // Truyền tasks hiện tại để quản lý
+            setTasks={setTasks} // Truyền setTasks để cập nhật nhiệm vụ
             selectedDates={selectedDates || []}
           />
         </div>

@@ -13,6 +13,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 
+
 // Import file mẫu Excel từ thư mục assets
 import sampleTemplate from '../../assets/form/Ca làm việc.xlsx';
 import Breadcrumb from '../Breadcrumb/Breadcrumb';
@@ -24,11 +25,12 @@ const WorkShiftCatalog = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [form] = Form.useForm();
   const fileInputRef = useRef(null);
+  const apiUrl =import.meta.env.VITE_API_BASE_URL;
 
   // Fetch work shifts from backend
   const fetchWorkShifts = async () => {
     try {
-      const response = await axios.get('http://192.168.1.9:5001/api/workShifts');
+      const response = await axios.get(`${apiUrl}/workShifts`);
       setWorkShifts(response.data);
     } catch (error) {
       toast.error('Lỗi khi tải danh sách ca làm việc');
@@ -70,12 +72,12 @@ const WorkShiftCatalog = () => {
       if (selectedShift) {
         // Update work shift
         console.log('Updating work shift:', selectedShift._id);
-        await axios.put(`http://192.168.1.9:5001/api/workShifts/${selectedShift._id}`, shiftData);
+        await axios.put(`${apiUrl}/workShifts/${selectedShift._id}`, shiftData);
         toast.success('Cập nhật ca làm việc thành công!');
       } else {
         // Create new work shift
         console.log('Creating new work shift', shiftData.breakTimeData);
-        await axios.post('http://192.168.1.9:5001/api/workShifts', shiftData);
+        await axios.post(`${apiUrl}/workShifts`, shiftData);
         toast.success('Thêm ca làm việc thành công!');
       }
       fetchWorkShifts();
@@ -92,7 +94,7 @@ const WorkShiftCatalog = () => {
   // Handle delete work shift
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://192.168.1.9:5001/api/workShifts/${id}`);
+      await axios.delete(`${apiUrl}/workShifts/${id}`);
       toast.success('Xóa ca làm việc thành công!');
       fetchWorkShifts();
     } catch (error) {

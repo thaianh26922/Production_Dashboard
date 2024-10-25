@@ -1,17 +1,34 @@
-// store/store.js
 import { configureStore } from '@reduxjs/toolkit';
-// Import các slice reducer từ các feature
-import productionPlanReducer from '../redux/appSlice'
-import maintenancePlanReducer from '../redux/maintenancePlanSlice'
-import  useReducer  from '../redux/userSlice'
+import intervalReducer from './intervalSlice';
 
-export const store = configureStore({
+const saveStateToLocalStorage = (state) => {
+  try {
+    const serializedState = JSON.stringify(state);
+    localStorage.setItem('intervalState', serializedState);
+  } catch (e) {
+    console.error("Lỗi khi lưu state vào localStorage:", e);
+  }
+};
+
+const loadStateFromLocalStorage = () => {
+  try {
+    const serializedState = localStorage.getItem('intervalState');
+    return serializedState ? JSON.parse(serializedState) : undefined;
+  } catch (e) {
+    console.error("Lỗi khi load state từ localStorage:", e);
+    return undefined;
+  }
+};
+
+const store = configureStore({
   reducer: {
-    productionPlan: productionPlanReducer,
-    maintenancePlan: maintenancePlanReducer,
-    users: useReducer,
-    // Thêm các reducer khác vào đây
+    interval: intervalReducer,
   },
+  preloadedState: loadStateFromLocalStorage(),
+});
+
+store.subscribe(() => {
+  saveStateToLocalStorage(store.getState().interval);
 });
 
 export default store;

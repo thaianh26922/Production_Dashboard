@@ -16,6 +16,7 @@ const StackedBarChart = ({ selectedDate, onDateChange }) => {
   const [positionToTolipth , setPositionToTolipth] = useState(1)
   const [textToTolipth , setTextToTolipth] = useState('')
   const deviceId = '543ff470-54c6-11ef-8dd4-b74d24d26b24';
+  const apiUrl =import.meta.env.VITE_API_BASE_URL;
 
   const formatDateForAPI = (date) => moment(date).format('YYYY-MM-DD');
 

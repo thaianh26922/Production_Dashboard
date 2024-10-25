@@ -1,114 +1,94 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Select, DatePicker } from 'antd';
-import Breadcrumb from '../../../Components/Breadcrumb/Breadcrumb'; // Đường dẫn tới Breadcrumb
-import AvailableGrid from '../../../Components/AvailableRate/AvailableGrid'; // Import AvailableGrid
+import Breadcrumb from '../../../Components/Breadcrumb/Breadcrumb';
+import AvailableGrid from '../../../Components/AvailableRate/AvailableGrid';
 import MachineComparisonChart from '../../../Components/AvailableRate/MachineComparisonChart';
-import moment from 'moment'; // Import moment
-
-
-
-
+import dayjs from 'dayjs';
+import axios from 'axios';
 
 const { Option } = Select;
 
 function AvailableRate() {
-  const [selectedMachineType, setSelectedMachineType] = useState('CNC'); // State cho loại máy
-  const [selectedDate, setSelectedDate] = useState(moment());
+  const [selectedArea, setSelectedArea] = useState('all'); // Default state for area
+  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [areaData, setAreaData] = useState([]); // Area data from API
+  const [deviceData, setDeviceData] = useState([]); // Device data from API
+  const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
-  // Danh sách máy CNC và PHAY
-  const cncMachines = Array.from({ length: 17 }, (_, i) => ({ value: `CNC ${i + 1}`, label: `CNC ${i + 1}` }));
-  const phayMachines = Array.from({ length: 18 }, (_, i) => ({ value: `PHAY ${i + 1}`, label: `PHAY ${i + 1}` }));
+  useEffect(() => {
+    // Fetch area and device data from API
+    const fetchData = async () => {
+      try {
+        const areaResponse = await axios.get(`${apiUrl}/areas`);
+        setAreaData(areaResponse.data);
 
-  // Dữ liệu giả lập cho máy CNC và PHAY
-  const generateSimulatedData = (machineType) => {
-    if (machineType === 'CNC') {
-      return [
-        { machine: 'CNC 1', percentage: 75 },
-        { machine: 'CNC 2', percentage: 65 },
-        { machine: 'CNC 3', percentage: 90 },
-        { machine: 'CNC 4', percentage: 75 },
-        { machine: 'CNC 5', percentage: 65 },
-        { machine: 'CNC 6', percentage: 90 },
-        { machine: 'CNC 7', percentage: 75 },
-        { machine: 'CNC 8', percentage: 65 },
-        { machine: 'CNC 9', percentage: 90 },
-        { machine: 'CNC 10', percentage: 75 },
-        { machine: 'CNC 11', percentage: 65 },
-        { machine: 'CNC 12', percentage: 90 },
-        { machine: 'CNC 13', percentage: 75 },
-        { machine: 'CNC 14', percentage: 65 },
-        { machine: 'CNC 15', percentage: 90 },
-        { machine: 'CNC 16', percentage: 65 },
-        { machine: 'CNC 17', percentage: 90 },
-      ];
-    } else if (machineType === 'PHAY') {
-      return [
-        { machine: 'PHAY 1', percentage: 80 },
-        { machine: 'PHAY 2', percentage: 55 },
-        { machine: 'PHAY 3', percentage: 70 },
-        { machine: 'PHAY 1', percentage: 80 },
-        { machine: 'PHAY 2', percentage: 55 },
-        { machine: 'PHAY 3', percentage: 70 },
-        { machine: 'PHAY 4', percentage: 80 },
-        { machine: 'PHAY 5', percentage: 55 },
-        { machine: 'PHAY 6', percentage: 70 },
-        { machine: 'PHAY 7', percentage: 80 },
-        { machine: 'PHAY 8', percentage: 90 },
-        { machine: 'PHAY 9', percentage: 89 },
-        { machine: 'PHAY 10', percentage: 80 },
-        { machine: 'PHAY 11', percentage: 55 },
-        { machine: 'PHAY 12', percentage: 70 },
-        { machine: 'PHAY 13', percentage: 80 },
-        { machine: 'PHAY 15', percentage: 55 },
-        { machine: 'PHAY 16', percentage: 70 },
-        { machine: 'PHAY 17', percentage: 55 },
-        { machine: 'PHAY 18', percentage: 79 },
+        const deviceResponse = await axios.get(`${apiUrl}/device`);
+        setDeviceData(deviceResponse.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
 
-      ];
+    fetchData();
+  }, []);
+
+  // Function to filter devices based on selected area
+  const getFilteredDevices = (area) => {
+    if (!area || area === 'all') {
+      return deviceData; // Return all devices if 'all' is selected
     }
-    return [];
+    return deviceData.filter(device => device.areaName === area); // Filter by areaName
   };
 
-  const [data, setData] = useState(generateSimulatedData(selectedMachineType));
+  // Handle area selection from dropdown
+  const handleAreaSelect = (value) => {
+    setSelectedArea(value);
+  };
 
-  // Hàm xử lý khi chọn loại máy từ Select
-  const handleMachineTypeSelect = (value) => {
-    setSelectedMachineType(value);
-    setData(generateSimulatedData(value)); // Cập nhật dữ liệu biểu đồ khi thay đổi loại máy
+  // Handle date change
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+    console.log("Selected Date:", date.format("YYYY-MM-DD")); // Correctly log the selected date
   };
-  const handleDateChange = (date, dateString) => {
-    setSelectedDate(date); 
-    console.log(date, dateString);
-  };
+
+  const filteredDevices = getFilteredDevices(selectedArea); // Get filtered devices based on selected area
 
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <div><Breadcrumb /></div>
+        <Breadcrumb />
         <div className="flex items-center space-x-2">
-          {/* Lựa chọn loại máy CNC hoặc PHAY */}
           <Select
-            value={selectedMachineType}
-            onChange={handleMachineTypeSelect}
-            placeholder="Chọn loại máy"
+            value={selectedArea}
+            onChange={handleAreaSelect}
+            placeholder="Chọn khu vực"
             style={{ width: 200 }}
+            allowClear // Allow clearing selection
           >
-            <Option value="CNC">Tổ Tiện</Option>
-            <Option value="PHAY">Tổ Phay</Option>
+            <Option value="all">Toàn nhà máy</Option>
+            {areaData.map(area => (
+              <Option key={area._id} value={area.areaName}>{area.areaName}</Option>
+            ))}
           </Select>
-          <DatePicker onChange={handleDateChange} 
-            value={selectedDate}  needConfirm />
+          <DatePicker 
+            onChange={handleDateChange} 
+            value={selectedDate} 
+            defaultValue={dayjs()} 
+          />
         </div>
       </div>
-      {/* Hiển thị AvailableGrid */}
+      {/* Show AvailableGrid */}
       <AvailableGrid
-        machines={selectedMachineType === 'CNC' ? cncMachines : phayMachines} // Truyền danh sách máy CNC hoặc PHAY
-        machineType={selectedMachineType} // Truyền loại máy
+        machines={filteredDevices} // Pass filtered devices
+        machineType={selectedArea} // Area type for grid
+        selectedDate={selectedDate}
       />
-      <div className="mt-2"><MachineComparisonChart data={data} machineType={selectedMachineType} /></div>
-
-      {/* Sử dụng component MachineComparisonChart để hiển thị biểu đồ */}
-      
+      <div className="mt-2">
+        <MachineComparisonChart 
+          selectedDate={selectedDate} // Pass the selected date
+          machineType={filteredDevices} // Pass filtered devices to chart
+        />
+      </div>
     </div>
   );
 }

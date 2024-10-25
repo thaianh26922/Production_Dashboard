@@ -9,6 +9,7 @@ import ImportButton from '../../../Components/Button/ImportButton';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 
 // Import sample template and data for areas
 import sampleTemplate from '../../../assets/form/Khu vực sản xuất.xlsx';
@@ -20,11 +21,12 @@ const AreasManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedArea, setSelectedArea] = useState(null); // Area for editing
   const [form] = Form.useForm(); // Ant Design form instance
+  const apiUrl = import.meta.env.VITE_API_BASE_URL
 
   // Fetch areas from the back-end API
   const fetchAreas = async () => {
     try {
-      const response = await axios.get('http://192.168.1.9:5001/api/areas'); // Your API URL
+      const response = await axios.get(`${apiUrl}/areas`); // Your API URL
       setAreas(response.data);
       setFilteredAreas(response.data);
     } catch (error) {
@@ -52,11 +54,11 @@ const AreasManagement = () => {
     try {
       if (selectedArea) {
         // Update Area
-        await axios.put(`http://192.168.1.9:5001/api/areas/${selectedArea._id}`, areaData);
+        await axios.put(`${apiUrl}/areas/${selectedArea._id}`, areaData);
         toast.success('Cập nhật khu vực thành công!');
       } else {
         // Create New Area
-        await axios.post('http://192.168.1.9:5001/api/areas', areaData);
+        await axios.post(`${apiUrl}/areas`, areaData);
         toast.success('Thêm khu vực thành công!');
       }
 
@@ -72,13 +74,52 @@ const AreasManagement = () => {
   // Delete area by ID
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://192.168.1.9:5001/api/areas/${id}`);
+      await axios.delete(`${apiUrl}/areas/${id}`);
       toast.success('Xóa khu vực thành công!');
       fetchAreas(); // Refresh area list after delete
     } catch (error) {
       toast.error('Failed to delete area');
     }
   };
+  const handleImport = (file) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+  
+      // Chuyển đổi dữ liệu thành định dạng phù hợp
+      const formattedData = jsonData.map((item) => ({
+        areaCode: item["Mã khu vực sản xuất"],
+        areaName: item["Tên khu vực sản xuất"],
+      }));
+  
+      // Gửi từng khu vực lên API và cập nhật state
+      const promises = formattedData.map(async (area) => {
+        try {
+          const response = await axios.post(`${apiUrl}/areas`, area);
+          // Cập nhật state ngay sau khi thêm thành công
+          return response.data;
+        } catch (error) {
+          toast.error('Failed to save area');
+          return null;
+        }
+      });
+  
+      // Đợi tất cả các yêu cầu hoàn tất và cập nhật bảng
+      Promise.all(promises).then((results) => {
+        const addedAreas = results.filter((area) => area !== null);
+        setAreas((prevAreas) => [...prevAreas, ...addedAreas]);
+        setFilteredAreas((prevFiltered) => [...prevFiltered, ...addedAreas]);
+        toast.success('Thêm khu vực thành công!');
+      });
+    };
+    reader.readAsArrayBuffer(file);
+  };
+  
+  
 
   // Open modal to add or edit area
   const openModal = (area = null) => {
@@ -105,7 +146,7 @@ const AreasManagement = () => {
         <div className="flex items-center gap-2 ml-auto">
           <AddButton onClick={() => openModal()} /> {/* Open modal for new area */}
           <FormSample href={sampleTemplate} label="Tải Form Mẫu" />
-          <ImportButton />
+          <ImportButton onImport={handleImport} />
           <ExportExcelButton data={areas} fileName="DanhSachKhuVuc.xlsx" />
         </div>
       </div>
@@ -170,7 +211,7 @@ const AreasManagement = () => {
         </Form>
       </Modal>
 
-      <ToastContainer />
+      
     </div>
   );
 };

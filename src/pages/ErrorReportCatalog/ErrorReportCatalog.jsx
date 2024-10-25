@@ -10,7 +10,7 @@ import axios from 'axios';  // Import axios để gọi API
 import FormSample from '../../Components/Button/FormSample';
 import ImportButton from '../../Components/Button/ImportButton';
 import Breadcrumb from '../../Components/Breadcrumb/Breadcrumb';
-
+import sampleTemplate from '../../assets/form/Nguyên nhân dừng máy.xlsx'
 const ErrorReportCatalog = () => {
   const [errorReports, setErrorReports] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,11 +18,12 @@ const ErrorReportCatalog = () => {
   const [selectedReport, setSelectedReport] = useState(null);
   const [deviceSuggestions, setDeviceSuggestions] = useState([]);
   const [form] = Form.useForm(); // Tạo form instance từ Ant Design
+  const apiUrl = import.meta.env.VITE_API_BASE_URL
 
   // Gọi API để lấy danh sách issue
   const fetchErrorReports = async () => {
     try {
-      const response = await axios.get('http://192.168.1.9:5001/api/issue');
+      const response = await axios.get(`${apiUrl}/issue`);
       setErrorReports(response.data);
     } catch (error) {
       toast.error('Lỗi khi tải báo cáo lỗi');
@@ -32,7 +33,7 @@ const ErrorReportCatalog = () => {
   // Gọi API để lấy danh sách deviceName từ model Device
   const fetchDeviceSuggestions = async () => {
     try {
-      const response = await axios.get('http://192.168.1.9:5001/api/device');
+      const response = await axios.get(`${apiUrl}/device`);
       setDeviceSuggestions(response.data); // Giả định rằng response trả về danh sách thiết bị
     } catch (error) {
       toast.error('Lỗi khi tải danh sách thiết bị');
@@ -51,11 +52,11 @@ const ErrorReportCatalog = () => {
       const values = await form.validateFields(); // Lấy và validate dữ liệu từ form
       if (selectedReport) {
         // Cập nhật issue
-        await axios.put(`http://192.168.1.9:5001/api/issue/${selectedReport._id}`, values);
+        await axios.put(`${apiUrl}/issue/${selectedReport._id}`, values);
         toast.success('Cập nhật nguyên nhân lỗi thành công!');
       } else {
         // Thêm mới issue
-        await axios.post('http://192.168.1.9:5001/api/issue', values);
+        await axios.post(`${apiUrl}/issue`, values);
         toast.success('Thêm nguyên nhân lỗi thành công!');
       }
       fetchErrorReports();  // Tải lại dữ liệu sau khi thêm/cập nhật
@@ -70,7 +71,7 @@ const ErrorReportCatalog = () => {
   // Hàm xóa issue
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://192.168.1.9:5001/api/issue/${id}`);
+      await axios.delete(`${apiUrl}/issue/${id}`);
       toast.success('Xóa báo cáo lỗi thành công!');
       fetchErrorReports();  // Tải lại dữ liệu sau khi xóa
     } catch (error) {
@@ -106,7 +107,7 @@ const ErrorReportCatalog = () => {
         <SearchButton placeholder="Tìm kiếm mã lỗi, mã thiết bị..." onSearch={(q) => setSearchQuery(q)} />
         <div className="flex items-center gap-2 ml-auto">
           <AddButton onClick={() => openModal()} />
-          <FormSample />
+          <FormSample href={sampleTemplate} label='Tải Form Mẫu'/>
           <ImportButton />
           <ExportExcelButton data={filteredReports} fileName="Báo cáo lỗi.xlsx" />
         </div>
@@ -163,7 +164,7 @@ const ErrorReportCatalog = () => {
           form.resetFields(); // Reset form khi đóng modal
         }}
         onOk={handleSave}
-        okText={selectedReport ? 'Cập nhật' : 'Thêm mới'}
+        okText={selectedReport ? 'Cập nhật' : 'OK'}
         cancelText="Hủy"
       >
         <Form form={form} layout="vertical">
@@ -209,7 +210,7 @@ const ErrorReportCatalog = () => {
               <Select placeholder="Chọn trạng thái thiết bị">
                 <Select.Option value="DỪNG">DỪNG</Select.Option>
                 <Select.Option value="CHỜ">CHỜ</Select.Option>
-                <Select.Option value="LỖI">TẮT MÁY</Select.Option>
+                <Select.Option value="TẮT MÁY">TẮT MÁY</Select.Option>
                 
               </Select>
             </Form.Item>
